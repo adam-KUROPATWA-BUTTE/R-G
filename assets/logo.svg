@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 80" width="200" height="80">
+  <defs>
+    <linearGradient id="blueGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d4af37;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#b8860b;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+  
+  <!-- Background circle for R -->
+  <circle cx="40" cy="40" r="35" fill="url(#blueGradient)" filter="url(#shadow)"/>
+  
+  <!-- Letter R -->
+  <path d="M20 20 L20 60 L35 60 L35 45 L40 45 L50 60 L60 60 L48 43 
+           C52 41 55 37 55 32 C55 25 50 20 43 20 Z
+           M30 30 L40 30 C42 30 45 31 45 34 C45 37 42 38 40 38 
+           L30 38 Z" 
+        fill="white" stroke="url(#goldGradient)" stroke-width="1"/>
+  
+  <!-- Ampersand symbol -->
+  <text x="100" y="50" font-family="serif" font-size="40" font-weight="bold" 
+        fill="url(#goldGradient)" text-anchor="middle" filter="url(#shadow)">&amp;</text>
+  
+  <!-- Background circle for G -->
+  <circle cx="160" cy="40" r="35" fill="url(#blueGradient)" filter="url(#shadow)"/>
+  
+  <!-- Letter G -->
+  <path d="M140 40 C140 25 150 15 165 15 C175 15 185 20 190 28 
+           L182 32 C179 27 172 25 165 25 C155 25 150 32 150 40 
+           C150 48 155 55 165 55 C170 55 175 53 178 50 
+           L178 45 L170 45 L170 38 L188 38 L188 52 
+           C183 58 174 65 165 65 C150 65 140 55 140 40 Z" 
+        fill="white" stroke="url(#goldGradient)" stroke-width="1"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="20" cy="15" r="3" fill="url(#goldGradient)" opacity="0.8"/>
+  <circle cx="180" cy="15" r="3" fill="url(#goldGradient)" opacity="0.8"/>
+  <circle cx="20" cy="65" r="3" fill="url(#goldGradient)" opacity="0.8"/>
+  <circle cx="180" cy="65" r="3" fill="url(#goldGradient)" opacity="0.8"/>
+  
+  <!-- Elegant underline -->
+  <path d="M15 70 Q100 75 185 70" stroke="url(#goldGradient)" stroke-width="2" fill="none" opacity="0.7"/>
+</svg>
