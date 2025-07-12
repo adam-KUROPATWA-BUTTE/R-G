@@ -1,0 +1,14 @@
+<svg width="120" height="60" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="30" cy="30" r="25" fill="rgb(29, 53, 87)" stroke="rgb(211, 170, 54)" stroke-width="2"/>
+  <circle cx="90" cy="30" r="25" fill="rgb(29, 53, 87)" stroke="rgb(211, 170, 54)" stroke-width="2"/>
+  
+  <!-- R letter -->
+  <text x="30" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="rgb(211, 170, 54)" text-anchor="middle">R</text>
+  
+  <!-- & symbol -->
+  <text x="60" y="38" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="rgb(211, 170, 54)" text-anchor="middle">&amp;</text>
+  
+  <!-- G letter -->
+  <text x="90" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="rgb(211, 170, 54)" text-anchor="middle">G</text>
+</svg>
