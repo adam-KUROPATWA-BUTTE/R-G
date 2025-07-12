@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bijoux - R&G</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo au centre -->
+            <div class="logo-container">
+                <a href="../index.html">
+                    <img src="../assets/logo.svg" alt="R&G Logo" class="logo">
+                </a>
+            </div>
+            
+            <!-- Menu déroulant avec 3 étoiles -->
+            <div class="menu-dropdown">
+                <button class="menu-trigger" id="menuTrigger">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </button>
+                <div class="dropdown-content" id="dropdownContent">
+                    <a href="../index.html">Accueil</a>
+                    <a href="femme.html">Vêtements Femme</a>
+                    <a href="homme.html">Vêtements Homme</a>
+                    <a href="bijoux.html" class="active">Bijoux</a>
+                </div>
+            </div>
+            
+            <!-- Icônes utilisateur et panier -->
+            <div class="nav-icons">
+                <button class="icon-btn" id="loginBtn">
+                    <i class="fas fa-user"></i>
+                </button>
+                <button class="icon-btn" id="cartBtn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-gem"></i> Bijoux</h1>
+            <p>Pièces précieuses et uniques pour sublimer votre élégance</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Filters Section -->
+        <section class="filters-section">
+            <div class="filters-container">
+                <h3>Filtrer par :</h3>
+                <div class="filters">
+                    <select id="categoryFilter">
+                        <option value="">Toutes les catégories</option>
+                        <option value="colliers">Colliers</option>
+                        <option value="boucles">Boucles d'Oreilles</option>
+                        <option value="bracelets">Bracelets</option>
+                        <option value="bagues">Bagues</option>
+                        <option value="montres">Montres</option>
+                    </select>
+                    
+                    <select id="materialFilter">
+                        <option value="">Tous les matériaux</option>
+                        <option value="or">Or</option>
+                        <option value="argent">Argent</option>
+                        <option value="platine">Platine</option>
+                        <option value="diamant">Diamant</option>
+                    </select>
+                    
+                    <select id="priceFilter">
+                        <option value="">Tous les prix</option>
+                        <option value="0-500">0 - 500€</option>
+                        <option value="500-1000">500 - 1000€</option>
+                        <option value="1000-2000">1000 - 2000€</option>
+                        <option value="2000+">2000€+</option>
+                    </select>
+                    
+                    <select id="stockFilter">
+                        <option value="">Tous les articles</option>
+                        <option value="inStock">En stock</option>
+                        <option value="onDemand">Sur demande</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Grid -->
+        <section class="products-section">
+            <div class="products-container">
+                <div class="products-grid" id="productsGrid">
+                    <!-- Les produits seront ajoutés dynamiquement -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>R&G</h3>
+                <p>Votre destination mode et bijoux de luxe</p>
+            </div>
+            <div class="footer-section">
+                <h3>Navigation</h3>
+                <ul>
+                    <li><a href="../index.html">Accueil</a></li>
+                    <li><a href="femme.html">Vêtements Femme</a></li>
+                    <li><a href="homme.html">Vêtements Homme</a></li>
+                    <li><a href="bijoux.html">Bijoux</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: contact@rg-boutique.fr</p>
+                <p>Téléphone: +33 1 23 45 67 89</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 R&G. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de connexion -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeLogin">&times;</span>
+            <h2>Connexion / Inscription</h2>
+            <div class="auth-tabs">
+                <button class="tab-button active" id="loginTab">Connexion</button>
+                <button class="tab-button" id="registerTab">Inscription</button>
+            </div>
+            
+            <form id="loginForm" class="auth-form">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Mot de passe" required>
+                <button type="submit">Se connecter</button>
+            </form>
+            
+            <form id="registerForm" class="auth-form hidden">
+                <input type="text" placeholder="Nom complet" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Mot de passe" required>
+                <input type="password" placeholder="Confirmer le mot de passe" required>
+                <button type="submit">S'inscrire</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal panier -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeCart">&times;</span>
+            <h2>Panier d'achat</h2>
+            <div id="cartItems" class="cart-items">
+                <!-- Les articles du panier seront ajoutés dynamiquement -->
+            </div>
+            <div class="cart-total">
+                <p>Total: <span id="cartTotal">0,00 €</span></p>
+                <button class="checkout-btn">Finaliser la commande</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../scripts/app.js"></script>
+    <script>
+        // Produits spécifiques aux bijoux
+        const bijouxProducts = [
+            {
+                id: 'b1',
+                name: 'Collier Or et Saphir',
+                description: 'Collier précieux en or 18k serti de saphirs bleus naturels. Pièce d\'exception artisanale.',
+                price: 899.99,
+                category: 'colliers',
+                material: 'or',
+                image: '../assets/products/collier-saphir.jpg',
+                inStock: false,
+                sizes: ['Unique'],
+                colors: ['Or Jaune', 'Or Blanc']
+            },
+            {
+                id: 'b2',
+                name: 'Boucles d\'Oreilles Diamant',
+                description: 'Boucles d\'oreilles élégantes serties de diamants véritables. Éclat et raffinement.',
+                price: 1299.99,
+                category: 'boucles',
+                material: 'diamant',
+                image: '../assets/products/boucles-diamant.jpg',
+                inStock: true,
+                sizes: ['Unique'],
+                colors: ['Or Blanc', 'Platine']
+            },
+            {
+                id: 'b3',
+                name: 'Bracelet Tennis Argent',
+                description: 'Bracelet tennis en argent 925 avec pierres de zirconium. Élégance quotidienne.',
+                price: 189.99,
+                category: 'bracelets',
+                material: 'argent',
+                image: '../assets/products/bracelet-tennis.jpg',
+                inStock: true,
+                sizes: ['S', 'M', 'L'],
+                colors: ['Argent Rhodié', 'Argent Doré']
+            },
+            {
+                id: 'b4',
+                name: 'Bague Solitaire Diamant',
+                description: 'Bague solitaire avec diamant de 1 carat, monture en or blanc 18k. Symbole d\'éternité.',
+                price: 2199.99,
+                category: 'bagues',
+                material: 'diamant',
+                image: '../assets/products/bague-solitaire.jpg',
+                inStock: false,
+                sizes: ['48', '50', '52', '54', '56', '58'],
+                colors: ['Or Blanc', 'Or Jaune', 'Platine']
+            },
+            {
+                id: 'b5',
+                name: 'Montre Luxe Dorée',
+                description: 'Montre de luxe avec boîtier doré et bracelet en cuir véritable. Mouvement automatique.',
+                price: 1599.99,
+                category: 'montres',
+                material: 'or',
+                image: '../assets/products/montre-luxe.jpg',
+                inStock: true,
+                sizes: ['Unique'],
+                colors: ['Doré/Noir', 'Doré/Marron']
+            },
+            {
+                id: 'b6',
+                name: 'Collier Perles Tahiti',
+                description: 'Collier de perles de Tahiti naturelles, reflets irisés exceptionnels. Fermoir en or.',
+                price: 789.99,
+                category: 'colliers',
+                material: 'or',
+                image: '../assets/products/collier-perles.jpg',
+                inStock: true,
+                sizes: ['45cm', '50cm', '55cm'],
+                colors: ['Noir Irisé', 'Gris Anthracite']
+            },
+            {
+                id: 'b7',
+                name: 'Boucles Créoles Dorées',
+                description: 'Créoles en or 14k, design moderne et intemporel. Port confortable toute la journée.',
+                price: 299.99,
+                category: 'boucles',
+                material: 'or',
+                image: '../assets/products/creoles-dorees.jpg',
+                inStock: true,
+                sizes: ['Petit', 'Moyen', 'Grand'],
+                colors: ['Or Jaune', 'Or Rose', 'Or Blanc']
+            },
+            {
+                id: 'b8',
+                name: 'Bracelet Gourmette Argent',
+                description: 'Bracelet gourmette massive en argent 925, gravure personnalisable. Style authentique.',
+                price: 149.99,
+                category: 'bracelets',
+                material: 'argent',
+                image: '../assets/products/gourmette-argent.jpg',
+                inStock: true,
+                sizes: ['18cm', '20cm', '22cm'],
+                colors: ['Argent Naturel', 'Argent Brossé']
+            },
+            {
+                id: 'b9',
+                name: 'Bague Alliance Platine',
+                description: 'Alliance en platine pur avec finition mate. Symbole d\'union éternelle et de pureté.',
+                price: 899.99,
+                category: 'bagues',
+                material: 'platine',
+                image: '../assets/products/alliance-platine.jpg',
+                inStock: false,
+                sizes: ['48', '50', '52', '54', '56', '58', '60'],
+                colors: ['Platine Mat', 'Platine Poli']
+            },
+            {
+                id: 'b10',
+                name: 'Montre Femme Diamants',
+                description: 'Montre féminine avec cadran serti de diamants. Bracelet en acier inoxydable doré.',
+                price: 999.99,
+                category: 'montres',
+                material: 'diamant',
+                image: '../assets/products/montre-femme.jpg',
+                inStock: true,
+                sizes: ['Unique'],
+                colors: ['Doré/Blanc', 'Argenté/Noir']
+            }
+        ];
+
+        // Initialisation de la page
+        document.addEventListener('DOMContentLoaded', () => {
+            renderProducts(bijouxProducts);
+            setupFilters();
+        });
+
+        function renderProducts(products) {
+            const grid = document.getElementById('productsGrid');
+            if (!grid) return;
+
+            grid.innerHTML = products.map(product => {
+                const stockStatus = product.inStock ? 'En stock' : 'Sur demande';
+                const stockClass = product.inStock ? 'in-stock' : 'on-demand';
+                
+                return `
+                    <div class="product-card jewelry-card" data-product-id="${product.id}">
+                        <div class="product-image">
+                            <div class="placeholder-image">
+                                <i class="fas fa-gem"></i>
+                            </div>
+                            <div class="product-overlay">
+                                <button class="quick-view-btn" onclick="showProductDetails('${product.id}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="luxury-badge">
+                                <i class="fas fa-crown"></i>
+                            </div>
+                        </div>
+                        <div class="product-info">
+                            <h3>${product.name}</h3>
+                            <p class="product-material">${product.material.toUpperCase()}</p>
+                            <p class="product-description">${product.description}</p>
+                            <div class="product-price">${app.formatPrice(product.price)}</div>
+                            <div class="product-status ${stockClass}">${stockStatus}</div>
+                            <div class="product-actions">
+                                <button class="add-to-cart-btn luxury-btn" onclick="app.addToCart({
+                                    id: '${product.id}',
+                                    name: '${product.name}',
+                                    price: ${product.price},
+                                    image: '${product.image}'
+                                })">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Ajouter au panier
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setupFilters() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            const materialFilter = document.getElementById('materialFilter');
+            const priceFilter = document.getElementById('priceFilter');
+            const stockFilter = document.getElementById('stockFilter');
+
+            [categoryFilter, materialFilter, priceFilter, stockFilter].forEach(filter => {
+                if (filter) {
+                    filter.addEventListener('change', applyFilters);
+                }
+            });
+        }
+
+        function applyFilters() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const materialFilter = document.getElementById('materialFilter').value;
+            const priceFilter = document.getElementById('priceFilter').value;
+            const stockFilter = document.getElementById('stockFilter').value;
+
+            let filteredProducts = bijouxProducts;
+
+            // Filtre par catégorie
+            if (categoryFilter) {
+                filteredProducts = filteredProducts.filter(p => p.category === categoryFilter);
+            }
+
+            // Filtre par matériau
+            if (materialFilter) {
+                filteredProducts = filteredProducts.filter(p => p.material === materialFilter);
+            }
+
+            // Filtre par prix
+            if (priceFilter) {
+                const [min, max] = priceFilter.split('-').map(p => p.replace('+', ''));
+                filteredProducts = filteredProducts.filter(p => {
+                    if (max) {
+                        return p.price >= parseInt(min) && p.price <= parseInt(max);
+                    } else {
+                        return p.price >= parseInt(min);
+                    }
+                });
+            }
+
+            // Filtre par stock
+            if (stockFilter) {
+                const inStock = stockFilter === 'inStock';
+                filteredProducts = filteredProducts.filter(p => p.inStock === inStock);
+            }
+
+            renderProducts(filteredProducts);
+        }
+
+        function showProductDetails(productId) {
+            const product = bijouxProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            app.showNotification(`Détails pour ${product.name}`, 'info');
+        }
+    </script>
+
+    <style>
+        /* Styles spécifiques aux bijoux */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--gold) 50%, var(--dark-gold) 100%);
+        }
+        
+        .jewelry-card {
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+        
+        .jewelry-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 15px;
+            background: linear-gradient(45deg, var(--gold), var(--primary-blue), var(--gold));
+            z-index: -1;
+            margin: -3px;
+        }
+        
+        .jewelry-card:hover::before {
+            background: linear-gradient(45deg, var(--dark-gold), var(--light-blue), var(--dark-gold));
+        }
+        
+        .luxury-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--gold);
+            color: var(--primary-blue);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            animation: sparkle 2s infinite;
+        }
+        
+        .product-material {
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .luxury-btn {
+            background: linear-gradient(135deg, var(--gold) 0%, var(--dark-gold) 100%);
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+        
+        .luxury-btn:hover {
+            background: linear-gradient(135deg, var(--dark-gold) 0%, var(--gold) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.3);
+        }
+        
+        .placeholder-image i {
+            color: var(--gold);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Animation pour les bijoux */
+        @keyframes gemSparkle {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.1) rotate(180deg);
+                opacity: 1;
+                text-shadow: 0 0 15px var(--gold);
+            }
+        }
+        
+        .jewelry-card:hover .placeholder-image i {
+            animation: gemSparkle 1.5s ease-in-out infinite;
+        }
+        
+        /* Filtres supplémentaires pour bijoux */
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .filters select {
+            background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+            border: 2px solid var(--gold);
+        }
+        
+        .filters select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        
+        /* Responsive pour bijoux */
+        @media (max-width: 768px) {
+            .filters {
+                grid-template-columns: 1fr;
+            }
+            
+            .luxury-badge {
+                width: 25px;
+                height: 25px;
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</body>
+</html>

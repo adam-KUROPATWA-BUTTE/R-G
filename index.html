@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R&G - Boutique de Mode et Bijoux</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo au centre -->
+            <div class="logo-container">
+                <img src="assets/logo.svg" alt="R&G Logo" class="logo">
+            </div>
+            
+            <!-- Menu déroulant avec 3 étoiles -->
+            <div class="menu-dropdown">
+                <button class="menu-trigger" id="menuTrigger">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </button>
+                <div class="dropdown-content" id="dropdownContent">
+                    <a href="index.html">Accueil</a>
+                    <a href="pages/femme.html">Vêtements Femme</a>
+                    <a href="pages/homme.html">Vêtements Homme</a>
+                    <a href="pages/bijoux.html">Bijoux</a>
+                </div>
+            </div>
+            
+            <!-- Icônes utilisateur et panier -->
+            <div class="nav-icons">
+                <button class="icon-btn" id="loginBtn">
+                    <i class="fas fa-user"></i>
+                </button>
+                <button class="icon-btn" id="cartBtn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Bienvenue chez R&G</h1>
+                <p>Découvrez notre collection exclusive de vêtements et bijoux</p>
+                <button class="cta-button">Découvrir nos collections</button>
+            </div>
+        </section>
+
+        <section class="categories-preview">
+            <h2>Nos Collections</h2>
+            <div class="categories-grid">
+                <div class="category-card" onclick="window.location.href='pages/femme.html'">
+                    <div class="category-image">
+                        <i class="fas fa-female"></i>
+                    </div>
+                    <h3>Vêtements Femme</h3>
+                    <p>Collections élégantes et modernes</p>
+                </div>
+                
+                <div class="category-card" onclick="window.location.href='pages/homme.html'">
+                    <div class="category-image">
+                        <i class="fas fa-male"></i>
+                    </div>
+                    <h3>Vêtements Homme</h3>
+                    <p>Style raffiné et sophistiqué</p>
+                </div>
+                
+                <div class="category-card" onclick="window.location.href='pages/bijoux.html'">
+                    <div class="category-image">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                    <h3>Bijoux</h3>
+                    <p>Pièces précieuses et uniques</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>R&G</h3>
+                <p>Votre destination mode et bijoux de luxe</p>
+            </div>
+            <div class="footer-section">
+                <h3>Navigation</h3>
+                <ul>
+                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="pages/femme.html">Vêtements Femme</a></li>
+                    <li><a href="pages/homme.html">Vêtements Homme</a></li>
+                    <li><a href="pages/bijoux.html">Bijoux</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: contact@rg-boutique.fr</p>
+                <p>Téléphone: +33 1 23 45 67 89</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 R&G. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de connexion -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeLogin">&times;</span>
+            <h2>Connexion / Inscription</h2>
+            <div class="auth-tabs">
+                <button class="tab-button active" id="loginTab">Connexion</button>
+                <button class="tab-button" id="registerTab">Inscription</button>
+            </div>
+            
+            <form id="loginForm" class="auth-form">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Mot de passe" required>
+                <button type="submit">Se connecter</button>
+            </form>
+            
+            <form id="registerForm" class="auth-form hidden">
+                <input type="text" placeholder="Nom complet" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Mot de passe" required>
+                <input type="password" placeholder="Confirmer le mot de passe" required>
+                <button type="submit">S'inscrire</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal panier -->
+    <div id="cartModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeCart">&times;</span>
+            <h2>Panier d'achat</h2>
+            <div id="cartItems" class="cart-items">
+                <!-- Les articles du panier seront ajoutés dynamiquement -->
+            </div>
+            <div class="cart-total">
+                <p>Total: <span id="cartTotal">0,00 €</span></p>
+                <button class="checkout-btn">Finaliser la commande</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/app.js"></script>
+</body>
+</html>
