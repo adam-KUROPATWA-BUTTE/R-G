@@ -1,8 +1,8 @@
 /* Variables CSS pour le thème bleu et doré */
 :root {
-    --primary-blue: #1e3a8a;
+    --primary-blue: rgb(29, 53, 87); /* #1D3557 - Couleur exacte du logo */
     --light-blue: #3b82f6;
-    --gold: #d4af37;
+    --gold: rgb(211, 170, 54); /* #D3AA36 - Couleur exacte du logo */
     --dark-gold: #b8860b;
     --white: #ffffff;
     --light-gray: #f8fafc;
@@ -58,11 +58,10 @@ body {
     filter: brightness(1.1);
 }
 
-/* Menu déroulant avec 3 étoiles */
+/* Menu déroulant avec 3 étoiles - REPOSITIONNÉ À DROITE */
 .menu-dropdown {
     position: relative;
-    margin-left: auto;
-    margin-right: 1rem;
+    order: 2; /* Assure que le menu est après les icônes */
 }
 
 .menu-trigger {
@@ -147,6 +146,7 @@ body {
     display: flex;
     gap: 1rem;
     align-items: center;
+    order: 1; /* Les icônes viennent avant le menu */
 }
 
 .icon-btn {
@@ -188,12 +188,240 @@ body {
     min-height: calc(100vh - 200px);
 }
 
+/* Page Header - pour les pages de catégories */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 50%, var(--gold) 100%);
+    color: var(--white);
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.header-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.header-content p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+/* Filters Section */
+.filters-section {
+    background-color: var(--light-gray);
+    padding: 2rem;
+    border-bottom: 2px solid var(--gold);
+}
+
+.filters-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.filters select {
+    padding: 0.8rem;
+    border: 2px solid var(--primary-blue);
+    border-radius: 5px;
+    background-color: var(--white);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filters select:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 5px rgba(211, 170, 54, 0.3);
+}
+
+/* Products Section */
+.products-section {
+    padding: 2rem;
+    background-color: var(--white);
+}
+
+.products-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.product-card {
+    background: var(--white);
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    border-color: var(--gold);
+}
+
+.product-image {
+    position: relative;
+    height: 200px;
+    background: linear-gradient(45deg, var(--light-gray), var(--white));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.placeholder-image {
+    font-size: 4rem;
+    color: var(--primary-blue);
+    opacity: 0.6;
+}
+
+.product-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(29, 53, 87, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.product-card:hover .product-overlay {
+    opacity: 1;
+}
+
+.quick-view-btn {
+    background: var(--gold);
+    color: var(--primary-blue);
+    border: none;
+    padding: 0.8rem;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.quick-view-btn:hover {
+    transform: scale(1.1);
+    background: var(--white);
+}
+
+.product-info {
+    padding: 1.5rem;
+}
+
+.product-info h3 {
+    color: var(--primary-blue);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.product-description {
+    color: var(--dark-gray);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.product-price {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+}
+
+.product-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.product-status.in-stock {
+    background-color: #10b981;
+    color: white;
+}
+
+.product-status.on-demand {
+    background-color: #f59e0b;
+    color: white;
+}
+
+.product-actions {
+    margin-top: 1rem;
+}
+
+.add-to-cart-btn {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+    color: var(--white);
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.add-to-cart-btn:hover {
+    background: linear-gradient(135deg, var(--light-blue) 0%, var(--primary-blue) 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(29, 53, 87, 0.3);
+}
+
 /* Hero Section */
 .hero {
     background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 50%, var(--gold) 100%);
     color: var(--white);
     text-align: center;
     padding: 4rem 2rem;
+    position: relative;
+}
+
+/* Logo R décoratif au centre du hero */
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    background-image: url('../assets/R.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.3;
+    z-index: 1;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
 }
 
 .hero-content h1 {
