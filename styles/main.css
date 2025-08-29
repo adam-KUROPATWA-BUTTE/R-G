@@ -1007,11 +1007,35 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
+    text-decoration: none;
 }
 
 .continue-shopping-btn:hover {
     background: var(--primary-blue);
     color: var(--white);
+}
+
+.view-cart-btn {
+    flex: 1;
+    background: var(--light-blue);
+    color: var(--white);
+    border: none;
+    padding: 1rem;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.view-cart-btn:hover {
+    background: var(--primary-blue);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3);
 }
 
 .checkout-btn {

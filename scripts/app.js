@@ -6,6 +6,11 @@ class RGApp {
         this.isLoggedIn = false;
         this.currentUser = null;
         
+        // Initialize new systems
+        this.authManager = null;
+        this.promoManager = null;
+        this.orderManager = null;
+        
         // Carousel state
         this.currentSlide = 0;
         this.totalSlides = 0;
@@ -22,10 +27,34 @@ class RGApp {
     }
     
     init() {
+        this.initializeManagers();
         this.setupEventListeners();
         this.loadCartFromStorage();
         this.updateCartDisplay();
         this.initCarousel();
+        this.updateUserInterface();
+    }
+    
+    initializeManagers() {
+        // Initialize managers if available
+        if (typeof AuthManager !== 'undefined') {
+            this.authManager = new AuthManager();
+            this.isLoggedIn = this.authManager.isUserLoggedIn();
+            this.currentUser = this.authManager.getCurrentUser();
+        }
+        
+        if (typeof PromoCodeManager !== 'undefined') {
+            this.promoManager = new PromoCodeManager();
+        }
+        
+        if (typeof OrderManager !== 'undefined') {
+            this.orderManager = new OrderManager();
+        }
+        
+        // Make managers globally accessible
+        window.authManager = this.authManager;
+        window.promoManager = this.promoManager;
+        window.orderManager = this.orderManager;
     }
     
     setupEventListeners() {
@@ -204,23 +233,36 @@ class RGApp {
     
     // Gestion de la connexion
     handleLogin(form) {
-        const formData = new FormData(form);
         const email = form.querySelector('input[type="email"]').value;
         const password = form.querySelector('input[type="password"]').value;
         
-        // Simulation de connexion
-        if (email && password) {
-            this.currentUser = {
-                email: email,
-                name: email.split('@')[0]
-            };
-            this.isLoggedIn = true;
+        if (this.authManager) {
+            const result = this.authManager.login(email, password);
             
-            this.updateUserInterface();
-            this.hideModal(document.getElementById('loginModal'));
-            this.showNotification('Connexion réussie !', 'success');
+            if (result.success) {
+                this.currentUser = result.user;
+                this.isLoggedIn = true;
+                this.updateUserInterface();
+                this.hideModal(document.getElementById('loginModal'));
+                this.showNotification('Connexion réussie !', 'success');
+            } else {
+                this.showNotification(result.error, 'error');
+            }
         } else {
-            this.showNotification('Veuillez remplir tous les champs', 'error');
+            // Fallback to original simulation
+            if (email && password) {
+                this.currentUser = {
+                    email: email,
+                    name: email.split('@')[0]
+                };
+                this.isLoggedIn = true;
+                
+                this.updateUserInterface();
+                this.hideModal(document.getElementById('loginModal'));
+                this.showNotification('Connexion réussie !', 'success');
+            } else {
+                this.showNotification('Veuillez remplir tous les champs', 'error');
+            }
         }
     }
     
@@ -232,26 +274,41 @@ class RGApp {
         const password = inputs[2].value;
         const confirmPassword = inputs[3].value;
         
-        if (!name || !email || !password || !confirmPassword) {
-            this.showNotification('Veuillez remplir tous les champs', 'error');
-            return;
+        if (this.authManager) {
+            const userData = { name, email, password, confirmPassword };
+            const result = this.authManager.register(userData);
+            
+            if (result.success) {
+                this.showNotification('Inscription réussie !', 'success');
+                // Connecter automatiquement l'utilisateur
+                const loginResult = this.authManager.login(email, password);
+                if (loginResult.success) {
+                    this.currentUser = loginResult.user;
+                    this.isLoggedIn = true;
+                    this.updateUserInterface();
+                    this.hideModal(document.getElementById('loginModal'));
+                }
+            } else {
+                this.showNotification(result.error, 'error');
+            }
+        } else {
+            // Fallback to original simulation
+            if (!name || !email || !password || !confirmPassword) {
+                this.showNotification('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                this.showNotification('Les mots de passe ne correspondent pas', 'error');
+                return;
+            }
+            
+            this.currentUser = { email, name };
+            this.isLoggedIn = true;
+            this.updateUserInterface();
+            this.hideModal(document.getElementById('loginModal'));
+            this.showNotification('Inscription réussie !', 'success');
         }
-        
-        if (password !== confirmPassword) {
-            this.showNotification('Les mots de passe ne correspondent pas', 'error');
-            return;
-        }
-        
-        // Simulation d'inscription
-        this.currentUser = {
-            email: email,
-            name: name
-        };
-        this.isLoggedIn = true;
-        
-        this.updateUserInterface();
-        this.hideModal(document.getElementById('loginModal'));
-        this.showNotification('Inscription réussie !', 'success');
     }
     
     // Mise à jour de l'interface utilisateur
@@ -951,11 +1008,45 @@ class RGApp {
     }
     
     completeOrder(paymentMethod, amount) {
+        // Calculate totals with promo codes if available
+        let subtotal = amount;
+        let discount = 0;
+        let promoCode = null;
+        
+        if (this.promoManager) {
+            const calculation = this.promoManager.calculateTotal(amount);
+            subtotal = calculation.subtotal;
+            discount = calculation.discount;
+            amount = calculation.total;
+            promoCode = calculation.promoCode;
+        }
+        
+        // Create order if OrderManager is available
+        if (this.orderManager) {
+            const orderData = {
+                userId: this.isLoggedIn && this.currentUser ? this.currentUser.id : null,
+                items: [...this.cart],
+                subtotal: subtotal,
+                discount: discount,
+                total: amount,
+                paymentMethod: paymentMethod,
+                promoCode: promoCode
+            };
+            
+            const order = this.orderManager.createOrder(orderData);
+            console.log('Order created:', order);
+        }
+        
         // Clear cart
         this.cart = [];
         this.cartCount = 0;
         this.updateCartDisplay();
         this.saveCartToStorage();
+        
+        // Clear applied promo code
+        if (this.promoManager) {
+            this.promoManager.removePromoCode();
+        }
         
         // Hide payment modal
         this.hideModal(document.getElementById('paymentModal'));

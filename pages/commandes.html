@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mes Commandes - R&G</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/auth.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo au centre -->
+            <div class="logo-container">
+                <a href="../index.html">
+                    <img src="../assets/logo.svg" alt="R&G Logo" class="logo">
+                </a>
+            </div>
+            
+            <!-- Menu déroulant avec 3 étoiles -->
+            <div class="menu-dropdown">
+                <button class="menu-trigger" id="menuTrigger">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </button>
+                <div class="dropdown-content" id="dropdownContent">
+                    <a href="../index.html">Accueil</a>
+                    <a href="femme.html">Vêtements Femme</a>
+                    <a href="homme.html">Vêtements Homme</a>
+                    <a href="bijoux.html">Bijoux</a>
+                    <a href="info.html">Info</a>
+                    <hr>
+                    <a href="profil.html">Mon Profil</a>
+                    <a href="commandes.html" class="active">Mes Commandes</a>
+                    <a href="#" id="logoutBtn">Déconnexion</a>
+                </div>
+            </div>
+            
+            <!-- Icônes utilisateur et panier -->
+            <div class="nav-icons">
+                <button class="icon-btn" id="loginBtn">
+                    <i class="fas fa-user-check"></i>
+                </button>
+                <button class="icon-btn" id="cartBtn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-shopping-bag"></i> Mes Commandes</h1>
+            <p>Suivez et gérez vos commandes</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="orders-container">
+            <!-- Orders Filter -->
+            <div class="orders-filter">
+                <div class="filter-group">
+                    <label for="statusFilter">Filtrer par statut :</label>
+                    <select id="statusFilter">
+                        <option value="">Tous les statuts</option>
+                        <option value="confirmed">Confirmée</option>
+                        <option value="preparing">En préparation</option>
+                        <option value="shipped">Expédiée</option>
+                        <option value="delivered">Livrée</option>
+                        <option value="cancelled">Annulée</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="periodFilter">Période :</label>
+                    <select id="periodFilter">
+                        <option value="">Toutes les commandes</option>
+                        <option value="month">Ce mois</option>
+                        <option value="quarter">3 derniers mois</option>
+                        <option value="year">Cette année</option>
+                    </select>
+                </div>
+                
+                <div class="orders-summary">
+                    <span id="ordersCount">0 commande(s)</span>
+                    <span id="totalSpent">Total : 0,00 €</span>
+                </div>
+            </div>
+
+            <!-- Orders List -->
+            <div class="orders-list" id="ordersList">
+                <!-- Orders will be populated here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyOrders" class="empty-orders" style="display: none;">
+                <div class="empty-content">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h2>Aucune commande trouvée</h2>
+                    <p>Vous n'avez pas encore passé de commande</p>
+                    <a href="../index.html" class="btn-shop">
+                        Découvrir nos produits
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>R&G</h3>
+                <p>Boutique de mode et bijoux de luxe</p>
+            </div>
+            <div class="footer-section">
+                <h4>Liens utiles</h4>
+                <ul>
+                    <li><a href="info.html">À propos</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Livraison</a></li>
+                    <li><a href="#">Retours</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Suivez-nous</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 R&G. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Order Details Modal -->
+    <div id="orderDetailsModal" class="modal">
+        <div class="modal-content order-modal">
+            <div class="modal-header">
+                <h2 id="orderModalTitle">Détails de la commande</h2>
+                <span class="close" id="closeOrderModal">&times;</span>
+            </div>
+            <div class="modal-body" id="orderModalBody">
+                <!-- Order details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../scripts/app.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/orders.js"></script>
+    <script>
+        class OrdersPage {
+            constructor() {
+                this.authManager = new AuthManager();
+                this.orderManager = new OrderManager();
+                this.currentUser = null;
+                this.allOrders = [];
+                this.filteredOrders = [];
+                this.init();
+            }
+            
+            init() {
+                // Check if user is logged in
+                if (!this.authManager.isUserLoggedIn()) {
+                    window.location.href = '../index.html';
+                    return;
+                }
+                
+                this.currentUser = this.authManager.getCurrentUser();
+                this.setupEventListeners();
+                this.loadOrders();
+            }
+            
+            setupEventListeners() {
+                // Filters
+                document.getElementById('statusFilter').addEventListener('change', () => {
+                    this.applyFilters();
+                });
+                
+                document.getElementById('periodFilter').addEventListener('change', () => {
+                    this.applyFilters();
+                });
+                
+                // Modal
+                document.getElementById('closeOrderModal').addEventListener('click', () => {
+                    this.closeOrderModal();
+                });
+                
+                // Click outside modal to close
+                document.getElementById('orderDetailsModal').addEventListener('click', (e) => {
+                    if (e.target.id === 'orderDetailsModal') {
+                        this.closeOrderModal();
+                    }
+                });
+                
+                // Logout
+                document.getElementById('logoutBtn').addEventListener('click', () => {
+                    this.authManager.logout();
+                    window.location.href = '../index.html';
+                });
+            }
+            
+            loadOrders() {
+                // Get user's orders from their profile and from the order manager
+                const userOrders = this.currentUser.orders || [];
+                const allOrders = this.orderManager.getUserOrders(this.currentUser.id) || [];
+                
+                // Merge orders (remove duplicates by ID)
+                const orderMap = new Map();
+                [...userOrders, ...allOrders].forEach(order => {
+                    orderMap.set(order.id, order);
+                });
+                
+                this.allOrders = Array.from(orderMap.values())
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                this.filteredOrders = [...this.allOrders];
+                this.renderOrders();
+                this.updateSummary();
+            }
+            
+            applyFilters() {
+                const statusFilter = document.getElementById('statusFilter').value;
+                const periodFilter = document.getElementById('periodFilter').value;
+                
+                this.filteredOrders = this.allOrders.filter(order => {
+                    // Status filter
+                    if (statusFilter && order.status !== statusFilter) {
+                        return false;
+                    }
+                    
+                    // Period filter
+                    if (periodFilter) {
+                        const orderDate = new Date(order.date);
+                        const now = new Date();
+                        
+                        switch (periodFilter) {
+                            case 'month':
+                                const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                                if (orderDate < thisMonth) return false;
+                                break;
+                                
+                            case 'quarter':
+                                const threeMonthsAgo = new Date();
+                                threeMonthsAgo.setMonth(now.getMonth() - 3);
+                                if (orderDate < threeMonthsAgo) return false;
+                                break;
+                                
+                            case 'year':
+                                const thisYear = new Date(now.getFullYear(), 0, 1);
+                                if (orderDate < thisYear) return false;
+                                break;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                this.renderOrders();
+                this.updateSummary();
+            }
+            
+            renderOrders() {
+                const ordersList = document.getElementById('ordersList');
+                const emptyOrders = document.getElementById('emptyOrders');
+                
+                if (this.filteredOrders.length === 0) {
+                    ordersList.style.display = 'none';
+                    emptyOrders.style.display = 'block';
+                    return;
+                }
+                
+                ordersList.style.display = 'block';
+                emptyOrders.style.display = 'none';
+                
+                ordersList.innerHTML = this.filteredOrders.map(order => {
+                    const formattedOrder = this.orderManager.formatOrderForDisplay(order);
+                    return this.createOrderCard(formattedOrder);
+                }).join('');
+            }
+            
+            createOrderCard(order) {
+                const statusClass = this.getStatusClass(order.status);
+                const statusIcon = this.getStatusIcon(order.status);
+                
+                return `
+                    <div class="order-card" data-order-id="${order.id}">
+                        <div class="order-header">
+                            <div class="order-id">
+                                <strong>Commande ${order.id}</strong>
+                                <span class="order-date">${order.formattedDate}</span>
+                            </div>
+                            <div class="order-status ${statusClass}">
+                                <i class="${statusIcon}"></i>
+                                ${order.statusLabel}
+                            </div>
+                        </div>
+                        
+                        <div class="order-content">
+                            <div class="order-items-preview">
+                                <h4>Articles (${order.items.length})</h4>
+                                <div class="items-list">
+                                    ${order.items.slice(0, 3).map(item => `
+                                        <div class="item-preview">
+                                            <span class="item-name">${item.name}</span>
+                                            <span class="item-qty">x${item.quantity}</span>
+                                        </div>
+                                    `).join('')}
+                                    ${order.items.length > 3 ? `
+                                        <div class="more-items">
+                                            +${order.items.length - 3} autre(s)
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="order-info">
+                                <div class="order-total">
+                                    <strong>${order.formattedTotal}</strong>
+                                </div>
+                                ${order.paymentMethod ? `
+                                    <div class="payment-method">
+                                        <i class="fas fa-credit-card"></i>
+                                        ${order.paymentMethod}
+                                    </div>
+                                ` : ''}
+                                ${order.trackingNumber ? `
+                                    <div class="tracking-info">
+                                        <i class="fas fa-truck"></i>
+                                        ${order.trackingNumber}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="order-actions">
+                            <button class="btn-view-details" onclick="ordersPage.viewOrderDetails('${order.id}')">
+                                <i class="fas fa-eye"></i>
+                                Voir détails
+                            </button>
+                            
+                            ${order.status === 'confirmed' || order.status === 'preparing' ? `
+                                <button class="btn-cancel" onclick="ordersPage.cancelOrder('${order.id}')">
+                                    <i class="fas fa-times"></i>
+                                    Annuler
+                                </button>
+                            ` : ''}
+                            
+                            ${order.status === 'delivered' ? `
+                                <button class="btn-reorder" onclick="ordersPage.reorder('${order.id}')">
+                                    <i class="fas fa-redo"></i>
+                                    Recommander
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            getStatusClass(status) {
+                const statusClasses = {
+                    'pending': 'status-pending',
+                    'confirmed': 'status-confirmed',
+                    'preparing': 'status-preparing',
+                    'shipped': 'status-shipped',
+                    'delivered': 'status-delivered',
+                    'cancelled': 'status-cancelled'
+                };
+                return statusClasses[status] || 'status-pending';
+            }
+            
+            getStatusIcon(status) {
+                const statusIcons = {
+                    'pending': 'fas fa-clock',
+                    'confirmed': 'fas fa-check',
+                    'preparing': 'fas fa-cog',
+                    'shipped': 'fas fa-truck',
+                    'delivered': 'fas fa-check-circle',
+                    'cancelled': 'fas fa-times-circle'
+                };
+                return statusIcons[status] || 'fas fa-clock';
+            }
+            
+            updateSummary() {
+                const ordersCount = this.filteredOrders.length;
+                const totalSpent = this.filteredOrders.reduce((sum, order) => {
+                    if (order.status !== 'cancelled') {
+                        return sum + order.total;
+                    }
+                    return sum;
+                }, 0);
+                
+                document.getElementById('ordersCount').textContent = 
+                    `${ordersCount} commande${ordersCount > 1 ? 's' : ''}`;
+                document.getElementById('totalSpent').textContent = 
+                    `Total : ${totalSpent.toFixed(2)} €`;
+            }
+            
+            viewOrderDetails(orderId) {
+                const order = this.allOrders.find(o => o.id === orderId);
+                if (!order) {
+                    this.showMessage('Commande non trouvée', 'error');
+                    return;
+                }
+                
+                const formattedOrder = this.orderManager.formatOrderForDisplay(order);
+                this.showOrderModal(formattedOrder);
+            }
+            
+            showOrderModal(order) {
+                const modal = document.getElementById('orderDetailsModal');
+                const title = document.getElementById('orderModalTitle');
+                const body = document.getElementById('orderModalBody');
+                
+                title.textContent = `Commande ${order.id}`;
+                
+                body.innerHTML = `
+                    <div class="order-details-content">
+                        <div class="order-status-section">
+                            <div class="status-badge ${this.getStatusClass(order.status)}">
+                                <i class="${this.getStatusIcon(order.status)}"></i>
+                                ${order.statusLabel}
+                            </div>
+                            <p class="order-date">Commandé le ${order.formattedDate}</p>
+                        </div>
+                        
+                        ${order.trackingNumber ? `
+                            <div class="tracking-section">
+                                <h3>Suivi de commande</h3>
+                                <div class="tracking-info">
+                                    <strong>Numéro de suivi :</strong> ${order.trackingNumber}
+                                </div>
+                                ${order.estimatedDelivery ? `
+                                    <div class="delivery-estimate">
+                                        <strong>Livraison estimée :</strong> ${order.formattedEstimatedDelivery}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="items-section">
+                            <h3>Articles commandés</h3>
+                            <div class="order-items-detailed">
+                                ${order.items.map(item => `
+                                    <div class="order-item-detailed">
+                                        <div class="item-info">
+                                            <h4>${item.name}</h4>
+                                            ${item.size ? `<p>Taille: ${item.size}</p>` : ''}
+                                            ${item.color ? `<p>Couleur: ${item.color}</p>` : ''}
+                                        </div>
+                                        <div class="item-quantity">Quantité: ${item.quantity}</div>
+                                        <div class="item-price">${this.orderManager.formatCurrency(item.price * item.quantity)}</div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div class="order-summary-section">
+                            <div class="summary-row">
+                                <span>Sous-total</span>
+                                <span>${this.orderManager.formatCurrency(order.subtotal)}</span>
+                            </div>
+                            ${order.discount > 0 ? `
+                                <div class="summary-row discount">
+                                    <span>Réduction${order.promoCode ? ` (${order.promoCode})` : ''}</span>
+                                    <span>-${this.orderManager.formatCurrency(order.discount)}</span>
+                                </div>
+                            ` : ''}
+                            <div class="summary-row">
+                                <span>Livraison</span>
+                                <span>Gratuite</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span><strong>Total</strong></span>
+                                <span><strong>${order.formattedTotal}</strong></span>
+                            </div>
+                        </div>
+                        
+                        ${order.deliveryAddress ? `
+                            <div class="delivery-section">
+                                <h3>Adresse de livraison</h3>
+                                <div class="address-details">
+                                    ${order.deliveryAddress.name}<br>
+                                    ${order.deliveryAddress.street}<br>
+                                    ${order.deliveryAddress.postalCode} ${order.deliveryAddress.city}<br>
+                                    ${order.deliveryAddress.country}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        <div class="payment-section">
+                            <h3>Paiement</h3>
+                            <div class="payment-details">
+                                <strong>Méthode :</strong> ${order.paymentMethod}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                modal.style.display = 'block';
+            }
+            
+            closeOrderModal() {
+                document.getElementById('orderDetailsModal').style.display = 'none';
+            }
+            
+            cancelOrder(orderId) {
+                if (confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
+                    const result = this.orderManager.cancelOrder(orderId);
+                    
+                    if (result.success) {
+                        this.showMessage('Commande annulée avec succès', 'success');
+                        this.loadOrders(); // Reload to reflect changes
+                    } else {
+                        this.showMessage(result.error, 'error');
+                    }
+                }
+            }
+            
+            reorder(orderId) {
+                const order = this.allOrders.find(o => o.id === orderId);
+                if (!order) {
+                    this.showMessage('Commande non trouvée', 'error');
+                    return;
+                }
+                
+                // Add items to cart
+                if (window.app) {
+                    order.items.forEach(item => {
+                        window.app.addToCart(item, {
+                            size: item.size,
+                            color: item.color,
+                            quantity: item.quantity
+                        });
+                    });
+                    
+                    this.showMessage(`${order.items.length} article(s) ajouté(s) au panier`, 'success');
+                } else {
+                    this.showMessage('Erreur lors de l\'ajout au panier', 'error');
+                }
+            }
+            
+            showMessage(message, type) {
+                if (window.app && window.app.showNotification) {
+                    window.app.showNotification(message, type);
+                } else {
+                    alert(message);
+                }
+            }
+        }
+        
+        // Initialize orders page
+        document.addEventListener('DOMContentLoaded', () => {
+            window.ordersPage = new OrdersPage();
+        });
+    </script>
+</body>
+</html>
