@@ -26,7 +26,7 @@ body {
 
 /* Navigation Bar */
 .navbar {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+    background: var(--primary-blue);
     padding: 1rem 0;
     box-shadow: var(--shadow);
     position: sticky;
@@ -395,7 +395,7 @@ body {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 50%, var(--gold) 100%);
+    background: var(--primary-blue);
     color: var(--white);
     text-align: center;
     padding: 4rem 2rem;
@@ -437,8 +437,8 @@ body {
 }
 
 .cta-button {
-    background-color: var(--gold);
-    color: var(--primary-blue);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--primary-blue) 100%);
+    color: var(--white);
     border: none;
     padding: 1rem 2rem;
     font-size: 1.1rem;
@@ -451,7 +451,7 @@ body {
 }
 
 .cta-button:hover {
-    background-color: var(--dark-gold);
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--gold) 100%);
     transform: translateY(-2px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
@@ -470,10 +470,54 @@ body {
     margin-bottom: 3rem;
 }
 
-.categories-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+/* Carousel System */
+.carousel-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.carousel-wrapper {
+    overflow: hidden;
+    flex: 1;
+    margin: 0 3rem;
+}
+
+.carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
     gap: 2rem;
+}
+
+.carousel-btn {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--primary-blue) 100%);
+    color: var(--white);
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+    z-index: 2;
+}
+
+.carousel-btn:hover {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--gold) 100%);
+    transform: scale(1.1);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.carousel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .category-card {
@@ -485,23 +529,31 @@ body {
     transition: all 0.3s ease;
     cursor: pointer;
     border: 2px solid transparent;
+    min-width: 300px;
+    flex-shrink: 0;
 }
 
 .category-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-    border-color: var(--gold);
+    border: 2px solid transparent;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--primary-blue) 100%);
+}
+
+.category-card:hover h3,
+.category-card:hover p {
+    color: var(--white);
 }
 
 .category-image {
     font-size: 4rem;
-    color: var(--light-blue);
+    color: var(--primary-blue);
     margin-bottom: 1rem;
     transition: all 0.3s ease;
 }
 
 .category-card:hover .category-image {
-    color: var(--gold);
+    color: var(--white);
     transform: scale(1.1);
 }
 
@@ -509,11 +561,59 @@ body {
     font-size: 1.5rem;
     color: var(--primary-blue);
     margin-bottom: 0.5rem;
+    transition: color 0.3s ease;
 }
 
 .category-card p {
     color: var(--dark-gray);
     opacity: 0.8;
+    transition: color 0.3s ease;
+}
+
+/* Carousel Dots */
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.carousel-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(29, 53, 87, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.carousel-dot.active {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--primary-blue) 100%);
+    transform: scale(1.2);
+}
+
+.carousel-dot:hover {
+    background-color: var(--primary-blue);
+    transform: scale(1.1);
+}
+
+/* Responsive Carousel */
+@media (max-width: 768px) {
+    .carousel-wrapper {
+        margin: 0 2rem;
+    }
+    
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .category-card {
+        min-width: 280px;
+        padding: 1.5rem;
+    }
 }
 
 /* Footer */

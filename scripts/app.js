@@ -6,6 +6,12 @@ class RGApp {
         this.isLoggedIn = false;
         this.currentUser = null;
         
+        // Carousel state
+        this.currentSlide = 0;
+        this.totalSlides = 0;
+        this.slidesToShow = 3; // Number of slides to show at once
+        this.slideWidth = 320; // Width of each slide including gap
+        
         this.init();
     }
     
@@ -13,6 +19,7 @@ class RGApp {
         this.setupEventListeners();
         this.loadCartFromStorage();
         this.updateCartDisplay();
+        this.initCarousel();
     }
     
     setupEventListeners() {
@@ -399,6 +406,146 @@ class RGApp {
     showProductDetails(productId) {
         // Cette méthode serait implémentée pour afficher un modal avec les détails du produit
         console.log('Affichage des détails pour le produit:', productId);
+    }
+    
+    // Carousel Methods
+    initCarousel() {
+        const carouselTrack = document.getElementById('carouselTrack');
+        const carouselPrev = document.getElementById('carouselPrev');
+        const carouselNext = document.getElementById('carouselNext');
+        const carouselDots = document.getElementById('carouselDots');
+        
+        if (!carouselTrack) return;
+        
+        const categoryCards = carouselTrack.querySelectorAll('.category-card');
+        this.totalSlides = categoryCards.length;
+        
+        // Set up responsive slides
+        this.updateSlidesToShow();
+        
+        // Create dots
+        this.createCarouselDots();
+        
+        // Add event listeners
+        if (carouselPrev) {
+            carouselPrev.addEventListener('click', () => this.prevSlide());
+        }
+        
+        if (carouselNext) {
+            carouselNext.addEventListener('click', () => this.nextSlide());
+        }
+        
+        // Add click events to category cards
+        categoryCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const category = card.getAttribute('data-category');
+                this.navigateToCategory(category);
+            });
+        });
+        
+        // Update initial state
+        this.updateCarousel();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            this.updateSlidesToShow();
+            this.updateCarousel();
+        });
+    }
+    
+    updateSlidesToShow() {
+        const width = window.innerWidth;
+        if (width < 768) {
+            this.slidesToShow = 1;
+            this.slideWidth = 300;
+        } else if (width < 1024) {
+            this.slidesToShow = 2;
+            this.slideWidth = 320;
+        } else {
+            this.slidesToShow = 3;
+            this.slideWidth = 320;
+        }
+    }
+    
+    createCarouselDots() {
+        const carouselDots = document.getElementById('carouselDots');
+        if (!carouselDots) return;
+        
+        carouselDots.innerHTML = '';
+        const totalDots = Math.max(1, this.totalSlides - this.slidesToShow + 1);
+        
+        for (let i = 0; i < totalDots; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'carousel-dot';
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => this.goToSlide(i));
+            carouselDots.appendChild(dot);
+        }
+    }
+    
+    updateCarousel() {
+        const carouselTrack = document.getElementById('carouselTrack');
+        const carouselPrev = document.getElementById('carouselPrev');
+        const carouselNext = document.getElementById('carouselNext');
+        const dots = document.querySelectorAll('.carousel-dot');
+        
+        if (!carouselTrack) return;
+        
+        // Calculate transform
+        const translateX = -this.currentSlide * this.slideWidth;
+        carouselTrack.style.transform = `translateX(${translateX}px)`;
+        
+        // Update button states
+        const maxSlide = Math.max(0, this.totalSlides - this.slidesToShow);
+        
+        if (carouselPrev) {
+            carouselPrev.disabled = this.currentSlide <= 0;
+        }
+        
+        if (carouselNext) {
+            carouselNext.disabled = this.currentSlide >= maxSlide;
+        }
+        
+        // Update dots
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === this.currentSlide);
+        });
+    }
+    
+    nextSlide() {
+        const maxSlide = Math.max(0, this.totalSlides - this.slidesToShow);
+        if (this.currentSlide < maxSlide) {
+            this.currentSlide++;
+            this.updateCarousel();
+        }
+    }
+    
+    prevSlide() {
+        if (this.currentSlide > 0) {
+            this.currentSlide--;
+            this.updateCarousel();
+        }
+    }
+    
+    goToSlide(slideIndex) {
+        const maxSlide = Math.max(0, this.totalSlides - this.slidesToShow);
+        this.currentSlide = Math.max(0, Math.min(slideIndex, maxSlide));
+        this.updateCarousel();
+    }
+    
+    navigateToCategory(category) {
+        const categoryMap = {
+            'femme': 'pages/femme.html',
+            'homme': 'pages/homme.html',
+            'bijoux': 'pages/bijoux.html',
+            'accessoires': 'pages/accessoires.html',
+            'nouvelle-collection': 'pages/nouvelle-collection.html'
+        };
+        
+        const url = categoryMap[category];
+        if (url) {
+            window.location.href = url;
+        }
     }
 }
 
