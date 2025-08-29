@@ -6,6 +6,12 @@ class RGApp {
         this.isLoggedIn = false;
         this.currentUser = null;
         
+        // Carousel state
+        this.currentSlide = 0;
+        this.totalSlides = 0;
+        this.slidesToShow = 3; // Number of slides to show at once
+        this.slideWidth = 320; // Width of each slide including gap
+        
         this.init();
     }
     
@@ -13,6 +19,7 @@ class RGApp {
         this.setupEventListeners();
         this.loadCartFromStorage();
         this.updateCartDisplay();
+        this.initCarousel();
     }
     
     setupEventListeners() {
@@ -96,6 +103,49 @@ class RGApp {
                 this.hideModal(cartModal);
             });
         }
+        
+        // Enhanced cart buttons
+        const continueShoppingBtn = document.getElementById('continueShoppingBtn');
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        
+        if (continueShoppingBtn) {
+            continueShoppingBtn.addEventListener('click', () => {
+                this.hideModal(document.getElementById('cartModal'));
+                this.scrollToCategories();
+            });
+        }
+        
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', () => {
+                this.proceedToCheckout();
+            });
+        }
+        
+        // Payment modal handlers
+        const paypalBtn = document.getElementById('paypalBtn');
+        const stripeBtn = document.getElementById('stripeBtn');
+        const closePayment = document.getElementById('closePayment');
+        
+        if (paypalBtn) {
+            paypalBtn.addEventListener('click', () => {
+                this.processPayment('paypal');
+            });
+        }
+        
+        if (stripeBtn) {
+            stripeBtn.addEventListener('click', () => {
+                this.processPayment('stripe');
+            });
+        }
+        
+        if (closePayment) {
+            closePayment.addEventListener('click', () => {
+                this.hideModal(document.getElementById('paymentModal'));
+            });
+        }
+        
+        // Card input formatting
+        this.setupCardInputFormatting();
         
         // Fermer les modals en cliquant à l'extérieur
         window.addEventListener('click', (e) => {
@@ -238,6 +288,50 @@ class RGApp {
         }
     }
     
+    updateQuantity(itemId, newQuantity) {
+        if (newQuantity <= 0) {
+            this.removeFromCart(itemId);
+            return;
+        }
+        
+        const item = this.cart.find(item => item.id === itemId);
+        if (item) {
+            const oldQuantity = item.quantity;
+            item.quantity = newQuantity;
+            this.cartCount = this.cartCount - oldQuantity + newQuantity;
+            this.updateCartDisplay();
+            this.saveCartToStorage();
+        }
+    }
+    
+    addToCart(product, options = {}) {
+        const existingItem = this.cart.find(item => 
+            item.id === product.id && 
+            item.size === options.size && 
+            item.color === options.color
+        );
+        
+        if (existingItem) {
+            existingItem.quantity += options.quantity || 1;
+            this.cartCount += options.quantity || 1;
+        } else {
+            this.cart.push({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                category: product.category,
+                size: options.size,
+                color: options.color,
+                quantity: options.quantity || 1
+            });
+            this.cartCount += options.quantity || 1;
+        }
+        
+        this.updateCartDisplay();
+        this.saveCartToStorage();
+        this.showNotification('Article ajouté au panier', 'success');
+    }
+    
     updateCartDisplay() {
         const cartCountElement = document.getElementById('cartCount');
         if (cartCountElement) {
@@ -252,15 +346,26 @@ class RGApp {
     
     renderCartItems() {
         const cartItemsContainer = document.getElementById('cartItems');
-        const cartTotalElement = document.getElementById('cartTotal');
+        const cartEmpty = document.getElementById('cartEmpty');
+        const cartSummary = document.getElementById('cartSummary');
+        const cartFooter = document.getElementById('cartFooter');
+        const cartSubtotal = document.getElementById('cartSubtotal');
+        const cartTotal = document.getElementById('cartTotal');
         
-        if (!cartItemsContainer || !cartTotalElement) return;
+        if (!cartItemsContainer) return;
         
         if (this.cart.length === 0) {
-            cartItemsContainer.innerHTML = '<p>Votre panier est vide</p>';
-            cartTotalElement.textContent = '0,00 €';
+            cartEmpty.style.display = 'block';
+            cartSummary.style.display = 'none';
+            cartFooter.style.display = 'none';
+            cartItemsContainer.innerHTML = '';
+            cartItemsContainer.appendChild(cartEmpty);
             return;
         }
+        
+        cartEmpty.style.display = 'none';
+        cartSummary.style.display = 'block';
+        cartFooter.style.display = 'flex';
         
         let total = 0;
         let itemsHTML = '';
@@ -269,22 +374,51 @@ class RGApp {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
             
+            // Generate icon based on category or use a default
+            const categoryIcons = {
+                'femme': 'fas fa-female',
+                'homme': 'fas fa-male',
+                'bijoux': 'fas fa-gem',
+                'accessoires': 'fas fa-shopping-bag'
+            };
+            const itemIcon = categoryIcons[item.category] || 'fas fa-shopping-bag';
+            
             itemsHTML += `
                 <div class="cart-item">
-                    <div>
-                        <h4>${item.name}</h4>
-                        <p>Quantité: ${item.quantity}</p>
-                        <p>${item.price.toFixed(2)} € × ${item.quantity}</p>
+                    <div class="cart-item-image">
+                        <i class="${itemIcon}"></i>
                     </div>
-                    <button onclick="app.removeFromCart('${item.id}')" class="remove-btn">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="cart-item-details">
+                        <h4 class="cart-item-name">${item.name}</h4>
+                        <div class="cart-item-options">
+                            ${item.size ? `Taille: ${item.size}` : ''}
+                            ${item.color ? ` • Couleur: ${item.color}` : ''}
+                        </div>
+                        <div class="cart-item-price">${item.price.toFixed(2)} €</div>
+                    </div>
+                    <div class="cart-item-controls">
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="app.updateQuantity('${item.id}', ${item.quantity - 1})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity-display">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="app.updateQuantity('${item.id}', ${item.quantity + 1})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <button class="remove-item-btn" onclick="app.removeFromCart('${item.id}')" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             `;
         });
         
         cartItemsContainer.innerHTML = itemsHTML;
-        cartTotalElement.textContent = `${total.toFixed(2)} €`;
+        
+        // Update summary
+        if (cartSubtotal) cartSubtotal.textContent = `${total.toFixed(2)} €`;
+        if (cartTotal) cartTotal.textContent = `${total.toFixed(2)} €`;
     }
     
     // Stockage local
@@ -399,6 +533,293 @@ class RGApp {
     showProductDetails(productId) {
         // Cette méthode serait implémentée pour afficher un modal avec les détails du produit
         console.log('Affichage des détails pour le produit:', productId);
+    }
+    
+    // Carousel Methods
+    initCarousel() {
+        const carouselTrack = document.getElementById('carouselTrack');
+        const carouselPrev = document.getElementById('carouselPrev');
+        const carouselNext = document.getElementById('carouselNext');
+        const carouselDots = document.getElementById('carouselDots');
+        
+        if (!carouselTrack) return;
+        
+        const categoryCards = carouselTrack.querySelectorAll('.category-card');
+        this.totalSlides = categoryCards.length;
+        
+        // Set up responsive slides
+        this.updateSlidesToShow();
+        
+        // Create dots
+        this.createCarouselDots();
+        
+        // Add event listeners
+        if (carouselPrev) {
+            carouselPrev.addEventListener('click', () => this.prevSlide());
+        }
+        
+        if (carouselNext) {
+            carouselNext.addEventListener('click', () => this.nextSlide());
+        }
+        
+        // Add click events to category cards
+        categoryCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const category = card.getAttribute('data-category');
+                this.navigateToCategory(category);
+            });
+        });
+        
+        // Update initial state
+        this.updateCarousel();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            this.updateSlidesToShow();
+            this.updateCarousel();
+        });
+    }
+    
+    updateSlidesToShow() {
+        const width = window.innerWidth;
+        if (width < 768) {
+            this.slidesToShow = 1;
+            this.slideWidth = 300;
+        } else if (width < 1024) {
+            this.slidesToShow = 2;
+            this.slideWidth = 320;
+        } else {
+            this.slidesToShow = 3;
+            this.slideWidth = 320;
+        }
+    }
+    
+    createCarouselDots() {
+        const carouselDots = document.getElementById('carouselDots');
+        if (!carouselDots) return;
+        
+        carouselDots.innerHTML = '';
+        const totalDots = Math.max(1, this.totalSlides - this.slidesToShow + 1);
+        
+        for (let i = 0; i < totalDots; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'carousel-dot';
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => this.goToSlide(i));
+            carouselDots.appendChild(dot);
+        }
+    }
+    
+    updateCarousel() {
+        const carouselTrack = document.getElementById('carouselTrack');
+        const carouselPrev = document.getElementById('carouselPrev');
+        const carouselNext = document.getElementById('carouselNext');
+        const dots = document.querySelectorAll('.carousel-dot');
+        
+        if (!carouselTrack) return;
+        
+        // Calculate transform
+        const translateX = -this.currentSlide * this.slideWidth;
+        carouselTrack.style.transform = `translateX(${translateX}px)`;
+        
+        // Update button states
+        const maxSlide = Math.max(0, this.totalSlides - this.slidesToShow);
+        
+        if (carouselPrev) {
+            carouselPrev.disabled = this.currentSlide <= 0;
+        }
+        
+        if (carouselNext) {
+            carouselNext.disabled = this.currentSlide >= maxSlide;
+        }
+        
+        // Update dots
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === this.currentSlide);
+        });
+    }
+    
+    nextSlide() {
+        const maxSlide = Math.max(0, this.totalSlides - this.slidesToShow);
+        if (this.currentSlide < maxSlide) {
+            this.currentSlide++;
+            this.updateCarousel();
+        }
+    }
+    
+    prevSlide() {
+        if (this.currentSlide > 0) {
+            this.currentSlide--;
+            this.updateCarousel();
+        }
+    }
+    
+    goToSlide(slideIndex) {
+        const maxSlide = Math.max(0, this.totalSlides - this.slidesToShow);
+        this.currentSlide = Math.max(0, Math.min(slideIndex, maxSlide));
+        this.updateCarousel();
+    }
+    
+    navigateToCategory(category) {
+        const categoryMap = {
+            'femme': 'pages/femme.html',
+            'homme': 'pages/homme.html',
+            'bijoux': 'pages/bijoux.html',
+            'accessoires': 'pages/accessoires.html',
+            'nouvelle-collection': 'pages/nouvelle-collection.html'
+        };
+        
+        const url = categoryMap[category];
+        if (url) {
+            window.location.href = url;
+        }
+    }
+    
+    // Notification system
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-info-circle'}"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => notification.classList.add('show'), 100);
+        
+        // Hide notification
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+    
+    // Checkout process
+    proceedToCheckout() {
+        if (this.cart.length === 0) {
+            this.showNotification('Votre panier est vide', 'info');
+            return;
+        }
+        
+        // Hide cart modal and show payment modal
+        this.hideModal(document.getElementById('cartModal'));
+        this.showPaymentModal();
+    }
+    
+    showPaymentModal() {
+        const paymentModal = document.getElementById('paymentModal');
+        const orderItems = document.getElementById('orderItems');
+        const orderTotal = document.getElementById('orderTotal');
+        
+        // Populate order summary
+        const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        let itemsHTML = '';
+        this.cart.forEach(item => {
+            itemsHTML += `
+                <div class="order-item">
+                    <div class="order-item-details">
+                        <div class="order-item-name">${item.name}</div>
+                        <div class="order-item-options">
+                            Quantité: ${item.quantity}
+                            ${item.size ? ` • Taille: ${item.size}` : ''}
+                            ${item.color ? ` • Couleur: ${item.color}` : ''}
+                        </div>
+                    </div>
+                    <div class="order-item-price">${(item.price * item.quantity).toFixed(2)} €</div>
+                </div>
+            `;
+        });
+        
+        orderItems.innerHTML = itemsHTML;
+        orderTotal.textContent = `${total.toFixed(2)} €`;
+        
+        this.showModal(paymentModal);
+    }
+    
+    processPayment(method) {
+        const total = this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        
+        if (method === 'paypal') {
+            // In a real implementation, this would integrate with PayPal SDK
+            this.showNotification(`Redirection vers PayPal pour ${total.toFixed(2)}€...`, 'info');
+            
+            // Simulate PayPal processing
+            setTimeout(() => {
+                this.completeOrder('PayPal', total);
+            }, 2000);
+            
+        } else if (method === 'stripe') {
+            // Validate card fields
+            const cardNumber = document.getElementById('cardNumber').value;
+            const expiryDate = document.getElementById('expiryDate').value;
+            const cvv = document.getElementById('cvv').value;
+            const cardName = document.getElementById('cardName').value;
+            
+            if (!cardNumber || !expiryDate || !cvv || !cardName) {
+                this.showNotification('Veuillez remplir tous les champs de la carte', 'info');
+                return;
+            }
+            
+            // In a real implementation, this would use Stripe Elements
+            this.showNotification(`Traitement du paiement par carte pour ${total.toFixed(2)}€...`, 'info');
+            
+            // Simulate Stripe processing
+            setTimeout(() => {
+                this.completeOrder('Carte bancaire', total);
+            }, 2000);
+        }
+    }
+    
+    completeOrder(paymentMethod, amount) {
+        // Clear cart
+        this.cart = [];
+        this.cartCount = 0;
+        this.updateCartDisplay();
+        this.saveCartToStorage();
+        
+        // Hide payment modal
+        this.hideModal(document.getElementById('paymentModal'));
+        
+        // Show success notification
+        this.showNotification(`Commande confirmée! Paiement de ${amount.toFixed(2)}€ via ${paymentMethod} réussi.`, 'success');
+        
+        // In a real app, this would redirect to an order confirmation page
+        console.log('Order completed:', { paymentMethod, amount, timestamp: new Date() });
+    }
+    
+    setupCardInputFormatting() {
+        const cardNumber = document.getElementById('cardNumber');
+        const expiryDate = document.getElementById('expiryDate');
+        const cvv = document.getElementById('cvv');
+        
+        if (cardNumber) {
+            cardNumber.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
+                value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+                e.target.value = value;
+            });
+        }
+        
+        if (expiryDate) {
+            expiryDate.addEventListener('input', (e) => {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length >= 2) {
+                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
+                }
+                e.target.value = value;
+            });
+        }
+        
+        if (cvv) {
+            cvv.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/\D/g, '');
+            });
+        }
     }
 }
 
