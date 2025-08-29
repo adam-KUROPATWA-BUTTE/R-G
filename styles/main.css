@@ -489,6 +489,7 @@ body {
     display: flex;
     transition: transform 0.5s ease-in-out;
     gap: 2rem;
+    will-change: transform; /* Optimize for smooth animations */
 }
 
 .carousel-btn {
@@ -596,6 +597,12 @@ body {
 .carousel-dot:hover {
     background-color: var(--primary-blue);
     transform: scale(1.1);
+}
+
+/* Infinite Carousel Support */
+.carousel-clone {
+    /* Cloned cards for infinite scrolling */
+    pointer-events: auto;
 }
 
 /* Responsive Carousel */
