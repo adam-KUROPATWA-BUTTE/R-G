@@ -493,7 +493,7 @@ body {
 }
 
 .carousel-btn {
-    background: linear-gradient(135deg, var(--gold) 0%, var(--primary-blue) 100%);
+    background: var(--primary-blue);
     color: var(--white);
     border: none;
     width: 50px;
@@ -510,7 +510,7 @@ body {
 }
 
 .carousel-btn:hover {
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--gold) 100%);
+    background: var(--gold));
     transform: scale(1.1);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
 }
