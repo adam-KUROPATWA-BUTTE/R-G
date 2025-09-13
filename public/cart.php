@@ -1,5 +1,5 @@
 <?php
-// Handle both direct access (public/index.php) and inclusion from root (index.php)
+// Handle both direct access (public/cart.php) and inclusion from root (cart.php)
 $auth_path = file_exists('../src/auth.php') ? '../src/auth.php' : 'src/auth.php';
 require_once $auth_path;
 $current_user = current_user();
@@ -9,8 +9,9 @@ $current_user = current_user();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R&G - Boutique de Mode et Bijoux</title>
+    <title>Panier - R&G</title>
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/panier.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -19,7 +20,7 @@ $current_user = current_user();
         <div class="nav-container">
             <!-- Logo au centre -->
             <div class="logo-container">
-                <a href="index.html">
+                <a href="index.php">
                     <img src="assets/logo.svg" alt="R&G Logo" class="logo">
                 </a>
             </div>
@@ -32,7 +33,7 @@ $current_user = current_user();
                     <i class="fas fa-star"></i>
                 </button>
                 <div class="dropdown-content" id="dropdownContent">
-                    <a href="index.html">Accueil</a>
+                    <a href="index.php">Accueil</a>
                     <a href="pages/femme.html">Vêtements Femme</a>
                     <a href="pages/homme.html">Vêtements Homme</a>
                     <a href="pages/bijoux.html">Bijoux</a>
@@ -42,9 +43,16 @@ $current_user = current_user();
             
             <!-- Icônes utilisateur et panier -->
             <div class="nav-icons">
-                <button class="icon-btn" id="loginBtn">
-                    <i class="fas fa-user"></i>
-                </button>
+                <?php if ($current_user): ?>
+                    <div class="user-menu">
+                        <span class="user-name">Bonjour, <?= htmlspecialchars($current_user['first_name']) ?></span>
+                        <a href="logout.php" class="logout-btn">Déconnexion</a>
+                    </div>
+                <?php else: ?>
+                    <button class="icon-btn" id="loginBtn">
+                        <i class="fas fa-user"></i>
+                    </button>
+                <?php endif; ?>
                 <button class="icon-btn" id="cartBtn">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cartCount">0</span>
@@ -55,75 +63,58 @@ $current_user = current_user();
 
     <!-- Main Content -->
     <main class="main-content">
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Bienvenue chez R&G</h1>
-                <p>Découvrez notre collection exclusive de vêtements et bijoux</p>
-                <button class="cta-button">Découvrir nos collections</button>
-            </div>
-        </section>
-
-        <section class="categories-preview">
-            <h2>Nos Collections</h2>
-            <div class="carousel-container">
-                <button class="carousel-btn carousel-btn-prev" id="carouselPrev">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                
-                <div class="carousel-wrapper">
-                    <div class="carousel-track" id="carouselTrack">
-                        <div class="category-card" data-category="femme">
-                            <div class="category-image">
-                                <i class="fas fa-female"></i>
-                            </div>
-                            <h3>Vêtements Femme</h3>
-                            <p>Collections élégantes et modernes</p>
-                        </div>
-                        
-                        <div class="category-card" data-category="homme">
-                            <div class="category-image">
-                                <i class="fas fa-male"></i>
-                            </div>
-                            <h3>Vêtements Homme</h3>
-                            <p>Style raffiné et sophistiqué</p>
-                        </div>
-                        
-                        <div class="category-card" data-category="bijoux">
-                            <div class="category-image">
-                                <i class="fas fa-gem"></i>
-                            </div>
-                            <h3>Bijoux</h3>
-                            <p>Pièces précieuses et uniques</p>
-                        </div>
-                        
-                        <!-- Modular: Easy to add new categories -->
-                        <div class="category-card" data-category="accessoires">
-                            <div class="category-image">
-                                <i class="fas fa-shopping-bag"></i>
-                            </div>
-                            <h3>Accessoires</h3>
-                            <p>Compléments de style</p>
-                        </div>
-                        
-                        <div class="category-card" data-category="nouvelle-collection">
-                            <div class="category-image">
-                                <i class="fas fa-star"></i>
-                            </div>
-                            <h3>Nouvelle Collection</h3>
-                            <p>Dernières tendances</p>
+        <div class="container">
+            <h1><i class="fas fa-shopping-cart"></i> Mon Panier</h1>
+            
+            <div class="cart-container">
+                <div class="cart-items-section">
+                    <div id="cartItems" class="cart-items">
+                        <!-- Les articles du panier seront chargés ici via JavaScript -->
+                        <div class="cart-empty" id="cartEmpty">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>Votre panier est vide</h3>
+                            <p>Découvrez nos collections pour ajouter des articles</p>
+                            <a href="index.php" class="continue-shopping-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Continuer mes achats
+                            </a>
                         </div>
                     </div>
                 </div>
                 
-                <button class="carousel-btn carousel-btn-next" id="carouselNext">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+                <div class="cart-summary-section" id="cartSummarySection" style="display: none;">
+                    <div class="cart-summary">
+                        <h3>Récapitulatif de commande</h3>
+                        
+                        <div class="summary-row">
+                            <span>Sous-total:</span>
+                            <span id="cartSubtotal">0,00 €</span>
+                        </div>
+                        
+                        <div class="summary-row">
+                            <span>Livraison:</span>
+                            <span id="cartShipping">Gratuite</span>
+                        </div>
+                        
+                        <div class="summary-row total-row">
+                            <span>Total:</span>
+                            <span id="cartTotal">0,00 €</span>
+                        </div>
+                        
+                        <div class="cart-actions">
+                            <a href="index.php" class="continue-shopping-btn">
+                                <i class="fas fa-arrow-left"></i>
+                                Continuer mes achats
+                            </a>
+                            <button class="checkout-btn" id="checkoutBtn">
+                                <i class="fas fa-credit-card"></i>
+                                Finaliser la commande
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            
-            <div class="carousel-dots" id="carouselDots">
-                <!-- Dots will be generated dynamically -->
-            </div>
-        </section>
+        </div>
     </main>
 
     <!-- Footer -->
@@ -136,7 +127,7 @@ $current_user = current_user();
             <div class="footer-section">
                 <h3>Navigation</h3>
                 <ul>
-                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="index.php">Accueil</a></li>
                     <li><a href="pages/femme.html">Vêtements Femme</a></li>
                     <li><a href="pages/homme.html">Vêtements Homme</a></li>
                     <li><a href="pages/bijoux.html">Bijoux</a></li>
@@ -154,7 +145,8 @@ $current_user = current_user();
         </div>
     </footer>
 
-    <!-- Modal de connexion -->
+    <!-- Login Modal (if not logged in) -->
+    <?php if (!$current_user): ?>
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeLogin">&times;</span>
@@ -164,72 +156,22 @@ $current_user = current_user();
                 <button class="tab-button" id="registerTab">Inscription</button>
             </div>
             
-            <form id="loginForm" class="auth-form">
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Mot de passe" required>
+            <form id="loginForm" class="auth-form" action="login.php" method="POST">
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
                 <button type="submit">Se connecter</button>
             </form>
             
-            <form id="registerForm" class="auth-form hidden">
-                <input type="text" placeholder="Nom complet" required>
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Mot de passe" required>
-                <input type="password" placeholder="Confirmer le mot de passe" required>
+            <form id="registerForm" class="auth-form hidden" action="register.php" method="POST">
+                <input type="text" name="first_name" placeholder="Prénom" required>
+                <input type="text" name="last_name" placeholder="Nom" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
                 <button type="submit">S'inscrire</button>
             </form>
         </div>
     </div>
-
-    <!-- Modal panier -->
-    <div id="cartModal" class="modal">
-        <div class="modal-content cart-modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-shopping-cart"></i> Panier d'achat</h2>
-                <span class="close" id="closeCart">&times;</span>
-            </div>
-            
-            <div class="cart-body">
-                <div id="cartItems" class="cart-items">
-                    <!-- Les articles du panier seront ajoutés dynamiquement -->
-                    <div class="cart-empty" id="cartEmpty">
-                        <i class="fas fa-shopping-cart"></i>
-                        <p>Votre panier est vide</p>
-                        <p class="cart-empty-subtitle">Découvrez nos collections pour ajouter des articles</p>
-                    </div>
-                </div>
-                
-                <div class="cart-summary" id="cartSummary" style="display: none;">
-                    <div class="summary-row">
-                        <span>Sous-total:</span>
-                        <span id="cartSubtotal">0,00 €</span>
-                    </div>
-                    <div class="summary-row">
-                        <span>Livraison:</span>
-                        <span id="cartShipping">Gratuite</span>
-                    </div>
-                    <div class="summary-row total-row">
-                        <span>Total:</span>
-                        <span id="cartTotal">0,00 €</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="cart-footer" id="cartFooter" style="display: none;">
-                <button class="continue-shopping-btn" id="continueShoppingBtn">
-                    <i class="fas fa-arrow-left"></i>
-                    Continuer mes achats
-                </button>
-                <a href="pages/panier.html" class="view-cart-btn">
-                    <i class="fas fa-shopping-cart"></i>
-                    Voir le panier
-                </a>
-                <button class="checkout-btn" id="checkoutBtn">
-                    <i class="fas fa-credit-card"></i>
-                    Finaliser la commande
-                </button>
-            </div>
-        </div>
-    </div>
+    <?php endif; ?>
 
     <!-- Payment Modal -->
     <div id="paymentModal" class="modal">

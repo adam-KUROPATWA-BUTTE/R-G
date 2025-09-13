@@ -1,6 +1,9 @@
 <?php
-require_once '../src/auth.php';
-require_once '../src/csrf.php';
+// Handle both direct access (public/register.php) and routing from root
+$auth_path = file_exists('../src/auth.php') ? '../src/auth.php' : 'src/auth.php';
+$csrf_path = file_exists('../src/csrf.php') ? '../src/csrf.php' : 'src/csrf.php';
+require_once $auth_path;
+require_once $csrf_path;
 
 $error = '';
 $success = '';
