@@ -1,0 +1,29 @@
+# Configuration files with secrets
+src/config.php
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+/tmp/
+*.tmp
+
+# Backup files
+*.bak
+*.backup
+
+# Node modules (if any JS tooling is added later)
+node_modules/
+
+# Composer vendor (if Composer is used later)
+vendor/
