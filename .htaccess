@@ -1,0 +1,23 @@
+# Empêcher l'indexation
+Options -Indexes
+
+# Essayer d'utiliser public/index.php comme page par défaut
+DirectoryIndex public/index.php index.php index.html
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Décommentez si le site est servi depuis un sous-dossier, ex: /mon-site
+  # RewriteBase /
+
+  # Bloquer l'accès aux fichiers sensibles
+  RewriteRule ^src/ - [F,L]
+  RewriteRule ^database\.sql$ - [F,L]
+
+  # Servir directement si le fichier/dossier existe à la racine (ex: admin/)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Router le reste vers public/ en conservant le chemin (assets, styles, scripts, pages, *.php, etc.)
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>

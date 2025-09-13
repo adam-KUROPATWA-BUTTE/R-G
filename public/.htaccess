@@ -1,0 +1,9 @@
+# Sécurisation de base dans public
+Options -Indexes
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # Prêt pour front controller si besoin plus tard
+  # RewriteCond %{REQUEST_FILENAME} !-f
+  # RewriteCond %{REQUEST_FILENAME} !-d
+  # RewriteRule ^ index.php [L]
+</IfModule>
