@@ -1,7 +1,9 @@
 <?php
 // Handle both direct access (public/index.php) and inclusion from root (index.php)
 $auth_path = file_exists('../src/auth.php') ? '../src/auth.php' : 'src/auth.php';
+$csrf_path = file_exists('../src/csrf.php') ? '../src/csrf.php' : 'src/csrf.php';
 require_once $auth_path;
+require_once $csrf_path;
 $current_user = current_user();
 ?>
 <!DOCTYPE html>
@@ -19,7 +21,7 @@ $current_user = current_user();
         <div class="nav-container">
             <!-- Logo au centre -->
             <div class="logo-container">
-                <a href="index.html">
+                <a href="/">
                     <img src="assets/logo.svg" alt="R&G Logo" class="logo">
                 </a>
             </div>
@@ -32,7 +34,7 @@ $current_user = current_user();
                     <i class="fas fa-star"></i>
                 </button>
                 <div class="dropdown-content" id="dropdownContent">
-                    <a href="index.html">Accueil</a>
+                    <a href="/">Accueil</a>
                     <a href="pages/femme.html">Vêtements Femme</a>
                     <a href="pages/homme.html">Vêtements Homme</a>
                     <a href="pages/bijoux.html">Bijoux</a>
@@ -42,13 +44,22 @@ $current_user = current_user();
             
             <!-- Icônes utilisateur et panier -->
             <div class="nav-icons">
-                <button class="icon-btn" id="loginBtn">
-                    <i class="fas fa-user"></i>
-                </button>
-                <button class="icon-btn" id="cartBtn">
+                <?php if ($current_user): ?>
+                    <div class="user-info">
+                        <span class="user-greeting">Bonjour, <?= htmlspecialchars($current_user['email']) ?></span>
+                        <a href="/logout.php" class="icon-btn" aria-label="Déconnexion">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <a href="/login.php" class="icon-btn" aria-label="Se connecter">
+                        <i class="fas fa-user"></i>
+                    </a>
+                <?php endif; ?>
+                <a href="/cart.php" class="icon-btn" aria-label="Panier">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cartCount">0</span>
-                </button>
+                </a>
             </div>
         </div>
     </nav>
@@ -136,7 +147,7 @@ $current_user = current_user();
             <div class="footer-section">
                 <h3>Navigation</h3>
                 <ul>
-                    <li><a href="index.html">Accueil</a></li>
+                    <li><a href="/">Accueil</a></li>
                     <li><a href="pages/femme.html">Vêtements Femme</a></li>
                     <li><a href="pages/homme.html">Vêtements Homme</a></li>
                     <li><a href="pages/bijoux.html">Bijoux</a></li>
@@ -164,17 +175,19 @@ $current_user = current_user();
                 <button class="tab-button" id="registerTab">Inscription</button>
             </div>
             
-            <form id="loginForm" class="auth-form">
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Mot de passe" required>
+            <form id="loginForm" class="auth-form" action="/login.php" method="POST">
+                <?= csrf_field() ?>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
                 <button type="submit">Se connecter</button>
             </form>
             
-            <form id="registerForm" class="auth-form hidden">
-                <input type="text" placeholder="Nom complet" required>
-                <input type="email" placeholder="Email" required>
-                <input type="password" placeholder="Mot de passe" required>
-                <input type="password" placeholder="Confirmer le mot de passe" required>
+            <form id="registerForm" class="auth-form hidden" action="/register.php" method="POST">
+                <?= csrf_field() ?>
+                <input type="text" name="full_name" placeholder="Nom complet" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Mot de passe" required>
+                <input type="password" name="password_confirm" placeholder="Confirmer le mot de passe" required>
                 <button type="submit">S'inscrire</button>
             </form>
         </div>
@@ -219,7 +232,7 @@ $current_user = current_user();
                     <i class="fas fa-arrow-left"></i>
                     Continuer mes achats
                 </button>
-                <a href="pages/panier.html" class="view-cart-btn">
+                <a href="/cart.php" class="view-cart-btn">
                     <i class="fas fa-shopping-cart"></i>
                     Voir le panier
                 </a>

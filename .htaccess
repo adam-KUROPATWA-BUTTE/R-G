@@ -9,6 +9,10 @@ DirectoryIndex public/index.php index.php index.html
   # Décommentez si le site est servi depuis un sous-dossier, ex: /mon-site
   # RewriteBase /
 
+  # Redirections de compatibilité pour les anciennes URLs
+  RewriteRule ^index\.html$ public/index.php [L]
+  RewriteRule ^pages/panier\.html$ public/cart.php [L]
+
   # Bloquer l'accès aux fichiers sensibles
   RewriteRule ^src/ - [F,L]
   RewriteRule ^database\.sql$ - [F,L]
