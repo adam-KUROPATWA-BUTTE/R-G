@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier - R&G</title>
+    <link rel="stylesheet" href="../styles/main.css">
+    <link rel="stylesheet" href="../styles/panier.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <!-- Logo au centre -->
+            <div class="logo-container">
+                <a href="../index.html">
+                    <img src="../assets/logo.svg" alt="R&G Logo" class="logo">
+                </a>
+            </div>
+            
+            <!-- Menu déroulant avec 3 étoiles -->
+            <div class="menu-dropdown">
+                <button class="menu-trigger" id="menuTrigger">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                </button>
+                <div class="dropdown-content" id="dropdownContent">
+                    <a href="../index.html">Accueil</a>
+                    <a href="femme.html">Vêtements Femme</a>
+                    <a href="homme.html">Vêtements Homme</a>
+                    <a href="bijoux.html">Bijoux</a>
+                    <a href="info.html">Info</a>
+                </div>
+            </div>
+            
+            <!-- Icônes utilisateur et panier -->
+            <div class="nav-icons">
+                <button class="icon-btn" id="loginBtn">
+                    <i class="fas fa-user"></i>
+                </button>
+                <button class="icon-btn" id="cartBtn">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" id="cartCount">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-shopping-cart"></i> Mon Panier</h1>
+            <p>Finalisez vos achats et procédez au paiement</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="cart-container">
+            <!-- Cart Items Section -->
+            <section class="cart-items-section">
+                <div id="cartItemsContainer" class="cart-items-container">
+                    <!-- Cart items will be populated here -->
+                </div>
+                
+                <div class="cart-actions">
+                    <a href="../index.html" class="continue-shopping-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Continuer mes achats
+                    </a>
+                    <button id="clearCartBtn" class="clear-cart-btn">
+                        <i class="fas fa-trash"></i>
+                        Vider le panier
+                    </button>
+                </div>
+            </section>
+
+            <!-- Cart Summary Section -->
+            <aside class="cart-summary-section">
+                <div class="cart-summary">
+                    <h3>Récapitulatif</h3>
+                    
+                    <!-- Promo Code Section -->
+                    <div id="promoCodeSection" class="promo-section">
+                        <h4>Code de réduction</h4>
+                        <form id="promoForm" class="promo-form">
+                            <div class="promo-input-group">
+                                <input 
+                                    type="text" 
+                                    name="promoCode" 
+                                    placeholder="Entrez votre code promo"
+                                    maxlength="20"
+                                >
+                                <button type="submit" class="apply-promo-btn">
+                                    Appliquer
+                                </button>
+                            </div>
+                        </form>
+                        <div id="promoDisplay" class="promo-display" style="display: none;"></div>
+                    </div>
+
+                    <!-- Price Breakdown -->
+                    <div class="price-breakdown">
+                        <div class="price-row">
+                            <span>Sous-total</span>
+                            <span id="cartSubtotal">0,00 €</span>
+                        </div>
+                        <div class="price-row discount-row" id="discountRow" style="display: none;">
+                            <span>Réduction</span>
+                            <span id="cartDiscount" class="discount-amount">0,00 €</span>
+                        </div>
+                        <div class="price-row shipping-row">
+                            <span>Livraison</span>
+                            <span id="shippingCost">Gratuite</span>
+                        </div>
+                        <hr>
+                        <div class="price-row total-row">
+                            <span><strong>Total</strong></span>
+                            <span id="cartTotal" class="total-amount"><strong>0,00 €</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Options -->
+                    <div class="delivery-options">
+                        <h4>Options de livraison</h4>
+                        <div class="delivery-option">
+                            <label>
+                                <input type="radio" name="delivery" value="standard" checked>
+                                <span class="delivery-info">
+                                    <strong>Livraison Standard (Gratuite)</strong>
+                                    <small>3-5 jours ouvrés</small>
+                                </span>
+                            </label>
+                        </div>
+                        <div class="delivery-option">
+                            <label>
+                                <input type="radio" name="delivery" value="express">
+                                <span class="delivery-info">
+                                    <strong>Livraison Express (+9,99 €)</strong>
+                                    <small>24-48h</small>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <button id="checkoutBtn" class="checkout-btn">
+                        <i class="fas fa-credit-card"></i>
+                        Finaliser la commande
+                    </button>
+
+                    <!-- Security Badges -->
+                    <div class="security-badges">
+                        <div class="security-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Paiement sécurisé</span>
+                        </div>
+                        <div class="security-badge">
+                            <i class="fas fa-undo"></i>
+                            <span>Retour gratuit 30 jours</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Empty Cart Message -->
+        <div id="emptyCartMessage" class="empty-cart" style="display: none;">
+            <div class="empty-cart-content">
+                <i class="fas fa-shopping-cart"></i>
+                <h2>Votre panier est vide</h2>
+                <p>Découvrez nos collections et ajoutez vos articles préférés</p>
+                <a href="../index.html" class="shop-now-btn">
+                    Découvrir nos produits
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>R&G</h3>
+                <p>Boutique de mode et bijoux de luxe</p>
+            </div>
+            <div class="footer-section">
+                <h4>Liens utiles</h4>
+                <ul>
+                    <li><a href="info.html">À propos</a></li>
+                    <li><a href="#">Contact</a></li>
+                    <li><a href="#">Livraison</a></li>
+                    <li><a href="#">Retours</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Suivez-nous</h4>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 R&G. Tous droits réservés.</p>
+        </div>
+    </footer>
+
+    <!-- Modal de connexion -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content auth-modal">
+            <div class="modal-header">
+                <h2>Connexion / Inscription</h2>
+                <span class="close" id="closeLogin">&times;</span>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="tab-button active" id="loginTab">Connexion</button>
+                <button class="tab-button" id="registerTab">Inscription</button>
+            </div>
+            
+            <form id="loginForm" class="auth-form">
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Mot de passe" required>
+                <button type="submit">Se connecter</button>
+            </form>
+            
+            <form id="registerForm" class="auth-form hidden">
+                <input type="text" placeholder="Nom complet" required>
+                <input type="email" placeholder="Email" required>
+                <input type="password" placeholder="Mot de passe" required>
+                <input type="password" placeholder="Confirmer le mot de passe" required>
+                <button type="submit">S'inscrire</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content payment-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-credit-card"></i> Finaliser votre commande</h2>
+                <span class="close" id="closePayment">&times;</span>
+            </div>
+            
+            <div class="payment-body">
+                <div class="order-summary">
+                    <h3>Récapitulatif de commande</h3>
+                    <div id="orderItems" class="order-items">
+                        <!-- Order items will be populated here -->
+                    </div>
+                    <div class="order-total">
+                        <div class="total-row">
+                            <span>Total à payer:</span>
+                            <span id="orderTotal" class="total-amount">0,00 €</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="payment-methods">
+                    <h3>Méthode de paiement</h3>
+                    
+                    <div class="payment-tabs">
+                        <button class="payment-tab active" data-method="card">
+                            <i class="fas fa-credit-card"></i>
+                            Carte bancaire
+                        </button>
+                        <button class="payment-tab" data-method="paypal">
+                            <i class="fab fa-paypal"></i>
+                            PayPal
+                        </button>
+                    </div>
+                    
+                    <div class="payment-forms">
+                        <div id="cardForm" class="payment-form active">
+                            <div class="form-row">
+                                <input type="text" id="cardNumber" placeholder="Numéro de carte" maxlength="19">
+                            </div>
+                            <div class="form-row">
+                                <input type="text" id="cardName" placeholder="Nom sur la carte">
+                            </div>
+                            <div class="form-row">
+                                <input type="text" id="expiryDate" placeholder="MM/AA" maxlength="5">
+                                <input type="text" id="cvv" placeholder="CVV" maxlength="3">
+                            </div>
+                        </div>
+                        
+                        <div id="paypalForm" class="payment-form">
+                            <p>Vous serez redirigé vers PayPal pour finaliser votre paiement.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-actions">
+                        <button id="payButton" class="pay-button">
+                            <i class="fas fa-lock"></i>
+                            Payer maintenant
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../scripts/app.js"></script>
+    <script src="../scripts/auth.js"></script>
+    <script src="../scripts/promo.js"></script>
+    <script src="../scripts/orders.js"></script>
+    <script>
+        // Cart page specific functionality
+        class CartPage {
+            constructor() {
+                this.app = window.app;
+                this.promoManager = new PromoCodeManager();
+                this.promoUI = new PromoCodeUI(this.promoManager);
+                this.authManager = new AuthManager();
+                this.authUI = new AuthUI(this.authManager);
+                this.orderManager = new OrderManager();
+                this.orderUI = new OrderUI(this.orderManager);
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.renderCartItems();
+                this.updateCartSummary();
+                this.updateDeliveryOptions();
+            }
+            
+            setupEventListeners() {
+                // Clear cart button
+                document.getElementById('clearCartBtn').addEventListener('click', () => {
+                    if (confirm('Êtes-vous sûr de vouloir vider votre panier ?')) {
+                        this.clearCart();
+                    }
+                });
+                
+                // Checkout button
+                document.getElementById('checkoutBtn').addEventListener('click', () => {
+                    this.proceedToCheckout();
+                });
+                
+                // Delivery options
+                document.querySelectorAll('input[name="delivery"]').forEach(radio => {
+                    radio.addEventListener('change', () => {
+                        this.updateDeliveryOptions();
+                    });
+                });
+                
+                // Payment method tabs
+                document.querySelectorAll('.payment-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.switchPaymentMethod(tab.dataset.method);
+                    });
+                });
+                
+                // Pay button
+                document.getElementById('payButton').addEventListener('click', () => {
+                    this.processPayment();
+                });
+            }
+            
+            renderCartItems() {
+                const container = document.getElementById('cartItemsContainer');
+                const emptyMessage = document.getElementById('emptyCartMessage');
+                const cartSection = document.querySelector('.cart-container');
+                
+                if (!this.app.cart || this.app.cart.length === 0) {
+                    cartSection.style.display = 'none';
+                    emptyMessage.style.display = 'block';
+                    return;
+                }
+                
+                cartSection.style.display = 'grid';
+                emptyMessage.style.display = 'none';
+                
+                container.innerHTML = this.app.cart.map(item => `
+                    <div class="cart-item" data-item-id="${item.id}">
+                        <div class="item-image">
+                            <img src="${item.image || '../assets/placeholder.svg'}" alt="${item.name}">
+                        </div>
+                        <div class="item-details">
+                            <h4 class="item-name">${item.name}</h4>
+                            <p class="item-description">${item.description || ''}</p>
+                            ${item.size ? `<p class="item-option">Taille: ${item.size}</p>` : ''}
+                            ${item.color ? `<p class="item-option">Couleur: ${item.color}</p>` : ''}
+                        </div>
+                        <div class="item-price">
+                            <span class="price">${item.price.toFixed(2)} €</span>
+                        </div>
+                        <div class="item-quantity">
+                            <button class="quantity-btn" onclick="cartPage.updateQuantity('${item.id}', ${item.quantity - 1})">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <span class="quantity">${item.quantity}</span>
+                            <button class="quantity-btn" onclick="cartPage.updateQuantity('${item.id}', ${item.quantity + 1})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                        <div class="item-total">
+                            <span class="total">${(item.price * item.quantity).toFixed(2)} €</span>
+                        </div>
+                        <div class="item-actions">
+                            <button class="remove-item-btn" onclick="cartPage.removeItem('${item.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updateQuantity(itemId, newQuantity) {
+                if (newQuantity <= 0) {
+                    this.removeItem(itemId);
+                    return;
+                }
+                
+                this.app.updateQuantity(itemId, newQuantity);
+                this.renderCartItems();
+                this.updateCartSummary();
+            }
+            
+            removeItem(itemId) {
+                this.app.removeFromCart(itemId);
+                this.renderCartItems();
+                this.updateCartSummary();
+            }
+            
+            clearCart() {
+                this.app.cart = [];
+                this.app.cartCount = 0;
+                this.app.saveCartToStorage();
+                this.app.updateCartDisplay();
+                this.renderCartItems();
+                this.updateCartSummary();
+            }
+            
+            updateCartSummary() {
+                const subtotal = this.app.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const calculation = this.promoManager.calculateTotal(subtotal);
+                const delivery = this.getDeliveryFee();
+                
+                document.getElementById('cartSubtotal').textContent = `${calculation.subtotal.toFixed(2)} €`;
+                
+                const discountRow = document.getElementById('discountRow');
+                const discountElement = document.getElementById('cartDiscount');
+                
+                if (calculation.discount > 0) {
+                    discountRow.style.display = 'flex';
+                    discountElement.textContent = `-${calculation.discount.toFixed(2)} €`;
+                } else {
+                    discountRow.style.display = 'none';
+                }
+                
+                document.getElementById('shippingCost').textContent = delivery > 0 ? `${delivery.toFixed(2)} €` : 'Gratuite';
+                document.getElementById('cartTotal').textContent = `${(calculation.total + delivery).toFixed(2)} €`;
+                
+                this.promoUI.updatePromoDisplay();
+            }
+            
+            updateDeliveryOptions() {
+                const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
+                const deliveryFee = selectedDelivery === 'express' ? 9.99 : 0;
+                
+                document.getElementById('shippingCost').textContent = deliveryFee > 0 ? `${deliveryFee.toFixed(2)} €` : 'Gratuite';
+                this.updateCartSummary();
+            }
+            
+            getDeliveryFee() {
+                const selectedDelivery = document.querySelector('input[name="delivery"]:checked').value;
+                return selectedDelivery === 'express' ? 9.99 : 0;
+            }
+            
+            proceedToCheckout() {
+                if (!this.app.cart || this.app.cart.length === 0) {
+                    this.app.showNotification('Votre panier est vide', 'info');
+                    return;
+                }
+                
+                this.showPaymentModal();
+            }
+            
+            showPaymentModal() {
+                const modal = document.getElementById('paymentModal');
+                const orderItems = document.getElementById('orderItems');
+                const orderTotal = document.getElementById('orderTotal');
+                
+                // Populate order items
+                const subtotal = this.app.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const calculation = this.promoManager.calculateTotal(subtotal);
+                const delivery = this.getDeliveryFee();
+                const finalTotal = calculation.total + delivery;
+                
+                orderItems.innerHTML = this.app.cart.map(item => `
+                    <div class="order-item">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-quantity">x${item.quantity}</span>
+                        <span class="item-price">${(item.price * item.quantity).toFixed(2)} €</span>
+                    </div>
+                `).join('');
+                
+                orderTotal.textContent = `${finalTotal.toFixed(2)} €`;
+                
+                modal.style.display = 'block';
+            }
+            
+            switchPaymentMethod(method) {
+                // Update active tab
+                document.querySelectorAll('.payment-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.querySelector(`[data-method="${method}"]`).classList.add('active');
+                
+                // Show corresponding form
+                document.querySelectorAll('.payment-form').forEach(form => {
+                    form.classList.remove('active');
+                });
+                document.getElementById(`${method}Form`).classList.add('active');
+            }
+            
+            processPayment() {
+                const activeMethod = document.querySelector('.payment-tab.active').dataset.method;
+                const subtotal = this.app.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                const calculation = this.promoManager.calculateTotal(subtotal);
+                const delivery = this.getDeliveryFee();
+                const finalTotal = calculation.total + delivery;
+                
+                // Create order
+                const orderData = {
+                    userId: this.authManager.isUserLoggedIn() ? this.authManager.getCurrentUser().id : null,
+                    items: this.app.cart,
+                    subtotal: calculation.subtotal,
+                    discount: calculation.discount,
+                    total: finalTotal,
+                    paymentMethod: activeMethod === 'card' ? 'Carte bancaire' : 'PayPal',
+                    promoCode: calculation.promoCode || null
+                };
+                
+                // Process payment based on method
+                if (activeMethod === 'card') {
+                    this.processCardPayment(orderData);
+                } else {
+                    this.processPayPalPayment(orderData);
+                }
+            }
+            
+            processCardPayment(orderData) {
+                const cardNumber = document.getElementById('cardNumber').value;
+                const cardName = document.getElementById('cardName').value;
+                const expiryDate = document.getElementById('expiryDate').value;
+                const cvv = document.getElementById('cvv').value;
+                
+                if (!cardNumber || !cardName || !expiryDate || !cvv) {
+                    this.app.showNotification('Veuillez remplir tous les champs de la carte', 'error');
+                    return;
+                }
+                
+                this.app.showNotification('Traitement du paiement...', 'info');
+                
+                setTimeout(() => {
+                    this.completeOrder(orderData);
+                }, 2000);
+            }
+            
+            processPayPalPayment(orderData) {
+                this.app.showNotification('Redirection vers PayPal...', 'info');
+                
+                setTimeout(() => {
+                    this.completeOrder(orderData);
+                }, 2000);
+            }
+            
+            completeOrder(orderData) {
+                // Create order
+                const order = this.orderManager.createOrder(orderData);
+                
+                // Clear cart
+                this.clearCart();
+                
+                // Close modal
+                document.getElementById('paymentModal').style.display = 'none';
+                
+                // Show success
+                this.app.showNotification(
+                    `Commande ${order.id} confirmée ! Merci pour votre achat.`, 
+                    'success'
+                );
+                
+                // Redirect to order confirmation or home
+                setTimeout(() => {
+                    window.location.href = '../index.html';
+                }, 3000);
+            }
+        }
+        
+        // Initialize cart page when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            window.cartPage = new CartPage();
+        });
+    </script>
+</body>
+</html>
