@@ -1,5 +1,7 @@
 <?php
-require_once '../src/auth.php';
+// Handle both direct access (public/cart.php) and inclusion from root (cart.php)
+$auth_path = file_exists('../src/auth.php') ? '../src/auth.php' : 'src/auth.php';
+require_once $auth_path;
 $current_user = current_user();
 ?>
 <!DOCTYPE html>

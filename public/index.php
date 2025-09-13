@@ -1,5 +1,7 @@
 <?php
-require_once '../src/auth.php';
+// Handle both direct access (public/index.php) and inclusion from root (index.php)
+$auth_path = file_exists('../src/auth.php') ? '../src/auth.php' : 'src/auth.php';
+require_once $auth_path;
 $current_user = current_user();
 ?>
 <!DOCTYPE html>

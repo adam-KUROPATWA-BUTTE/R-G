@@ -1,7 +1,11 @@
 <?php
-require_once '../src/auth.php';
-require_once '../src/csrf.php';
-require_once '../src/functions.php';
+// Handle both direct access and routing from root
+$auth_path = file_exists('../src/auth.php') ? '../src/auth.php' : 'src/auth.php';
+$csrf_path = file_exists('../src/csrf.php') ? '../src/csrf.php' : 'src/csrf.php';
+$functions_path = file_exists('../src/functions.php') ? '../src/functions.php' : 'src/functions.php';
+require_once $auth_path;
+require_once $csrf_path;
+require_once $functions_path;
 
 header('Content-Type: application/json');
 
