@@ -1,6 +1,6 @@
 <?php
-require_once 'src/auth.php';
-require_once 'src/csrf.php';
+require_once '../src/auth.php';
+require_once '../src/csrf.php';
 
 $error = '';
 $success = '';
