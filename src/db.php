@@ -9,7 +9,10 @@ function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
         $cfg = config()['db'];
-        if ($cfg['host'] === 'sqlite') {
+        if (isset($cfg['driver']) && $cfg['driver'] === 'sqlite') {
+            $dsn = "sqlite:{$cfg['path']}";
+            $pdo = new PDO($dsn);
+        } elseif ($cfg['host'] === 'sqlite') {
             $dsn = "sqlite:{$cfg['name']}";
             $pdo = new PDO($dsn);
         } else {
