@@ -97,43 +97,6 @@ function users_list(): array {
     return $rows;
 }
 
-// Cart functions (for session-based cart)
-function cart_get(): array {
-    if (!isset($_SESSION)) session_start();
-    return $_SESSION['cart'] ?? [];
-}
-
-function cart_count(): int {
-    $cart = cart_get();
-    $count = 0;
-    foreach ($cart as $item) {
-        $count += (int)($item['quantity'] ?? 1);
-    }
-    return $count;
-}
-
-function cart_add(int $product_id, int $quantity = 1): void {
-    if (!isset($_SESSION)) session_start();
-    if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-    
-    $product_id = (string)$product_id; // Use string keys for consistency
-    if (isset($_SESSION['cart'][$product_id])) {
-        $_SESSION['cart'][$product_id]['quantity'] += $quantity;
-    } else {
-        $_SESSION['cart'][$product_id] = [
-            'product_id' => $product_id,
-            'quantity' => $quantity
-        ];
-    }
-}
-
-function cart_remove(int $product_id): void {
-    if (!isset($_SESSION)) session_start();
-    $product_id = (string)$product_id;
-    unset($_SESSION['cart'][$product_id]);
-}
-
-function cart_clear(): void {
-    if (!isset($_SESSION)) session_start();
-    $_SESSION['cart'] = [];
-}
+// Cart functions moved to src/cart.php
+// Include cart.php if you need cart functions
+require_once __DIR__ . '/cart.php';

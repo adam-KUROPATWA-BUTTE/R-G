@@ -6,6 +6,7 @@ $current_user = current_user();
 // Set up page variables for header
 $page_title = 'R&G - Boutique de Mode et Bijoux';
 $include_scripts = true;
+$additional_css = ['styles/carousel-fixes.css'];
 
 require __DIR__ . '/partials/header.php';
 ?>
@@ -112,7 +113,7 @@ require __DIR__ . '/partials/header.php';
 
 <?php
 // Set additional scripts for this page
-$additional_scripts = ['scripts/app.js', 'scripts/auth.js', 'scripts/promo.js', 'scripts/orders.js'];
+$additional_scripts = ['scripts/carousel-init.js', 'scripts/app.js', 'scripts/auth.js', 'scripts/promo.js', 'scripts/orders.js'];
 
 // Include footer
 require __DIR__ . '/partials/footer.php';

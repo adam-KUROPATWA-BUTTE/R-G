@@ -5,11 +5,12 @@ if (!function_exists('table_columns')) {
     function table_columns(string $table): array {
         static $cache = [];
         if (!isset($cache[$table])) {
-            $stmt = db()->prepare("SHOW COLUMNS FROM `$table`");
+            // Use SQLite-compatible PRAGMA command
+            $stmt = db()->prepare("PRAGMA table_info(`$table`)");
             $stmt->execute();
             $cols = [];
             foreach ($stmt->fetchAll() as $row) {
-                $cols[$row['Field']] = true;
+                $cols[$row['name']] = true;
             }
             $cache[$table] = $cols;
         }

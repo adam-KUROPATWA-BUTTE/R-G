@@ -1455,3 +1455,21 @@ body {
         padding: 2rem 1rem;
     }
 }
+
+/* Auth area link normalization */
+.auth-area {
+    color: #fff;
+}
+
+.auth-area .auth-link,
+.auth-area .auth-link:visited,
+.auth-area .user-icon,
+.auth-area .user-icon:visited {
+    color: currentColor;
+    text-decoration: none;
+}
+
+.auth-area .auth-link:hover,
+.auth-area .user-icon:hover {
+    opacity: .85;
+}

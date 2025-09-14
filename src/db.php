@@ -9,14 +9,21 @@ function db(): PDO {
     static $pdo = null;
     if ($pdo === null) {
         $cfg = config()['db'];
-        $dsn = "mysql:host={$cfg['host']};dbname={$cfg['name']};charset={$cfg['charset']}";
+        if ($cfg['host'] === 'sqlite') {
+            $dsn = "sqlite:{$cfg['name']}";
+            $pdo = new PDO($dsn);
+        } else {
+            $dsn = "mysql:host={$cfg['host']};dbname={$cfg['name']};charset={$cfg['charset']}";
+            $pdo = new PDO($dsn, $cfg['user'], $cfg['pass']);
+        }
         $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
-            PDO::ATTR_TIMEOUT            => 5, // optionnel
         ];
-        $pdo = new PDO($dsn, $cfg['user'], $cfg['pass'], $options);
+        foreach ($options as $key => $value) {
+            $pdo->setAttribute($key, $value);
+        }
     }
     return $pdo;
 }
