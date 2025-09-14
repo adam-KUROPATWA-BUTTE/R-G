@@ -28,6 +28,10 @@
 
     <!-- Scripts -->
     <?php if (isset($include_scripts) && $include_scripts): ?>
+        <script>
+            // Initialize cart count from server
+            window.serverCartCount = <?= $cart_count ?>;
+        </script>
         <script src="<?= $base_path ?>scripts/app.js"></script>
         <?php if (isset($additional_scripts)): ?>
             <?php foreach ($additional_scripts as $script_file): ?>

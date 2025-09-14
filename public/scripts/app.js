@@ -498,7 +498,10 @@ class RGApp {
             this.cart = JSON.parse(savedCart);
         }
         
-        if (savedCount) {
+        // Use server cart count if available, otherwise use localStorage
+        if (typeof window.serverCartCount !== 'undefined') {
+            this.cartCount = window.serverCartCount;
+        } else if (savedCount) {
             this.cartCount = parseInt(savedCount);
         }
     }
