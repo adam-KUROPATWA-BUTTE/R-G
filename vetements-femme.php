@@ -3,29 +3,57 @@ require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
 $current_user = current_user();
 
-// Load products from database (bijoux category if you use it)
+// Get products for femme category
 try {
-    // Filter by bijoux category if your table has a category column
-    $products = products_list('bijoux');
+    $products = products_list('femme');
 } catch (Throwable $e) {
     $products = [];
     $error = 'Erreur lors du chargement des produits.';
 }
 
-$page_title = 'Bijoux - R&G';
+$page_title = 'Vêtements Femme - R&G';
 require __DIR__ . '/partials/header.php';
 ?>
 
     <!-- Page Header -->
     <header class="page-header">
         <div class="header-content">
-            <h1><i class="fas fa-gem"></i> Bijoux</h1>
-            <p>Pièces précieuses et uniques pour sublimer votre style</p>
+            <h1><i class="fas fa-female"></i> Vêtements Femme</h1>
+            <p>Élégance et sophistication pour la femme moderne</p>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Filters Section -->
+        <section class="filters-section">
+            <div class="filters-container">
+                <h3>Filtrer par :</h3>
+                <div class="filters">
+                    <select id="categoryFilter">
+                        <option value="">Toutes les catégories</option>
+                        <option value="robes">Robes</option>
+                        <option value="hauts">Hauts</option>
+                        <option value="pantalons">Pantalons</option>
+                        <option value="vestes">Vestes</option>
+                    </select>
+                    
+                    <select id="priceFilter">
+                        <option value="">Tous les prix</option>
+                        <option value="0-150">0 - 150€</option>
+                        <option value="150-300">150 - 300€</option>
+                        <option value="300+">300€ et plus</option>
+                    </select>
+                    
+                    <select id="stockFilter">
+                        <option value="">Tous les articles</option>
+                        <option value="inStock">En stock</option>
+                        <option value="onDemand">Sur demande</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
         <!-- Products Grid -->
         <section class="products-section">
             <div class="products-container">
@@ -33,13 +61,13 @@ require __DIR__ . '/partials/header.php';
                     <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
-                <?php if (empty($products)): ?>
-                    <div class="no-products">
-                        <i class="fas fa-gem"></i>
-                        <p>Aucun produit disponible pour le moment dans cette catégorie.</p>
-                    </div>
-                <?php else: ?>
-                    <div class="products-grid">
+                <div class="products-grid" id="productsGrid">
+                    <?php if (empty($products)): ?>
+                        <div class="no-products">
+                            <i class="fas fa-tshirt"></i>
+                            <p>Aucun produit disponible pour le moment dans cette catégorie.</p>
+                        </div>
+                    <?php else: ?>
                         <?php foreach ($products as $product): ?>
                             <div class="product-card" data-product-id="<?= $product['id'] ?>">
                                 <div class="product-image">
@@ -47,7 +75,7 @@ require __DIR__ . '/partials/header.php';
                                         <img src="<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
                                     <?php else: ?>
                                         <div class="placeholder-image">
-                                            <i class="fas fa-gem"></i>
+                                            <i class="fas fa-tshirt"></i>
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-overlay">
@@ -83,8 +111,8 @@ require __DIR__ . '/partials/header.php';
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    </div>
-                <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </div>
         </section>
     </main>
@@ -110,6 +138,46 @@ require __DIR__ . '/partials/header.php';
         .header-content p {
             font-size: 1.2rem;
             opacity: 0.9;
+        }
+
+        /* Filters Section */
+        .filters-section {
+            padding: 2rem;
+            background-color: var(--light-gray);
+        }
+
+        .filters-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .filters-container h3 {
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .filters select {
+            padding: 0.8rem;
+            border: 2px solid var(--primary-blue);
+            border-radius: 5px;
+            background-color: var(--white);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filters select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 5px rgba(211, 170, 54, 0.3);
         }
 
         /* Products Section */
@@ -291,6 +359,14 @@ require __DIR__ . '/partials/header.php';
         }
 
         @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filters select {
+                width: 100%;
+            }
+            
             .products-grid {
                 grid-template-columns: 1fr;
             }
@@ -305,15 +381,18 @@ require __DIR__ . '/partials/header.php';
         function addToCart(product) {
             // Add to cart functionality
             console.log('Adding to cart:', product);
-            // You can implement AJAX call to add to cart here
             alert('Produit ajouté au panier !');
         }
 
         function showProductDetails(productId) {
             // Show product details modal
             console.log('Show details for product:', productId);
-            // You can implement product details modal here
         }
+
+        // Filter functionality can be added here if needed
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize any JavaScript functionality
+        });
     </script>
 
 <?php

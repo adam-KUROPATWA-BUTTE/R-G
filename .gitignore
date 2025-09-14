@@ -1,0 +1,23 @@
+# Configuration files with secrets
+src/config.php
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+
+# Node modules (if any)
+node_modules/
+
+# Backup files
+*_backup.php
+*.bak
