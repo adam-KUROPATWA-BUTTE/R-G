@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../src/auth.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 require_once __DIR__ . '/../src/cart.php';
 
 $current_user = current_user();
@@ -73,20 +74,6 @@ if ($current_user) {
                         <a href="/admin/">Administration</a>
                     <?php endif; ?>
                 </div>
-            </div>
-            
-            <!-- User authentication info (simplified) -->
-            <div class="nav-icons auth-area">
-                <?php if ($current_user): ?>
-                    <div class="user-info">
-                        <span class="user-greeting">Bonjour, <?= htmlspecialchars($displayName) ?></span>
-                    </div>
-                <?php else: ?>
-                    <div class="auth-links">
-                        <a href="/login.php" class="auth-link">Se connecter</a>
-                        <a href="/register.php" class="auth-link">S'inscrire</a>
-                    </div>
-                <?php endif; ?>
             </div>
         </div>
     </nav>

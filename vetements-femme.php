@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/src/bootstrap.php';   // session + csrf
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
 $current_user = current_user();
@@ -69,17 +70,18 @@ require __DIR__ . '/partials/header.php';
                         </div>
                     <?php else: ?>
                         <?php foreach ($products as $product): ?>
-                            <div class="product-card" data-product-id="<?= $product['id'] ?>">
+                            <div class="product-card" data-product-id="<?= (int)$product['id'] ?>">
                                 <div class="product-image">
-                                    <?php if (!empty($product['image_url'])): ?>
-                                        <img src="<?= htmlspecialchars($product['image_url']) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
+                                    <?php $img = $product['image'] ?? ($product['image_url'] ?? null); ?>
+                                    <?php if (!empty($img)): ?>
+                                        <img src="<?= htmlspecialchars((string)$img) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
                                     <?php else: ?>
                                         <div class="placeholder-image">
                                             <i class="fas fa-tshirt"></i>
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-overlay">
-                                        <button class="quick-view-btn" onclick="showProductDetails('<?= $product['id'] ?>')">
+                                        <button class="quick-view-btn" onclick="showProductDetails('<?= (int)$product['id'] ?>')">
                                             <i class="fas fa-eye"></i>
                                         </button>
                                     </div>
@@ -92,16 +94,25 @@ require __DIR__ . '/partials/header.php';
                                     <?php if (isset($product['price'])): ?>
                                         <div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div>
                                     <?php endif; ?>
-                                    <?php if (isset($product['stock'])): ?>
-                                        <div class="product-status <?= $product['stock'] > 0 ? 'in-stock' : 'on-demand' ?>">
-                                            <?= $product['stock'] > 0 ? 'En stock' : 'Sur demande' ?>
+                                    <?php $stock = $product['stock_quantity'] ?? ($product['stock'] ?? null); ?>
+                                    <?php if ($stock !== null): ?>
+                                        <div class="product-status <?= (int)$stock > 0 ? 'in-stock' : 'on-demand' ?>">
+                                            <?= (int)$stock > 0 ? 'En stock' : 'Sur demande' ?>
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-actions">
-                                        <button class="add-to-cart-btn" onclick="addToCartServer(<?= $product['id'] ?>, '<?= htmlspecialchars($product['name'] ?? '') ?>')">
-                                            <i class="fas fa-shopping-cart"></i>
-                                            Ajouter au panier
-                                        </button>
+                                        <form method="post" action="/add_to_cart.php">
+                                            <?= csrf_input() ?>
+                                            <input type="hidden" name="id" value="<?= (int)$product['id'] ?>">
+                                            <input type="hidden" name="back" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/') ?>">
+                                            <div class="qty-row">
+                                                <input type="number" name="qty" min="1" value="1" class="qty-input">
+                                                <button type="submit" class="add-to-cart-btn">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    Ajouter au panier
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -307,8 +318,18 @@ require __DIR__ . '/partials/header.php';
             color: #856404;
         }
 
+        .product-actions .qty-row {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+        }
+
+        .qty-input {
+            width: 70px;
+            padding: .5rem;
+        }
+
         .add-to-cart-btn {
-            width: 100%;
             padding: 0.8rem;
             background: var(--primary-blue);
             color: var(--white);
@@ -317,9 +338,8 @@ require __DIR__ . '/partials/header.php';
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 0.5rem;
         }
 
@@ -373,92 +393,10 @@ require __DIR__ . '/partials/header.php';
     </style>
 
     <script>
-        // Server-side cart functionality
-        async function addToCartServer(productId, productName) {
-            try {
-                const response = await fetch('/add-to-cart.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        product_id: productId,
-                        quantity: 1,
-                        csrf_token: '<?= csrf_token() ?>'
-                    })
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    // Update cart count in header
-                    const cartCountElement = document.getElementById('cartCount');
-                    if (cartCountElement) {
-                        cartCountElement.textContent = result.cart_count;
-                    }
-                    
-                    // Show success notification
-                    showNotification(result.message || 'Produit ajouté au panier', 'success');
-                } else {
-                    showNotification(result.error || 'Erreur lors de l\'ajout au panier', 'error');
-                }
-                
-            } catch (error) {
-                console.error('Error adding to cart:', error);
-                showNotification('Erreur de connexion', 'error');
-            }
-        }
-
         function showProductDetails(productId) {
-            // Show product details modal
             console.log('Show details for product:', productId);
-            // You can implement product details modal here
         }
-        
-        // Notification system
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `notification notification-${type}`;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
-                color: white;
-                padding: 1rem 1.5rem;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 3000;
-                transform: translateX(100%);
-                transition: transform 0.3s ease;
-                max-width: 300px;
-            `;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            // Animation d'entrée
-            setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 100);
-            
-            // Suppression automatique
-            setTimeout(() => {
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 3000);
-        }
-
-        // Filter functionality can be added here if needed
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize any JavaScript functionality
-        });
     </script>
 
 <?php
 require __DIR__ . '/partials/footer.php';
-?>
