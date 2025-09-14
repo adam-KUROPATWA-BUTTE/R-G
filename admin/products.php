@@ -6,7 +6,7 @@ require_admin();
 
 $action = $_GET['action'] ?? '';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$msg = '';
+$msg = $_GET['msg'] ?? '';
 
 if ($action === 'delete' && $id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_validate();
@@ -18,39 +18,87 @@ $products = products_list();
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Produits - Admin</title>
   <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/admin.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="admin-container" style="max-width:1100px;margin:2rem auto;background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.08);">
-    <h1>Produits</h1>
-    <p><a href="/admin/product_edit.php?action=create" class="btn btn-primary">Ajouter un produit</a> | <a href="/admin/">Retour</a></p>
-    <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr>
-          <th>ID</th><th>Nom</th><th>Prix</th><th>Stock</th><th>Catégorie</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-      <?php foreach ($products as $p): ?>
-        <tr>
-          <td><?= (int)$p['id'] ?></td>
-          <td><?= htmlspecialchars($p['name'] ?? '') ?></td>
-          <td><?= isset($p['price']) ? number_format((float)$p['price'], 2, ',', ' ') . ' €' : '' ?></td>
-          <td><?= (int)($p['stock'] ?? 0) ?></td>
-          <td><?= htmlspecialchars($p['category'] ?? '') ?></td>
-          <td>
-            <a href="/admin/product_edit.php?action=edit&id=<?= (int)$p['id'] ?>">Modifier</a>
-            <form action="/admin/products.php?action=delete&id=<?= (int)$p['id'] ?>" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ce produit ?');">
-              <?= csrf_field() ?>
-              <button type="submit" style="background:#c00;color:#fff;padding:.25rem .5rem;border:none;border-radius:4px;cursor:pointer;">Supprimer</button>
-            </form>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-      </tbody>
-    </table>
+  <div class="admin-container">
+    <div class="admin-header">
+      <h1><i class="fas fa-box"></i> Gestion des Produits</h1>
+      <a href="/admin/" class="btn btn-outline">Retour</a>
+    </div>
+    
+    <?php if ($msg === 'supprime'): ?>
+      <div class="alert alert-success">
+        <i class="fas fa-check-circle"></i> Produit supprimé avec succès.
+      </div>
+    <?php endif; ?>
+    
+    <div class="admin-actions">
+      <a href="/admin/product_edit.php?action=create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Ajouter un produit
+      </a>
+    </div>
+    
+    <div class="table-container">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Prix</th>
+            <th>Stock</th>
+            <th>Catégorie</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php if (empty($products)): ?>
+          <tr>
+            <td colspan="6" class="text-center">
+              <i class="fas fa-inbox"></i>
+              <p>Aucun produit trouvé.</p>
+            </td>
+          </tr>
+        <?php else: ?>
+          <?php foreach ($products as $p): ?>
+            <tr>
+              <td><?= (int)$p['id'] ?></td>
+              <td><?= htmlspecialchars($p['name'] ?? '') ?></td>
+              <td><?= isset($p['price']) ? number_format((float)$p['price'], 2, ',', ' ') . ' €' : '' ?></td>
+              <td>
+                <span class="stock-badge <?= (int)($p['stock'] ?? 0) > 0 ? 'stock-available' : 'stock-empty' ?>">
+                  <?= (int)($p['stock'] ?? 0) ?>
+                </span>
+              </td>
+              <td>
+                <?php if (!empty($p['category'])): ?>
+                  <span class="category-badge"><?= htmlspecialchars($p['category']) ?></span>
+                <?php else: ?>
+                  <span class="text-muted">Non définie</span>
+                <?php endif; ?>
+              </td>
+              <td class="actions">
+                <a href="/admin/product_edit.php?action=edit&id=<?= (int)$p['id'] ?>" class="btn btn-sm btn-secondary">
+                  <i class="fas fa-edit"></i> Modifier
+                </a>
+                <form action="/admin/products.php?action=delete&id=<?= (int)$p['id'] ?>" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ce produit ?');">
+                  <?= csrf_field() ?>
+                  <button type="submit" class="btn btn-sm btn-danger">
+                    <i class="fas fa-trash"></i> Supprimer
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 </body>
 </html>

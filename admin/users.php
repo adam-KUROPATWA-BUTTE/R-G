@@ -7,33 +7,59 @@ $users = users_list();
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Utilisateurs - Admin</title>
   <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/admin.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <div class="admin-container" style="max-width:1100px;margin:2rem auto;background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.08);">
-    <h1>Utilisateurs</h1>
-    <p><a href="/admin/">Retour</a></p>
-    <table border="1" cellpadding="8" cellspacing="0" style="width:100%;border-collapse:collapse;">
-      <thead>
-        <tr>
-          <th>ID</th><th>Email</th><th>Rôle</th><th>Prénom</th><th>Nom</th><th>Créé le</th>
-        </tr>
-      </thead>
-      <tbody>
-      <?php foreach ($users as $u): ?>
-        <tr>
-          <td><?= (int)$u['id'] ?></td>
-          <td><?= htmlspecialchars($u['email']) ?></td>
-          <td><?= htmlspecialchars($u['role']) ?></td>
-          <td><?= htmlspecialchars($u['first_name'] ?? '') ?></td>
-          <td><?= htmlspecialchars($u['last_name'] ?? '') ?></td>
-          <td><?= htmlspecialchars($u['created_at'] ?? '') ?></td>
-        </tr>
-      <?php endforeach; ?>
-      </tbody>
-    </table>
+  <div class="admin-container">
+    <div class="admin-header">
+      <h1><i class="fas fa-users"></i> Liste des Utilisateurs</h1>
+      <a href="/admin/" class="btn btn-outline">Retour</a>
+    </div>
+    
+    <div class="table-container">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Prénom</th>
+            <th>Nom</th>
+            <th>Créé le</th>
+          </tr>
+        </thead>
+        <tbody>
+        <?php if (empty($users)): ?>
+          <tr>
+            <td colspan="6" class="text-center">
+              <i class="fas fa-user-slash"></i>
+              <p>Aucun utilisateur trouvé.</p>
+            </td>
+          </tr>
+        <?php else: ?>
+          <?php foreach ($users as $u): ?>
+            <tr>
+              <td><?= (int)$u['id'] ?></td>
+              <td><?= htmlspecialchars($u['email']) ?></td>
+              <td>
+                <span class="role-badge role-<?= htmlspecialchars($u['role']) ?>">
+                  <?= htmlspecialchars($u['role']) ?>
+                </span>
+              </td>
+              <td><?= htmlspecialchars($u['first_name'] ?? '') ?></td>
+              <td><?= htmlspecialchars($u['last_name'] ?? '') ?></td>
+              <td><?= htmlspecialchars($u['created_at'] ?? '') ?></td>
+            </tr>
+          <?php endforeach; ?>
+        <?php endif; ?>
+        </tbody>
+      </table>
+    </div>
   </div>
 </body>
 </html>

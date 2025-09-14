@@ -1,0 +1,22 @@
+<?php
+/**
+ * Configuration template file for R&G website
+ * 
+ * INSTRUCTIONS:
+ * 1. Copy this file to src/config.php
+ * 2. Fill in your actual database credentials
+ * 3. NEVER commit src/config.php to git
+ */
+return [
+    'db' => [
+        'host' => 'your-database-host',    // e.g., 'mysql4201.lwspanel.com'
+        'name' => 'randg2664393',          // Database name
+        'user' => 'your-username',         // Database username
+        'pass' => 'your-password',         // Database password
+        'charset' => 'utf8mb4',
+    ],
+    'app' => [
+        'base_url' => '/',
+        'session_name' => 'rg_session',
+    ],
+];
