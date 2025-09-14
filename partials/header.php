@@ -35,9 +35,15 @@ if ($current_user) {
         <div class="nav-container">
             <!-- User icon and cart in top left -->
             <div class="nav-left">
-                <a href="/login.php" class="icon-btn user-btn" aria-label="Connexion/Profil">
-                    <i class="fas fa-user"></i>
-                </a>
+                <?php if ($current_user): ?>
+                    <a href="/compte.php" class="icon-btn user-btn" aria-label="Mon Compte">
+                        <i class="fas fa-user-circle"></i>
+                    </a>
+                <?php else: ?>
+                    <a href="/login.php" class="icon-btn user-btn" aria-label="Connexion">
+                        <i class="fas fa-user"></i>
+                    </a>
+                <?php endif; ?>
                 <a href="/cart.php" class="icon-btn cart-btn" aria-label="Panier">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cartCount"><?= $cart_count ?></span>
@@ -63,20 +69,17 @@ if ($current_user) {
                     <a href="/vetements-femme.php">Vêtements Femme</a>
                     <a href="/vetements-homme.php">Vêtements Homme</a>
                     <a href="/bijoux.php">Bijoux</a>
+                    <?php if ($current_user && ($current_user['role'] ?? '') === 'admin'): ?>
+                        <a href="/admin/">Administration</a>
+                    <?php endif; ?>
                 </div>
             </div>
             
-            <!-- User authentication info -->
+            <!-- User authentication info (simplified) -->
             <div class="nav-icons">
                 <?php if ($current_user): ?>
                     <div class="user-info">
                         <span class="user-greeting">Bonjour, <?= htmlspecialchars($displayName) ?></span>
-                        <?php if (($current_user['role'] ?? '') === 'admin'): ?>
-                            <a href="/admin/" class="admin-link">Admin</a>
-                        <?php endif; ?>
-                        <a href="/logout.php" class="logout-link" aria-label="Déconnexion">
-                            Déconnexion
-                        </a>
                     </div>
                 <?php else: ?>
                     <div class="auth-links">

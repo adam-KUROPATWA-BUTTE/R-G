@@ -575,6 +575,17 @@ body {
     border: 2px solid transparent;
     min-width: 300px;
     flex-shrink: 0;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.category-card.clickable {
+    text-decoration: none;
+}
+
+.category-card.clickable:visited {
+    color: inherit;
 }
 
 .category-card:hover {

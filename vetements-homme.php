@@ -98,12 +98,7 @@ require __DIR__ . '/partials/header.php';
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-actions">
-                                        <button class="add-to-cart-btn" onclick="addToCart({
-                                            id: '<?= $product['id'] ?>',
-                                            name: '<?= htmlspecialchars($product['name'] ?? '') ?>',
-                                            price: <?= (float)($product['price'] ?? 0) ?>,
-                                            image: '<?= htmlspecialchars($product['image_url'] ?? '') ?>'
-                                        })">
+                                        <button class="add-to-cart-btn" onclick="addToCartServer(<?= $product['id'] ?>, '<?= htmlspecialchars($product['name'] ?? '') ?>')">
                                             <i class="fas fa-shopping-cart"></i>
                                             Ajouter au panier
                                         </button>
@@ -378,15 +373,84 @@ require __DIR__ . '/partials/header.php';
     </style>
 
     <script>
-        function addToCart(product) {
-            // Add to cart functionality
-            console.log('Adding to cart:', product);
-            alert('Produit ajouté au panier !');
+        // Server-side cart functionality
+        async function addToCartServer(productId, productName) {
+            try {
+                const response = await fetch('/add-to-cart.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: 1,
+                        csrf_token: '<?= csrf_token() ?>'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Update cart count in header
+                    const cartCountElement = document.getElementById('cartCount');
+                    if (cartCountElement) {
+                        cartCountElement.textContent = result.cart_count;
+                    }
+                    
+                    // Show success notification
+                    showNotification(result.message || 'Produit ajouté au panier', 'success');
+                } else {
+                    showNotification(result.error || 'Erreur lors de l\'ajout au panier', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showNotification('Erreur de connexion', 'error');
+            }
         }
 
         function showProductDetails(productId) {
             // Show product details modal
             console.log('Show details for product:', productId);
+            // You can implement product details modal here
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 3000;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                max-width: 300px;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Animation d'entrée
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Suppression automatique
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
 
         // Filter functionality can be added here if needed
