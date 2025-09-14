@@ -1,0 +1,20 @@
+# Anti-indexation et sécurité de base
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Interdire l'accès direct à src/
+  RewriteRule ^src/ - [F,L]
+
+  # Compat éventuelle: rediriger /index.html -> /index.php
+  RewriteRule ^index\.html$ /index.php [L]
+
+  # Forcer www sans casser LWS (optionnel) - commentez si non souhaité
+  #RewriteCond %{HTTP_HOST} !^www\. [NC]
+  #RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
+</IfModule>
+
+# Types et headers de base pour SVG (optionnel)
+AddType image/svg+xml .svg
+Header set X-Content-Type-Options "nosniff"
