@@ -70,8 +70,8 @@ if (strpos($current_dir, '/partials') !== false) {
                 </button>
                 <div class="dropdown-content" id="dropdownContent">
                     <a href="<?= $base_path ?>index.php">Accueil</a>
-                    <a href="<?= $base_path ?>pages/femme.html">Vêtements Femme</a>
-                    <a href="<?= $base_path ?>pages/homme.html">Vêtements Homme</a>
+                    <a href="<?= $base_path ?>vetements-femme.php">Vêtements Femme</a>
+                    <a href="<?= $base_path ?>vetements-homme.php">Vêtements Homme</a>
                     <a href="<?= $base_path ?>pages/bijoux.html">Bijoux</a>
                     <a href="<?= $base_path ?>pages/info.php">Info</a>
                 </div>

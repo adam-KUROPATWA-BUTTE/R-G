@@ -95,6 +95,7 @@ $categories = $pdo->query('SELECT * FROM categories ORDER BY name')->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion des Produits - Admin R&G</title>
     <link rel="stylesheet" href="../../public/styles/main.css">
+    <link rel="stylesheet" href="../../public/styles/admin.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .admin-container {

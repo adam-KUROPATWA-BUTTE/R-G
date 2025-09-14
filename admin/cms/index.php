@@ -97,6 +97,7 @@ Que vous soyez à la recherche d\'un vêtement sur-mesure ou d\'un bijou coup de
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestion CMS - Admin R&G</title>
     <link rel="stylesheet" href="../../public/styles/main.css">
+    <link rel="stylesheet" href="../../public/styles/admin.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .admin-container {

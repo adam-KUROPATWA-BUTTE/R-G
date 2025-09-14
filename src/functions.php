@@ -11,6 +11,13 @@ function products_list_admin(): array {
   return $pdo->query('SELECT p.*, c.name AS category FROM products p LEFT JOIN categories c ON c.id = p.category_id ORDER BY p.created_at DESC')->fetchAll();
 }
 
+function products_list_by_category(string $category_name): array {
+  $pdo = db();
+  $stmt = $pdo->prepare('SELECT p.*, c.name AS category FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE c.slug = ? AND p.stock_quantity > 0 ORDER BY p.created_at DESC');
+  $stmt->execute([$category_name]);
+  return $stmt->fetchAll();
+}
+
 function product_find(int $id): ?array {
   $pdo = db();
   $stmt = $pdo->prepare('SELECT * FROM products WHERE id = ?');
