@@ -4,66 +4,14 @@ $auth_path = file_exists('../src/auth.php') ? '../src/auth.php' : 'src/auth.php'
 $csrf_path = file_exists('../src/csrf.php') ? '../src/csrf.php' : 'src/csrf.php';
 require_once $auth_path;
 require_once $csrf_path;
-$current_user = current_user();
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>R&G - Boutique de Mode et Bijoux</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <!-- Logo au centre -->
-            <div class="logo-container">
-                <a href="/">
-                    <img src="assets/logo.svg" alt="R&G Logo" class="logo">
-                </a>
-            </div>
-            
-            <!-- Menu déroulant avec 3 étoiles -->
-            <div class="menu-dropdown">
-                <button class="menu-trigger" id="menuTrigger">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                </button>
-                <div class="dropdown-content" id="dropdownContent">
-                    <a href="/">Accueil</a>
-                    <a href="pages/femme.html">Vêtements Femme</a>
-                    <a href="pages/homme.html">Vêtements Homme</a>
-                    <a href="pages/bijoux.html">Bijoux</a>
-                    <a href="pages/info.html">Info</a>
-                </div>
-            </div>
-            
-            <!-- Icônes utilisateur et panier -->
-            <div class="nav-icons">
-                <?php if ($current_user): ?>
-                    <div class="user-info">
-                        <span class="user-greeting">Bonjour, <?= htmlspecialchars($current_user['email']) ?></span>
-                        <a href="/logout.php" class="icon-btn" aria-label="Déconnexion">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </a>
-                    </div>
-                <?php else: ?>
-                    <a href="/login.php" class="icon-btn" aria-label="Se connecter">
-                        <i class="fas fa-user"></i>
-                    </a>
-                <?php endif; ?>
-                <a href="/cart.php" class="icon-btn" aria-label="Panier">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount">0</span>
-                </a>
-            </div>
-        </div>
-    </nav>
 
+// Set up page variables for header
+$page_title = 'R&G - Boutique de Mode et Bijoux';
+$include_scripts = true;
+
+// Include header
+require_once 'partials/header.php';
+?>
     <!-- Main Content -->
     <main class="main-content">
         <section class="hero">
@@ -330,9 +278,10 @@ $current_user = current_user();
         </div>
     </div>
 
-    <script src="scripts/auth.js"></script>
-    <script src="scripts/promo.js"></script>
-    <script src="scripts/orders.js"></script>
-    <script src="scripts/app.js"></script>
-</body>
-</html>
+<?php
+// Set additional scripts for this page
+$additional_scripts = ['scripts/auth.js', 'scripts/promo.js', 'scripts/orders.js'];
+
+// Include footer
+require_once 'partials/footer.php';
+?>

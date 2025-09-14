@@ -34,6 +34,11 @@ function cart_get(): array {
   return $_SESSION['cart'] ?? [];
 }
 
+function cart_count(): int {
+  $cart = cart_get();
+  return array_sum($cart);
+}
+
 function cart_total(): float {
   $cart = cart_get();
   $total = 0;
