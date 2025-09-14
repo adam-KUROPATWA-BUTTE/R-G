@@ -3,6 +3,11 @@ require_once __DIR__ . '/db.php';
 
 function products_list(): array {
   $pdo = db();
+  return $pdo->query('SELECT p.*, c.name AS category FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE p.stock_quantity > 0 ORDER BY p.created_at DESC')->fetchAll();
+}
+
+function products_list_admin(): array {
+  $pdo = db();
   return $pdo->query('SELECT p.*, c.name AS category FROM products p LEFT JOIN categories c ON c.id = p.category_id ORDER BY p.created_at DESC')->fetchAll();
 }
 

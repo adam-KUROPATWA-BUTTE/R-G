@@ -73,7 +73,7 @@ if (strpos($current_dir, '/partials') !== false) {
                     <a href="<?= $base_path ?>pages/femme.html">Vêtements Femme</a>
                     <a href="<?= $base_path ?>pages/homme.html">Vêtements Homme</a>
                     <a href="<?= $base_path ?>pages/bijoux.html">Bijoux</a>
-                    <a href="<?= $base_path ?>pages/info.html">Info</a>
+                    <a href="<?= $base_path ?>pages/info.php">Info</a>
                 </div>
             </div>
             
