@@ -88,6 +88,11 @@ function create_order(int $user_id, array $items, float $total, string $payment_
   }
 }
 
+function users_list(): array {
+  $pdo = db();
+  return $pdo->query('SELECT id, email, role, name, created_at FROM users ORDER BY created_at DESC')->fetchAll();
+}
+
 function get_user_orders(int $user_id): array {
   $pdo = db();
   $stmt = $pdo->prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC');

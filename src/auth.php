@@ -21,14 +21,18 @@ function require_admin(): void {
   }
 }
 
-function register_user(string $email, string $password): bool {
+function register_user(string $email, string $password, string $first_name = '', string $last_name = ''): bool {
   $pdo = db();
   $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
   $stmt->execute([$email]);
   if ($stmt->fetch()) return false;
   $hash = password_hash($password, PASSWORD_DEFAULT);
-  $ins = $pdo->prepare('INSERT INTO users(email, password_hash) VALUES(?, ?)');
-  return $ins->execute([$email, $hash]);
+  
+  // Combine first_name and last_name into name field
+  $name = trim($first_name . ' ' . $last_name);
+  
+  $ins = $pdo->prepare('INSERT INTO users(email, password_hash, name) VALUES(?, ?, ?)');
+  return $ins->execute([$email, $hash, $name ?: null]);
 }
 
 function login_user(string $email, string $password): bool {
@@ -38,7 +42,21 @@ function login_user(string $email, string $password): bool {
   $stmt->execute([$email]);
   $u = $stmt->fetch();
   if (!$u || !password_verify($password, $u['password_hash'])) return false;
-  $_SESSION['user'] = ['id' => $u['id'], 'email' => $u['email'], 'role' => $u['role']];
+  
+  // Extract first name from full name
+  $first_name = '';
+  if ($u['name']) {
+    $name_parts = explode(' ', trim($u['name']), 2);
+    $first_name = $name_parts[0];
+  }
+  
+  $_SESSION['user'] = [
+    'id' => $u['id'], 
+    'email' => $u['email'], 
+    'role' => $u['role'],
+    'name' => $u['name'],
+    'first_name' => $first_name
+  ];
   return true;
 }
 

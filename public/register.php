@@ -14,6 +14,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $password_confirm = $_POST['password_confirm'] ?? '';
+    $first_name = trim($_POST['first_name'] ?? '');
+    $last_name = trim($_POST['last_name'] ?? '');
     
     if ($email && $password && $password_confirm) {
         if ($password !== $password_confirm) {
@@ -21,14 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif (strlen($password) < 6) {
             $error = 'Le mot de passe doit contenir au moins 6 caractères';
         } else {
-            if (register_user($email, $password)) {
+            if (register_user($email, $password, $first_name, $last_name)) {
                 $success = 'Inscription réussie ! Vous pouvez maintenant vous connecter.';
             } else {
                 $error = 'Cette adresse email est déjà utilisée';
             }
         }
     } else {
-        $error = 'Veuillez remplir tous les champs';
+        $error = 'Veuillez remplir tous les champs requis';
     }
 }
 ?>
@@ -67,6 +69,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             <form method="POST" class="auth-form">
                 <?= csrf_field() ?>
+                
+                <div class="form-group">
+                    <label for="first_name">Prénom (optionnel)</label>
+                    <input type="text" id="first_name" name="first_name" value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="last_name">Nom (optionnel)</label>
+                    <input type="text" id="last_name" name="last_name" value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>">
+                </div>
                 
                 <div class="form-group">
                     <label for="email">Email</label>

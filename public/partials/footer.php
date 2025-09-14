@@ -11,8 +11,8 @@
                     <li><a href="<?= $base_path ?>index.php">Accueil</a></li>
                     <li><a href="<?= $base_path ?>pages/femme.html">Vêtements Femme</a></li>
                     <li><a href="<?= $base_path ?>pages/homme.html">Vêtements Homme</a></li>
-                    <li><a href="<?= $base_path ?>pages/bijoux.html">Bijoux</a></li>
-                    <li><a href="<?= $base_path ?>pages/info.html">Info</a></li>
+                    <li><a href="<?= $base_path ?>bijoux.php">Bijoux</a></li>
+                    <li><a href="<?= $base_path ?>pages/info.php">Info</a></li>
                 </ul>
             </div>
             <div class="footer-section">

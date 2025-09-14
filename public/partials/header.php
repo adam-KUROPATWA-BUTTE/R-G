@@ -72,7 +72,7 @@ if (strpos($current_dir, '/partials') !== false) {
                     <a href="<?= $base_path ?>index.php">Accueil</a>
                     <a href="<?= $base_path ?>pages/femme.html">Vêtements Femme</a>
                     <a href="<?= $base_path ?>pages/homme.html">Vêtements Homme</a>
-                    <a href="<?= $base_path ?>pages/bijoux.html">Bijoux</a>
+                    <a href="<?= $base_path ?>bijoux.php">Bijoux</a>
                     <a href="<?= $base_path ?>pages/info.php">Info</a>
                 </div>
             </div>
@@ -81,7 +81,14 @@ if (strpos($current_dir, '/partials') !== false) {
             <div class="nav-icons">
                 <?php if ($current_user): ?>
                     <div class="user-info">
-                        <span class="user-greeting">Bonjour, <?= htmlspecialchars($current_user['email']) ?></span>
+                        <span class="user-greeting">
+                            Bonjour, <?= htmlspecialchars($current_user['first_name'] ?: $current_user['email']) ?>
+                        </span>
+                        <?php if ($current_user['role'] === 'admin'): ?>
+                            <a href="<?= $base_path ?>admin/" class="icon-btn" aria-label="Administration">
+                                <i class="fas fa-cog"></i>
+                            </a>
+                        <?php endif; ?>
                         <a href="<?= $base_path ?>logout.php" class="icon-btn" aria-label="Déconnexion">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
