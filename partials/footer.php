@@ -8,10 +8,10 @@
             <div class="footer-section">
                 <h3>Navigation</h3>
                 <ul>
-                    <li><a href="/">Accueil</a></li>
-                    <li><a href="/vetements-femme.php">Vêtements Femme</a></li>
-                    <li><a href="/vetements-homme.php">Vêtements Homme</a></li>
-                    <li><a href="/bijoux.php">Bijoux</a></li>
+                    <li><a href="<?= $base_path ?>/">Accueil</a></li>
+                    <li><a href="<?= $base_path ?>/vetements-femme.php">Vêtements Femme</a></li>
+                    <li><a href="<?= $base_path ?>/vetements-homme.php">Vêtements Homme</a></li>
+                    <li><a href="<?= $base_path ?>/bijoux.php">Bijoux</a></li>
                 </ul>
             </div>
             <div class="footer-section">
@@ -52,10 +52,10 @@
             }
         });
     </script>
-    <script src="/scripts/cart.js"></script>
+    <script src="<?= $base_path ?>/scripts/cart.js"></script>
     <?php if (isset($additional_scripts)): ?>
         <?php foreach ($additional_scripts as $script_file): ?>
-            <script src="/<?= htmlspecialchars($script_file) ?>"></script>
+            <script src="<?= $base_path ?>/<?= htmlspecialchars($script_file) ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
 </body>

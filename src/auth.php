@@ -110,7 +110,7 @@ function logout_user(): void {
 
 function require_login(): void {
     if (!current_user()) {
-        header('Location: /login.php');
+        header('Location: login.php');
         exit;
     }
 }

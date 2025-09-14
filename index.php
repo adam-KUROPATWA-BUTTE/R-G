@@ -16,7 +16,7 @@ require __DIR__ . '/partials/header.php';
             <div class="hero-content">
                 <h1>Bienvenue chez R&G</h1>
                 <p>Découvrez notre collection exclusive de vêtements et bijoux</p>
-                <a href="/bijoux.php" class="cta-button">Découvrir nos collections</a>
+                <a href="bijoux.php" class="cta-button">Découvrir nos collections</a>
             </div>
         </section>
 
@@ -29,7 +29,7 @@ require __DIR__ . '/partials/header.php';
                 
                 <div class="carousel-wrapper">
                     <div class="carousel-track" id="carouselTrack">
-                        <a href="/vetements-femme.php" class="category-card clickable" data-category="femme">
+                        <a href="vetements-femme.php" class="category-card clickable" data-category="femme">
                             <div class="category-image">
                                 <i class="fas fa-female"></i>
                             </div>
@@ -37,7 +37,7 @@ require __DIR__ . '/partials/header.php';
                             <p>Collections élégantes et modernes</p>
                         </a>
                         
-                        <a href="/vetements-homme.php" class="category-card clickable" data-category="homme">
+                        <a href="vetements-homme.php" class="category-card clickable" data-category="homme">
                             <div class="category-image">
                                 <i class="fas fa-male"></i>
                             </div>
@@ -45,7 +45,7 @@ require __DIR__ . '/partials/header.php';
                             <p>Style raffiné et sophistiqué</p>
                         </a>
                         
-                        <a href="/bijoux.php" class="category-card clickable" data-category="bijoux">
+                        <a href="bijoux.php" class="category-card clickable" data-category="bijoux">
                             <div class="category-image">
                                 <i class="fas fa-gem"></i>
                             </div>
@@ -54,7 +54,7 @@ require __DIR__ . '/partials/header.php';
                         </a>
                         
                         <!-- Modular: Easy to add new categories -->
-                        <a href="/bijoux.php" class="category-card clickable" data-category="accessoires">
+                        <a href="bijoux.php" class="category-card clickable" data-category="accessoires">
                             <div class="category-image">
                                 <i class="fas fa-shopping-bag"></i>
                             </div>
@@ -62,7 +62,7 @@ require __DIR__ . '/partials/header.php';
                             <p>Compléments de style</p>
                         </a>
                         
-                        <a href="/bijoux.php" class="category-card clickable" data-category="nouvelle-collection">
+                        <a href="bijoux.php" class="category-card clickable" data-category="nouvelle-collection">
                             <div class="category-image">
                                 <i class="fas fa-star"></i>
                             </div>
@@ -93,14 +93,14 @@ require __DIR__ . '/partials/header.php';
                 <button class="tab-button" id="registerTab">Inscription</button>
             </div>
             
-            <form id="loginForm" class="auth-form" action="/login.php" method="POST">
+            <form id="loginForm" class="auth-form" action="login.php" method="POST">
                 <?= csrf_field() ?>
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Mot de passe" required>
                 <button type="submit">Se connecter</button>
             </form>
             
-            <form id="registerForm" class="auth-form hidden" action="/register.php" method="POST">
+            <form id="registerForm" class="auth-form hidden" action="register.php" method="POST">
                 <?= csrf_field() ?>
                 <input type="text" name="full_name" placeholder="Nom complet" required>
                 <input type="email" name="email" placeholder="Email" required>

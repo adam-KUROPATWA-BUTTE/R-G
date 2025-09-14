@@ -8,4 +8,4 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); exit('Mét
 if (!csrf_verify($_POST['csrf'] ?? null)) { http_response_code(400); exit('CSRF invalide'); }
 
 cart_clear();
-header('Location: /cart.php');
+header('Location: cart.php');

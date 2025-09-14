@@ -13,8 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Inscription - R&G</title>
-  <link rel="stylesheet" href="/styles/main.css">
-  <link rel="stylesheet" href="/styles/auth.css">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/auth.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <button type="submit" class="btn btn-primary">S'inscrire</button>
       </form>
-      <p>Déjà inscrit ? <a href="/login.php">Se connecter</a></p>
+      <p>Déjà inscrit ? <a href="login.php">Se connecter</a></p>
     </div>
   </main>
 

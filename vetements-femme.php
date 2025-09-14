@@ -101,7 +101,7 @@ require __DIR__ . '/partials/header.php';
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-actions">
-                                        <form method="post" action="/add_to_cart.php">
+                                        <form method="post" action="add_to_cart.php">
                                             <?= csrf_input() ?>
                                             <input type="hidden" name="id" value="<?= (int)$product['id'] ?>">
                                             <input type="hidden" name="back" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/') ?>">

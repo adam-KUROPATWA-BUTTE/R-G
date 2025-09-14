@@ -5,12 +5,22 @@ class CartManager {
     constructor() {
         this.csrfToken = this.getCSRFToken();
         this.cartBadge = document.querySelector('[data-cart-count]');
+        this.basePath = this.getBasePath();
         this.init();
     }
 
     init() {
         this.setupAddToCartButtons();
         this.initializeCartCount();
+    }
+
+    getBasePath() {
+        // Get base path from current page location
+        const path = window.location.pathname;
+        const segments = path.split('/');
+        // Remove the current page name to get the directory
+        segments.pop();
+        return segments.join('/');
     }
 
     getCSRFToken() {
@@ -43,7 +53,7 @@ class CartManager {
             const originalText = button.innerHTML;
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Ajout...';
 
-            const response = await fetch('/add-to-cart.php', {
+            const response = await fetch(`${this.basePath}/add_to_cart.php`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

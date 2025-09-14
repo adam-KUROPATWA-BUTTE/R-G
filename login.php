@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     if ($email && $password) {
         if (login_user($email, $password)) {
-            header('Location: /');
+            header('Location: index.php');
             exit;
         } else {
             $error = 'Email ou mot de passe incorrect.';
@@ -40,7 +40,7 @@ require __DIR__ . '/partials/header.php';
       </div>
       <button type="submit" class="btn btn-primary">Se connecter</button>
     </form>
-    <p>Pas de compte ? <a href="/register.php">Créer un compte</a></p>
+    <p>Pas de compte ? <a href="register.php">Créer un compte</a></p>
   </div>
 </main>
 

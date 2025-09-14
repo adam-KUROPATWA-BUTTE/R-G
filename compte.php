@@ -59,20 +59,20 @@ require __DIR__ . '/partials/header.php';
                 <h2>Actions</h2>
                 <div class="action-buttons">
                     <?php if (($current_user['role'] ?? '') === 'admin'): ?>
-                        <a href="/admin/" class="btn btn-secondary">
+                        <a href="admin/" class="btn btn-secondary">
                             <i class="fas fa-cog"></i>
                             Administration
                         </a>
                     <?php endif; ?>
                     
-                    <a href="/cart.php" class="btn btn-secondary">
+                    <a href="cart.php" class="btn btn-secondary">
                         <i class="fas fa-shopping-cart"></i>
                         Mon Panier
                     </a>
                 </div>
                 
                 <!-- Logout Form with CSRF Protection -->
-                <form method="POST" action="/logout.php" class="logout-form">
+                <form method="POST" action="logout.php" class="logout-form">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn btn-danger logout-btn">
                         <i class="fas fa-sign-out-alt"></i>

@@ -9,4 +9,4 @@ if (!csrf_verify($_POST['csrf'] ?? null)) { http_response_code(400); exit('CSRF 
 
 $id = (int)($_POST['id'] ?? 0);
 cart_remove($id);
-header('Location: /cart.php');
+header('Location: cart.php');
