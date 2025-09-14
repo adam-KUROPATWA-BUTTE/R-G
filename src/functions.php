@@ -93,6 +93,28 @@ function users_list(): array {
   return $pdo->query('SELECT id, email, role, name, created_at FROM users ORDER BY created_at DESC')->fetchAll();
 }
 
+function product_create(string $name, string $description = '', float $price = 0, int $stock = 0, string $image_url = '', string $category = ''): bool {
+  $pdo = db();
+  $stmt = $pdo->prepare('INSERT INTO products (name, description, price, stock_quantity, image_url, category) VALUES (?, ?, ?, ?, ?, ?)');
+  return $stmt->execute([$name, $description, $price, $stock, $image_url, $category]);
+}
+
+function product_update(int $id, string $name, string $description = '', float $price = 0, int $stock = 0, string $image_url = '', string $category = ''): bool {
+  $pdo = db();
+  $stmt = $pdo->prepare('UPDATE products SET name = ?, description = ?, price = ?, stock_quantity = ?, image_url = ?, category = ? WHERE id = ?');
+  return $stmt->execute([$name, $description, $price, $stock, $image_url, $category, $id]);
+}
+
+function product_delete(int $id): bool {
+  $pdo = db();
+  $stmt = $pdo->prepare('DELETE FROM products WHERE id = ?');
+  return $stmt->execute([$id]);
+}
+
+function product_get(int $id): ?array {
+  return product_find($id); // Alias for consistency with naming convention
+}
+
 function get_user_orders(int $user_id): array {
   $pdo = db();
   $stmt = $pdo->prepare('SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC');

@@ -33,18 +33,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Veuillez remplir tous les champs requis';
     }
 }
+
+// Set up page variables for header
+$page_title = 'Inscription - R&G';
+$additional_css = ['styles/auth.css'];
+
+// Include header
+require_once 'partials/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscription - R&G</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/auth.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
     <div class="auth-container">
         <div class="auth-card">
             <div class="auth-header">
@@ -108,5 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </div>
     </div>
-</body>
-</html>
+
+<?php
+// Include footer
+require_once 'partials/footer.php';
+?>
