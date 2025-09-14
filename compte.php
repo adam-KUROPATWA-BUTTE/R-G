@@ -1,6 +1,6 @@
 <?php
+require_once __DIR__ . '/src/bootstrap.php';  // Start session and CSRF first
 require_once __DIR__ . '/src/auth.php';
-require_once __DIR__ . '/src/csrf.php';
 
 // Require user to be logged in
 require_login();
