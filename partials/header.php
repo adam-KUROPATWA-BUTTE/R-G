@@ -1,6 +1,6 @@
 <?php
 require_once __DIR__ . '/../src/auth.php';
-require_once __DIR__ . '/../src/functions.php';
+require_once __DIR__ . '/../src/cart.php';
 
 $current_user = current_user();
 $cart_count = cart_count();
@@ -36,17 +36,17 @@ if ($current_user) {
             <!-- User icon and cart in top left -->
             <div class="nav-left">
                 <?php if ($current_user): ?>
-                    <a href="/compte.php" class="icon-btn user-btn" aria-label="Mon Compte">
+                    <a href="/compte.php" class="icon-btn user-btn user-icon" aria-label="Mon Compte">
                         <i class="fas fa-user-circle"></i>
                     </a>
                 <?php else: ?>
-                    <a href="/login.php" class="icon-btn user-btn" aria-label="Connexion">
+                    <a href="/login.php" class="icon-btn user-btn user-icon" aria-label="Connexion">
                         <i class="fas fa-user"></i>
                     </a>
                 <?php endif; ?>
                 <a href="/cart.php" class="icon-btn cart-btn" aria-label="Panier">
                     <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount"><?= $cart_count ?></span>
+                    <span class="cart-count" id="cartCount" data-cart-count="<?= $cart_count ?>"><?= $cart_count ?></span>
                 </a>
             </div>
             
@@ -76,15 +76,15 @@ if ($current_user) {
             </div>
             
             <!-- User authentication info (simplified) -->
-            <div class="nav-icons">
+            <div class="nav-icons auth-area">
                 <?php if ($current_user): ?>
                     <div class="user-info">
                         <span class="user-greeting">Bonjour, <?= htmlspecialchars($displayName) ?></span>
                     </div>
                 <?php else: ?>
                     <div class="auth-links">
-                        <a href="/login.php" class="login-link">Se connecter</a>
-                        <a href="/register.php" class="register-link">S'inscrire</a>
+                        <a href="/login.php" class="auth-link">Se connecter</a>
+                        <a href="/register.php" class="auth-link">S'inscrire</a>
                     </div>
                 <?php endif; ?>
             </div>

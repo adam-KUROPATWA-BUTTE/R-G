@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/src/auth.php';
+require_once __DIR__ . '/src/cart.php';
 require_once __DIR__ . '/src/functions.php';
 $current_user = current_user();
 

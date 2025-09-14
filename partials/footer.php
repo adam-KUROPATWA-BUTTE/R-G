@@ -52,6 +52,7 @@
             }
         });
     </script>
+    <script src="/scripts/cart.js"></script>
     <?php if (isset($additional_scripts)): ?>
         <?php foreach ($additional_scripts as $script_file): ?>
             <script src="/<?= htmlspecialchars($script_file) ?>"></script>

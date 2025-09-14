@@ -1,0 +1,124 @@
+/**
+ * Carousel Fixes CSS
+ * Ensures carousel overlays don't interfere with clickability
+ * and proper z-index for carousel controls
+ */
+
+/* Carousel overlay fixes */
+.carousel-caption {
+    pointer-events: none;
+}
+
+.carousel-caption * {
+    pointer-events: auto;
+}
+
+.carousel-overlay {
+    pointer-events: none;
+}
+
+.carousel-overlay * {
+    pointer-events: auto;
+}
+
+/* Ensure carousel links and buttons are clickable */
+.category-card {
+    pointer-events: auto !important;
+    cursor: pointer;
+}
+
+.category-card a {
+    pointer-events: auto !important;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+/* Carousel controls z-index */
+.carousel-btn {
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.carousel-btn-prev,
+.carousel-btn-next {
+    z-index: 100;
+    pointer-events: auto;
+}
+
+/* Bootstrap carousel controls */
+.carousel-control-prev,
+.carousel-control-next {
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.carousel-indicators {
+    z-index: 100;
+    pointer-events: auto;
+}
+
+/* Ensure carousel track allows proper interactions */
+.carousel-track {
+    pointer-events: auto;
+}
+
+.carousel-track .category-card {
+    pointer-events: auto;
+    position: relative;
+}
+
+/* Custom carousel dots */
+.carousel-dots {
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.carousel-dot {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* Prevent overlays from blocking clicks */
+.product-overlay {
+    pointer-events: none;
+}
+
+.product-overlay .quick-view-btn {
+    pointer-events: auto;
+}
+
+/* Ensure images and content are clickable */
+.category-image,
+.product-image {
+    pointer-events: auto;
+}
+
+/* Fix for any modal overlays that might interfere */
+.modal {
+    pointer-events: auto;
+}
+
+.modal-backdrop {
+    pointer-events: auto;
+}
+
+/* Smooth transitions for carousel */
+.carousel-track {
+    transition: transform 0.5s ease-in-out;
+}
+
+/* Hover effects should work */
+.category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Bootstrap carousel fade override to ensure slides are clickable */
+.carousel-fade .carousel-item {
+    pointer-events: auto;
+}
+
+.carousel-fade .carousel-item.active {
+    pointer-events: auto;
+}
