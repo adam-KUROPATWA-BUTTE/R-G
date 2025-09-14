@@ -2,65 +2,15 @@
 // Handle both direct access (public/cart.php) and inclusion from root (cart.php)
 $auth_path = file_exists('../src/auth.php') ? '../src/auth.php' : 'src/auth.php';
 require_once $auth_path;
-$current_user = current_user();
-?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panier - R&G</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/panier.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <!-- Logo au centre -->
-            <div class="logo-container">
-                <a href="index.php">
-                    <img src="assets/logo.svg" alt="R&G Logo" class="logo">
-                </a>
-            </div>
-            
-            <!-- Menu déroulant avec 3 étoiles -->
-            <div class="menu-dropdown">
-                <button class="menu-trigger" id="menuTrigger">
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                    <i class="fas fa-star"></i>
-                </button>
-                <div class="dropdown-content" id="dropdownContent">
-                    <a href="index.php">Accueil</a>
-                    <a href="pages/femme.html">Vêtements Femme</a>
-                    <a href="pages/homme.html">Vêtements Homme</a>
-                    <a href="pages/bijoux.html">Bijoux</a>
-                    <a href="pages/info.html">Info</a>
-                </div>
-            </div>
-            
-            <!-- Icônes utilisateur et panier -->
-            <div class="nav-icons">
-                <?php if ($current_user): ?>
-                    <div class="user-menu">
-                        <span class="user-name">Bonjour, <?= htmlspecialchars($current_user['first_name']) ?></span>
-                        <a href="logout.php" class="logout-btn">Déconnexion</a>
-                    </div>
-                <?php else: ?>
-                    <button class="icon-btn" id="loginBtn">
-                        <i class="fas fa-user"></i>
-                    </button>
-                <?php endif; ?>
-                <button class="icon-btn" id="cartBtn">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" id="cartCount">0</span>
-                </button>
-            </div>
-        </div>
-    </nav>
 
+// Set up page variables for header
+$page_title = 'Panier - R&G';
+$additional_css = ['styles/panier.css'];
+$include_scripts = true;
+
+// Include header
+require_once 'partials/header.php';
+?>
     <!-- Main Content -->
     <main class="main-content">
         <div class="container">
@@ -259,9 +209,10 @@ $current_user = current_user();
         </div>
     </div>
 
-    <script src="scripts/auth.js"></script>
-    <script src="scripts/promo.js"></script>
-    <script src="scripts/orders.js"></script>
-    <script src="scripts/app.js"></script>
-</body>
-</html>
+<?php
+// Set additional scripts for this page
+$additional_scripts = ['scripts/auth.js', 'scripts/promo.js', 'scripts/orders.js'];
+
+// Include footer
+require_once 'partials/footer.php';
+?>

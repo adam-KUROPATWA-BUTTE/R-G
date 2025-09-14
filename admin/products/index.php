@@ -83,8 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get all products and categories
-$products = products_list();
+// Get all products for admin (including those with 0 stock)
+$products = products_list_admin();
 $pdo = db();
 $categories = $pdo->query('SELECT * FROM categories ORDER BY name')->fetchAll();
 ?>
@@ -237,6 +237,9 @@ $categories = $pdo->query('SELECT * FROM categories ORDER BY name')->fetchAll();
         <div class="admin-header">
             <h1><i class="fas fa-box"></i> Gestion des Produits</h1>
             <div>
+                <a href="../cms/" class="btn btn-primary" style="background-color: #6c757d; margin-right: 10px;">
+                    <i class="fas fa-edit"></i> CMS
+                </a>
                 <button class="btn btn-primary" onclick="showAddModal()">
                     <i class="fas fa-plus"></i> Ajouter un produit
                 </button>

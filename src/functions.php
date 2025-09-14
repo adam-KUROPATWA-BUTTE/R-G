@@ -3,6 +3,11 @@ require_once __DIR__ . '/db.php';
 
 function products_list(): array {
   $pdo = db();
+  return $pdo->query('SELECT p.*, c.name AS category FROM products p LEFT JOIN categories c ON c.id = p.category_id WHERE p.stock_quantity > 0 ORDER BY p.created_at DESC')->fetchAll();
+}
+
+function products_list_admin(): array {
+  $pdo = db();
   return $pdo->query('SELECT p.*, c.name AS category FROM products p LEFT JOIN categories c ON c.id = p.category_id ORDER BY p.created_at DESC')->fetchAll();
 }
 
@@ -32,6 +37,11 @@ function cart_clear(): void {
 function cart_get(): array {
   if (session_status() !== PHP_SESSION_ACTIVE) session_start();
   return $_SESSION['cart'] ?? [];
+}
+
+function cart_count(): int {
+  $cart = cart_get();
+  return array_sum($cart);
 }
 
 function cart_total(): float {

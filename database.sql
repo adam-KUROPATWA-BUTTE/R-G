@@ -89,3 +89,18 @@ INSERT INTO products (name, description, price, category_id, image, stock_quanti
 -- Create admin user (password: admin123)
 INSERT INTO users (email, password_hash, role, name) VALUES
 ('admin@rg-boutique.fr', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'Administrateur R&G');
+
+-- Page content table for CMS
+CREATE TABLE IF NOT EXISTS page_content (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    page_name VARCHAR(50) NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_page_name (page_name)
+);
+
+-- Insert default info page content
+INSERT INTO page_content (page_name, title, content) VALUES 
+('info', 'À propos de R&G', 'Bienvenue dans l\'univers de R&G, où chaque pièce est pensée et créée avec soin.\n\nDiplômée en couture, R&G propose des vêtements entièrement faits sur mesure, pensés pour s\'adapter à votre morphologie, à vos envies et à votre style. Ici, pas de production en série ni de stock : chaque création est unique, à votre image.\n\nEn parallèle, elle imagine et assemble également une collection de bijoux en acier inoxydable, pour sublimer vos tenues avec des pièces durables, élégantes et accessibles.\n\nQue vous soyez à la recherche d\'un vêtement sur-mesure ou d\'un bijou coup de cœur, vous êtes au bon endroit. Merci de soutenir l\'artisanat local et la création indépendante ❤️');
