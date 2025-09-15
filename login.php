@@ -1,7 +1,10 @@
 <?php
+require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
-require_once __DIR__ . '/src/csrf.php';
-session_boot(); // Assure l'utilisation du cookie de session unique (rg_session)
+
+// Compute base path for subdirectory deployments
+$base_path = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
+$base_path = $base_path === '/' ? '' : rtrim($base_path, '');
 
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -10,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
     if ($email && $password) {
         if (login_user($email, $password)) {
-            header('Location: /');
+            header('Location: ' . $base_path . '/');
             exit;
         } else {
             $error = 'Email ou mot de passe incorrect.';
@@ -40,7 +43,7 @@ require __DIR__ . '/partials/header.php';
       </div>
       <button type="submit" class="btn btn-primary">Se connecter</button>
     </form>
-    <p>Pas de compte ? <a href="/register.php">Créer un compte</a></p>
+    <p>Pas de compte ? <a href="<?= $base_path ?>/register.php">Créer un compte</a></p>
   </div>
 </main>
 

@@ -1,7 +1,10 @@
 <?php
+require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
-require_once __DIR__ . '/src/csrf.php';
-session_boot(); // idem
+
+// Compute base path for subdirectory deployments
+$base_path = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
+$base_path = $base_path === '/' ? '' : rtrim($base_path, '');
 
 $error = ''; $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,8 +16,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Inscription - R&G</title>
-  <link rel="stylesheet" href="/styles/main.css">
-  <link rel="stylesheet" href="/styles/auth.css">
+  <link rel="stylesheet" href="<?= $base_path ?>/styles/main.css">
+  <link rel="stylesheet" href="<?= $base_path ?>/styles/auth.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -49,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <button type="submit" class="btn btn-primary">S'inscrire</button>
       </form>
-      <p>Déjà inscrit ? <a href="/login.php">Se connecter</a></p>
+      <p>Déjà inscrit ? <a href="<?= $base_path ?>/login.php">Se connecter</a></p>
     </div>
   </main>
 

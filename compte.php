@@ -59,13 +59,13 @@ require __DIR__ . '/partials/header.php';
                 <h2>Actions</h2>
                 <div class="action-buttons">
                     <?php if (($current_user['role'] ?? '') === 'admin'): ?>
-                        <a href="/admin/" class="btn btn-secondary">
+                        <a href="<?= $base_path ?>/admin/" class="btn btn-secondary">
                             <i class="fas fa-cog"></i>
                             Administration
                         </a>
                     <?php endif; ?>
                     
-                    <a href="/cart.php" class="btn btn-secondary">
+                    <a href="<?= $base_path ?>/cart.php" class="btn btn-secondary">
                         <i class="fas fa-shopping-cart"></i>
                         Mon Panier
                     </a>

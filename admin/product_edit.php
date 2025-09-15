@@ -4,6 +4,10 @@ require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/csrf.php';
 require_admin();
 
+// Compute base path for subdirectory deployments
+$base_path = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
+$base_path = $base_path === '/' ? '' : rtrim($base_path, '');
+
 $action = $_GET['action'] ?? 'edit';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -33,11 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
       if ($action === 'create') {
         $newId = product_create($data);
-        header('Location: /admin/products.php');
+        header('Location: ' . $base_path . '/admin/products.php');
         exit;
       } else {
         product_update($id, $data);
-        header('Location: /admin/products.php');
+        header('Location: ' . $base_path . '/admin/products.php');
         exit;
       }
     }
@@ -47,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= $action === 'create' ? 'Ajouter' : 'Modifier' ?> un produit - Admin</title>
-  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="<?= $base_path ?>/styles/main.css">
 </head>
 <body>
   <div class="admin-container" style="max-width:800px;margin:2rem auto;background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 12px rgba(0,0,0,.08);">
@@ -80,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="text" name="category" value="<?= htmlspecialchars($product['category']) ?>">
       </div>
       <button type="submit" class="btn btn-primary"><?= $action === 'create' ? 'Créer' : 'Enregistrer' ?></button>
-      <a href="/admin/products.php" class="btn">Annuler</a>
+      <a href="<?= $base_path ?>/admin/products.php" class="btn">Annuler</a>
     </form>
   </div>
 </body>

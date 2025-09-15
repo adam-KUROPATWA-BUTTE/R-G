@@ -1,14 +1,18 @@
 <?php
 require_once __DIR__ . '/../src/auth.php';
 require_admin();
+
+// Compute base path for subdirectory deployments
+$base_path = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
+$base_path = $base_path === '/' ? '' : rtrim($base_path, '');
 ?><!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Admin - R&G</title>
-  <link rel="stylesheet" href="/styles/main.css">
-  <link rel="stylesheet" href="/styles/admin.css">
+  <link rel="stylesheet" href="<?= $base_path ?>/styles/main.css">
+  <link rel="stylesheet" href="<?= $base_path ?>/styles/admin.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -20,7 +24,7 @@ require_admin();
     
     <div class="admin-navigation">
       <div class="nav-cards">
-        <a href="/admin/products.php" class="nav-card">
+        <a href="<?= $base_path ?>/admin/products.php" class="nav-card">
           <div class="nav-card-icon">
             <i class="fas fa-box"></i>
           </div>
@@ -30,7 +34,7 @@ require_admin();
           </div>
         </a>
         
-        <a href="/admin/users.php" class="nav-card">
+        <a href="<?= $base_path ?>/admin/users.php" class="nav-card">
           <div class="nav-card-icon">
             <i class="fas fa-users"></i>
           </div>

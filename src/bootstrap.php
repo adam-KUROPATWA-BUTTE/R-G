@@ -9,14 +9,18 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
 
+    // Compute base path for subdirectory deployments
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
+    $basePath = $scriptDir === '/' ? '/' : rtrim($scriptDir, '/') . '/';
+
     // Important: définir les paramètres AVANT session_start()
     $params = [
         'lifetime' => 0,
-        'path' => '/',
-        'domain' => '',            // laisse vide pour host courant
-        'secure' => $isHttps,      // true si HTTPS
+        'path' => $basePath,          // Set session cookie path to subdirectory
+        'domain' => '',               // laisse vide pour host courant
+        'secure' => $isHttps,         // true si HTTPS
         'httponly' => true,
-        'samesite' => 'Lax',       // ok pour formulaires cross-page
+        'samesite' => 'Lax',          // ok pour formulaires cross-page
     ];
     if (PHP_VERSION_ID >= 70300) {
         session_set_cookie_params($params);
