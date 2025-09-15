@@ -36,3 +36,13 @@ function csrf_input(): string {
 if (!function_exists('csrf_field')) {
     function csrf_field(): string { return csrf_input(); }
 }
+
+// Alias for backward compatibility with existing code
+if (!function_exists('csrf_validate')) {
+    function csrf_validate(): void {
+        if (!csrf_verify($_POST['csrf'] ?? null)) {
+            http_response_code(419);
+            exit('CSRF token invalide');
+        }
+    }
+}

@@ -3,6 +3,10 @@ require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/functions.php';
 require_admin();
 
+// Compute base path for subdirectory deployments
+$base_path = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
+$base_path = $base_path === '/' ? '' : rtrim($base_path, '');
+
 $users = users_list();
 ?><!DOCTYPE html>
 <html lang="fr">
@@ -10,15 +14,15 @@ $users = users_list();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Utilisateurs - Admin</title>
-  <link rel="stylesheet" href="/styles/main.css">
-  <link rel="stylesheet" href="/styles/admin.css">
+  <link rel="stylesheet" href="<?= $base_path ?>/styles/main.css">
+  <link rel="stylesheet" href="<?= $base_path ?>/styles/admin.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
   <div class="admin-container">
     <div class="admin-header">
       <h1><i class="fas fa-users"></i> Liste des Utilisateurs</h1>
-      <a href="/admin/" class="btn btn-outline">Retour</a>
+      <a href="<?= $base_path ?>/admin/" class="btn btn-outline">Retour</a>
     </div>
     
     <div class="table-container">

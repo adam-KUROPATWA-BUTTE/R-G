@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/cart.php';
+require_once __DIR__ . '/src/CartService.php';
 
 // Helper pour savoir si la requête est JSON
 function is_json_request(): bool {

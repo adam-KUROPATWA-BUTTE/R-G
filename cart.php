@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/src/bootstrap.php';  // démarre la session tôt + helpers CSRF
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
-require_once __DIR__ . '/src/cart.php';
+require_once __DIR__ . '/src/CartService.php';
 
 $current_user = current_user();
 
@@ -33,7 +33,7 @@ require __DIR__ . '/partials/header.php';
           <i class="fas fa-shopping-cart"></i>
           <h2>Votre panier est vide</h2>
           <p>Découvrez nos collections pour ajouter des articles</p>
-          <a href="/" class="btn btn-primary">Continuer mes achats</a>
+          <a href="<?= $base_path ?>/" class="btn btn-primary">Continuer mes achats</a>
         </div>
       <?php else: ?>
         <div class="cart-items">
@@ -65,7 +65,7 @@ require __DIR__ . '/partials/header.php';
                   <p class="cart-item-price">Prix unitaire : <?= number_format($price, 2, ',', ' ') ?> €</p>
 
                   <div class="quantity-controls">
-                    <form method="post" action="/cart_update.php" class="qty-form">
+                    <form method="post" action="<?= $base_path ?>/cart_update.php" class="qty-form">
                       <?= csrf_input() ?>
                       <input type="hidden" name="id" value="<?= $id ?>">
                       <button type="button" class="qty-btn" onclick="this.nextElementSibling.stepDown(); this.closest('form').submit();">-</button>
@@ -78,7 +78,7 @@ require __DIR__ . '/partials/header.php';
                 </div>
 
                 <div class="cart-item-actions">
-                  <form method="post" action="/cart_remove.php">
+                  <form method="post" action="<?= $base_path ?>/cart_remove.php">
                     <?= csrf_input() ?>
                     <input type="hidden" name="id" value="<?= $id ?>">
                     <button class="remove-btn" type="submit" title="Retirer l'article">
@@ -95,8 +95,8 @@ require __DIR__ . '/partials/header.php';
               <h3>Total : <?= number_format($total, 2, ',', ' ') ?> €</h3>
             </div>
             <div class="cart-actions">
-              <a href="/" class="btn btn-secondary">Continuer mes achats</a>
-              <form method="post" action="/cart_clear.php" style="display:inline">
+              <a href="<?= $base_path ?>/" class="btn btn-secondary">Continuer mes achats</a>
+              <form method="post" action="<?= $base_path ?>/cart_clear.php" style="display:inline">
                 <?= csrf_input() ?>
                 <button class="btn btn-primary" type="submit">Vider le panier</button>
               </form>
