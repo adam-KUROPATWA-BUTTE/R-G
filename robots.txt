@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /scripts/        # Les scripts JS n'ont pas besoin d'être explorés directement
+Allow: /
+
+Sitemap: https://www.rg-boutique.fr/sitemap.xml

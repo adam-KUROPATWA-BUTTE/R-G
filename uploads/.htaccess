@@ -1,0 +1,7 @@
+# Empêche l’exécution de PHP et autres dans /uploads
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .phps
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .phps
+<FilesMatch "\\.(php|phtml|php3|php4|php5|php7|phps)$">
+  Require all denied
+</FilesMatch>
+Options -ExecCGI

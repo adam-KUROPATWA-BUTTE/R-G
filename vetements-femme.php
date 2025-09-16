@@ -4,6 +4,10 @@ require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
 $current_user = current_user();
 
+// Base path (gère sous-dossier)
+$base_path = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+if ($base_path === '/') $base_path = '';
+
 // Get products for femme category
 try {
     $products = products_list('femme');
@@ -58,7 +62,7 @@ require __DIR__ . '/partials/header.php';
         <!-- Products Grid -->
         <section class="products-section">
             <div class="products-container">
-                <?php if (!empty($error)): ?>
+                <?php if (!empty($error ?? '')): ?>
                     <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
@@ -70,11 +74,23 @@ require __DIR__ . '/partials/header.php';
                         </div>
                     <?php else: ?>
                         <?php foreach ($products as $product): ?>
+                            <?php
+                              // Image: accepte URL absolue, sinon préfixe avec $base_path
+                              $rawImg = (string)($product['image'] ?? ($product['image_url'] ?? ''));
+                              $imgUrl = '';
+                              if ($rawImg !== '') {
+                                  $isAbs = preg_match('#^(?:https?:)?//#', $rawImg) || strncmp($rawImg, 'data:', 5) === 0;
+                                  $imgUrl = $isAbs ? $rawImg : ($base_path . '/' . ltrim($rawImg, '/'));
+                              }
+
+                              // Stock: si null/absent => on considère en stock; sinon >0 en stock
+                              $stockRaw = $product['stock_quantity'] ?? ($product['stock'] ?? null);
+                              $stockVal = ($stockRaw === null) ? 1 : (int)$stockRaw;
+                            ?>
                             <div class="product-card" data-product-id="<?= (int)$product['id'] ?>">
                                 <div class="product-image">
-                                    <?php $img = $product['image'] ?? ($product['image_url'] ?? null); ?>
-                                    <?php if (!empty($img)): ?>
-                                        <img src="<?= htmlspecialchars((string)$img) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
+                                    <?php if ($imgUrl): ?>
+                                        <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
                                     <?php else: ?>
                                         <div class="placeholder-image">
                                             <i class="fas fa-tshirt"></i>
@@ -94,12 +110,9 @@ require __DIR__ . '/partials/header.php';
                                     <?php if (isset($product['price'])): ?>
                                         <div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div>
                                     <?php endif; ?>
-                                    <?php $stock = $product['stock_quantity'] ?? ($product['stock'] ?? null); ?>
-                                    <?php if ($stock !== null): ?>
-                                        <div class="product-status <?= (int)$stock > 0 ? 'in-stock' : 'on-demand' ?>">
-                                            <?= (int)$stock > 0 ? 'En stock' : 'Sur demande' ?>
-                                        </div>
-                                    <?php endif; ?>
+                                    <div class="product-status <?= $stockVal > 0 ? 'in-stock' : 'on-demand' ?>">
+                                        <?= $stockVal > 0 ? 'En stock' : 'Sur demande' ?>
+                                    </div>
                                     <div class="product-actions">
                                         <form method="post" action="<?= $base_path ?>/add_to_cart.php">
                                             <?= csrf_input() ?>
@@ -124,6 +137,7 @@ require __DIR__ . '/partials/header.php';
     </main>
 
     <style>
+    /* ... ton CSS existant inchangé ... */
         /* Page Header */
         .page-header {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--gold) 100%);
@@ -393,9 +407,7 @@ require __DIR__ . '/partials/header.php';
     </style>
 
     <script>
-        function showProductDetails(productId) {
-            console.log('Show details for product:', productId);
-        }
+        function showProductDetails(productId) { console.log('Show details for product:', productId); }
     </script>
 
 <?php

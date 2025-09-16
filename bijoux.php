@@ -1,8 +1,12 @@
 <?php
-require_once __DIR__ . '/src/bootstrap.php';   // session + csrf
+require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
 $current_user = current_user();
+
+// Base path
+$base_path = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+if ($base_path === '/') $base_path = '';
 
 // Load products from database (bijoux category)
 try {
@@ -15,13 +19,24 @@ try {
 $page_title = 'Bijoux - R&G';
 require __DIR__ . '/partials/header.php';
 ?>
-
-    <!-- Page Header -->
-    <header class="page-header">
-        <div class="header-content">
-            <h1><i class="fas fa-gem"></i> Bijoux</h1>
-            <p>Pièces précieuses et uniques pour sublimer votre style</p>
+<header class="page-header">
+  <div class="header-content">
+    <h1><i class="fas fa-gem"></i> Bijoux</h1>
+    <p>Pièces précieuses et uniques pour sublimer votre style</p>
+  </div>
+</header>
+<main class="main-content">
+  <section class="products-section">
+    <div class="products-container">
+      <?php if (!empty($error ?? '')): ?>
+        <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
+      <?php endif; ?>
+      <?php if (empty($products)): ?>
+        <div class="no-products">
+          <i class="fas fa-gem"></i>
+          <p>Aucun produit disponible pour le moment dans cette catégorie.</p>
         </div>
+<<<<<<< HEAD
     </header>
 
     <!-- Main Content -->
@@ -87,11 +102,57 @@ require __DIR__ . '/partials/header.php';
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
+=======
+      <?php else: ?>
+      <div class="products-grid">
+        <?php foreach ($products as $product):
+          $rawImg = (string)($product['image'] ?? ($product['image_url'] ?? ''));
+          $imgUrl = '';
+          if ($rawImg !== '') {
+              $isAbs = preg_match('#^(?:https?:)?//#', $rawImg) || strncmp($rawImg, 'data:', 5) === 0;
+              $imgUrl = $isAbs ? $rawImg : ($base_path . '/' . ltrim($rawImg, '/'));
+          }
+          $stockRaw = $product['stock_quantity'] ?? ($product['stock'] ?? null);
+          $stockVal = ($stockRaw === null) ? 1 : (int)$stockRaw;
+        ?>
+        <div class="product-card" data-product-id="<?= (int)$product['id'] ?>">
+          <div class="product-image">
+            <?php if ($imgUrl): ?>
+              <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
+            <?php else: ?>
+              <div class="placeholder-image"><i class="fas fa-gem"></i></div>
+            <?php endif; ?>
+            <div class="product-overlay">
+              <button class="quick-view-btn" onclick="showProductDetails('<?= (int)$product['id'] ?>')"><i class="fas fa-eye"></i></button>
+>>>>>>> 51b0590 (dernier version)
             </div>
-        </section>
-    </main>
-
-    <style>
+          </div>
+          <div class="product-info">
+            <h3><?= htmlspecialchars($product['name'] ?? 'Produit') ?></h3>
+            <?php if (!empty($product['description'])): ?><p class="product-description"><?= htmlspecialchars($product['description']) ?></p><?php endif; ?>
+            <?php if (isset($product['price'])): ?><div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div><?php endif; ?>
+            <div class="product-status <?= $stockVal > 0 ? 'in-stock' : 'on-demand' ?>"><?= $stockVal > 0 ? 'En stock' : 'Sur demande' ?></div>
+            <div class="product-actions">
+              <form method="post" action="<?= $base_path ?>/add_to_cart.php">
+                <?= csrf_input() ?>
+                <input type="hidden" name="id" value="<?= (int)$product['id'] ?>">
+                <input type="hidden" name="back" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/', ENT_QUOTES, 'UTF-8') ?>">
+                <div class="qty-row">
+                  <input type="number" name="qty" min="1" value="1" style="width:60px">
+                  <button type="submit" class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Ajouter au panier</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <?php endif; ?>
+    </div>
+  </section>
+</main>
+<style>
+/* ... ton CSS existant inchangé ... */
         /* Page Header */
         .page-header {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--gold) 100%);
@@ -149,7 +210,7 @@ require __DIR__ . '/partials/header.php';
         .product-image {
             position: relative;
             height: 250px;
-            overflow: hidden;
+            overflow: hidden.
         }
 
         .product-image img {
@@ -184,7 +245,7 @@ require __DIR__ . '/partials/header.php';
         }
 
         .product-card:hover .product-overlay {
-            opacity: 1;
+            opacity: 1.
         }
 
         .quick-view-btn {
@@ -246,17 +307,6 @@ require __DIR__ . '/partials/header.php';
             color: #856404;
         }
 
-        .product-actions .qty-row {
-            display: flex;
-            gap: .5rem;
-            align-items: center;
-        }
-
-        .qty-input {
-            width: 70px;
-            padding: .5rem;
-        }
-
         .add-to-cart-btn {
             padding: 0.8rem;
             background: var(--primary-blue);
@@ -270,53 +320,8 @@ require __DIR__ . '/partials/header.php';
             align-items: center;
             gap: 0.5rem;
         }
-
-        .add-to-cart-btn:hover {
-            background-color: var(--light-blue);
-            transform: translateY(-1px);
-        }
-
-        .no-products {
-            text-align: center;
-            padding: 3rem;
-            color: var(--dark-gray);
-            grid-column: 1 / -1;
-        }
-
-        .no-products i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary-blue);
-        }
-
-        .alert {
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 5px;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        @media (max-width: 768px) {
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header-content h1 {
-                font-size: 2rem;
-            }
-        }
-    </style>
-
-    <script>
-        function showProductDetails(productId) {
-            console.log('Show details for product:', productId);
-        }
-    </script>
-
-<?php
-require __DIR__ . '/partials/footer.php';
+</style>
+<script>
+function showProductDetails(productId){ console.log('Show details for product:', productId); }
+</script>
+<?php require __DIR__ . '/partials/footer.php'; ?>
