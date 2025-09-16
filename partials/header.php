@@ -58,7 +58,7 @@ if ($current_user) {
             <!-- Logo au centre -->
             <div class="logo-container">
                 <a href="<?= $base_path ?>/">
-                    <img src="<?= $base_path ?>/assets/logo.svg" alt="R&G Logo" class="logo">
+                    <img src="<?= $base_path ?>/assets/logo.png" alt="R&G Logo" class="logo">
                 </a>
             </div>
             

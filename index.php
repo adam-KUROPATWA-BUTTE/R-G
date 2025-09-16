@@ -16,7 +16,7 @@ require __DIR__ . '/partials/header.php';
             <div class="hero-content">
                 <h1>Bienvenue chez R&G</h1>
                 <p>Découvrez notre collection exclusive de vêtements et bijoux</p>
-                <a href="<?= $base_path ?>/bijoux.php" class="cta-button">Découvrir nos collections</a>
+                <a href="<?= $base_path ?>" class="cta-button">Découvrir nos collections</a>
             </div>
         </section>
 

@@ -1,30 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-   <!-- Page d'accueil -->
-   <url>
-      <loc>https://www.rg-boutique.fr/</loc>
-      <lastmod>2025-09-15</lastmod>
-      <changefreq>daily</changefreq>
-      <priority>1.0</priority>
-   </url>
+<urlset 
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <!-- Pages principales -->
+  <url>
+    <loc>https://www.r-and-g.fr/</loc>
+    <lastmod>2025-09-16</lastmod>
+    <priority>1.00</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://www.r-and-g.fr/vetements-femme</loc>
+    <lastmod>2025-09-16</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.r-and-g.fr/vetements-homme</loc>
+    <lastmod>2025-09-16</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.r-and-g.fr/bijoux</loc>
+    <lastmod>2025-09-16</lastmod>
+    <priority>0.75</priority>
+  </url>
 
-   <!-- Catégories principales -->
-   <url>
-      <loc>https://www.rg-boutique.fr/pages/femme.html</loc>
-      <lastmod>2025-09-15</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.9</priority>
-   </url>
-   <url>
-      <loc>https://www.rg-boutique.fr/pages/homme.html</loc>
-      <lastmod>2025-09-15</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.9</priority>
-   </url>
-   <url>
-      <loc>https://www.rg-boutique.fr/pages/bijoux.html</loc>
-      <lastmod>2025-09-15</lastmod>
-      <changefreq>weekly</changefreq>
-      <priority>0.9</priority>
-   </url>
+  <!-- Exemple produits (remplace par vrais slugs) -->
+  <url>
+    <loc>https://www.r-and-g.fr/produit/bague-argent-minimaliste</loc>
+    <lastmod>2025-09-16</lastmod>
+    <priority>0.65</priority>
+    <image:image>
+      <image:loc>https://www.r-and-g.fr/uploads/products/7/bague-argent.jpg</image:loc>
+      <image:title>Bague Argent Minimaliste</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://www.r-and-g.fr/produit/collier-coeur-dore</loc>
+    <lastmod>2025-09-16</lastmod>
+    <priority>0.65</priority>
+  </url>
 </urlset>

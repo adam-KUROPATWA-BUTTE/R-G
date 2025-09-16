@@ -1,6 +1,28 @@
 User-agent: *
+# Zones privées / techniques
 Disallow: /admin/
-Disallow: /scripts/        # Les scripts JS n'ont pas besoin d'être explorés directement
-Allow: /
+Disallow: /src/
+Disallow: /vendor/
+Disallow: /scripts/
+Disallow: /composer.json
+Disallow: /composer.lock
 
-Sitemap: https://www.rg-boutique.fr/sitemap.xml
+# (Facultatif) empêcher des pages utilitaires si tu ne veux pas qu’elles rankent
+# Préfère <meta name="robots" content="noindex,follow"> plutôt qu’un Disallow pour login / register
+# Disallow: /login
+# Disallow: /register
+# Disallow: /panier
+# Disallow: /checkout
+
+# Si tu ajoutes des paramètres de filtre (ex: ?sort=, ?page=, ?prix=...), tu peux aider Google:
+# Attention: ne PAS abuser. Laisse Google explorer si peu de variations.
+# Exemple:
+# Disallow: /*?sort=
+# Disallow: /*?page=
+
+# Autoriser uploads (images produits)
+Allow: /uploads/
+
+# Déclaration des sitemaps
+Sitemap: https://www.r-and-g.fr/sitemap.xml
+Sitemap: https://www.r-and-g.fr/image-sitemap.xml

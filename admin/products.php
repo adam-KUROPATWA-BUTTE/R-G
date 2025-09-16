@@ -4,10 +4,6 @@ require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/csrf.php';
 require_admin();
 
-// Compute base path for subdirectory deployments
-$base_path = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
-$base_path = $base_path === '/' ? '' : rtrim($base_path, '');
-
 $action = $_GET['action'] ?? '';
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 $msg = $_GET['msg'] ?? '';
@@ -15,7 +11,7 @@ $msg = $_GET['msg'] ?? '';
 if ($action === 'delete' && $id > 0 && $_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_validate();
     product_delete($id);
-    header('Location: ' . $base_path . '/admin/products.php?msg=supprime');
+    header('Location: /admin/products.php?msg=supprime');
     exit;
 }
 $products = products_list();
@@ -25,15 +21,15 @@ $products = products_list();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Produits - Admin</title>
-  <link rel="stylesheet" href="<?= $base_path ?>/styles/main.css">
-  <link rel="stylesheet" href="<?= $base_path ?>/styles/admin.css">
+  <link rel="stylesheet" href="/styles/main.css">
+  <link rel="stylesheet" href="/styles/admin.css">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
   <div class="admin-container">
     <div class="admin-header">
       <h1><i class="fas fa-box"></i> Gestion des Produits</h1>
-      <a href="<?= $base_path ?>/admin/" class="btn btn-outline">Retour</a>
+      <a href="/admin/" class="btn btn-outline">Retour</a>
     </div>
     
     <?php if ($msg === 'supprime'): ?>
@@ -43,7 +39,7 @@ $products = products_list();
     <?php endif; ?>
     
     <div class="admin-actions">
-      <a href="<?= $base_path ?>/admin/product_edit.php?action=create" class="btn btn-primary">
+      <a href="/admin/product_edit.php?action=create" class="btn btn-primary">
         <i class="fas fa-plus"></i> Ajouter un produit
       </a>
     </div>
@@ -87,7 +83,7 @@ $products = products_list();
                 <?php endif; ?>
               </td>
               <td class="actions">
-                <a href="<?= $base_path ?>/admin/product_edit.php?action=edit&id=<?= (int)$p['id'] ?>" class="btn btn-sm btn-secondary">
+                <a href="/admin/product_edit.php?action=edit&id=<?= (int)$p['id'] ?>" class="btn btn-sm btn-secondary">
                   <i class="fas fa-edit"></i> Modifier
                 </a>
                 <form action="/admin/products.php?action=delete&id=<?= (int)$p['id'] ?>" method="POST" style="display:inline" onsubmit="return confirm('Supprimer ce produit ?');">

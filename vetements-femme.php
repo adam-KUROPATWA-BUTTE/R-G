@@ -1,10 +1,11 @@
 <?php
-require_once __DIR__ . '/src/bootstrap.php';   // session + csrf
+require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
+require_once __DIR__ . '/src/products_front.php';
 $current_user = current_user();
 
-// Base path (gère sous-dossier)
+// Base path (gère les sous-dossiers)
 $base_path = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
 if ($base_path === '/') $base_path = '';
 
@@ -53,7 +54,7 @@ require __DIR__ . '/partials/header.php';
                     <select id="stockFilter">
                         <option value="">Tous les articles</option>
                         <option value="inStock">En stock</option>
-                        <option value="onDemand">Sur demande</option>
+                        <option value="outOfStock">Rupture de stock</option>
                     </select>
                 </div>
             </div>
@@ -75,17 +76,8 @@ require __DIR__ . '/partials/header.php';
                     <?php else: ?>
                         <?php foreach ($products as $product): ?>
                             <?php
-                              // Image: accepte URL absolue, sinon préfixe avec $base_path
-                              $rawImg = (string)($product['image'] ?? ($product['image_url'] ?? ''));
-                              $imgUrl = '';
-                              if ($rawImg !== '') {
-                                  $isAbs = preg_match('#^(?:https?:)?//#', $rawImg) || strncmp($rawImg, 'data:', 5) === 0;
-                                  $imgUrl = $isAbs ? $rawImg : ($base_path . '/' . ltrim($rawImg, '/'));
-                              }
-
-                              // Stock: si null/absent => on considère en stock; sinon >0 en stock
-                              $stockRaw = $product['stock_quantity'] ?? ($product['stock'] ?? null);
-                              $stockVal = ($stockRaw === null) ? 1 : (int)$stockRaw;
+                              $imgUrl = product_image_public_url($product, $base_path);
+                              [$label, $cls] = product_stock_ui($product);
                             ?>
                             <div class="product-card" data-product-id="<?= (int)$product['id'] ?>">
                                 <div class="product-image">
@@ -110,9 +102,7 @@ require __DIR__ . '/partials/header.php';
                                     <?php if (isset($product['price'])): ?>
                                         <div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div>
                                     <?php endif; ?>
-                                    <div class="product-status <?= $stockVal > 0 ? 'in-stock' : 'on-demand' ?>">
-                                        <?= $stockVal > 0 ? 'En stock' : 'Sur demande' ?>
-                                    </div>
+                                    <div class="product-status <?= $cls ?>"><?= $label ?></div>
                                     <div class="product-actions">
                                         <form method="post" action="<?= $base_path ?>/add_to_cart.php">
                                             <?= csrf_input() ?>
@@ -137,7 +127,6 @@ require __DIR__ . '/partials/header.php';
     </main>
 
     <style>
-    /* ... ton CSS existant inchangé ... */
         /* Page Header */
         .page-header {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--gold) 100%);
@@ -327,9 +316,9 @@ require __DIR__ . '/partials/header.php';
             color: #155724;
         }
 
-        .product-status.on-demand {
-            background: #fff3cd;
-            color: #856404;
+        .product-status.out-of-stock {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .product-actions .qty-row {
@@ -407,7 +396,9 @@ require __DIR__ . '/partials/header.php';
     </style>
 
     <script>
-        function showProductDetails(productId) { console.log('Show details for product:', productId); }
+        function showProductDetails(productId) {
+            console.log('Show details for product:', productId);
+        }
     </script>
 
 <?php

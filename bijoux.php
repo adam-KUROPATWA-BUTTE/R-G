@@ -2,6 +2,7 @@
 require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
+require_once __DIR__ . '/src/products_front.php';
 $current_user = current_user();
 
 // Base path
@@ -19,32 +20,49 @@ try {
 $page_title = 'Bijoux - R&G';
 require __DIR__ . '/partials/header.php';
 ?>
-<header class="page-header">
-  <div class="header-content">
-    <h1><i class="fas fa-gem"></i> Bijoux</h1>
-    <p>Pièces précieuses et uniques pour sublimer votre style</p>
-  </div>
-</header>
-<main class="main-content">
-  <section class="products-section">
-    <div class="products-container">
-      <?php if (!empty($error ?? '')): ?>
-        <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
-      <?php endif; ?>
-      <?php if (empty($products)): ?>
-        <div class="no-products">
-          <i class="fas fa-gem"></i>
-          <p>Aucun produit disponible pour le moment dans cette catégorie.</p>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-gem"></i> Bijoux</h1>
+            <p>Pièces précieuses et uniques pour sublimer votre style</p>
         </div>
-<<<<<<< HEAD
     </header>
 
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Filters Section -->
+        <section class="filters-section">
+            <div class="filters-container">
+                <h3>Filtrer par :</h3>
+                <div class="filters">
+                    <select id="categoryFilter">
+                        <option value="">Toutes les catégories</option>
+                        <option value="robes">Robes</option>
+                        <option value="hauts">Hauts</option>
+                        <option value="pantalons">Pantalons</option>
+                        <option value="vestes">Vestes</option>
+                    </select>
+                    
+                    <select id="priceFilter">
+                        <option value="">Tous les prix</option>
+                        <option value="0-150">0 - 150€</option>
+                        <option value="150-300">150 - 300€</option>
+                        <option value="300+">300€ et plus</option>
+                    </select>
+                    
+                    <select id="stockFilter">
+                        <option value="">Tous les articles</option>
+                        <option value="inStock">En stock</option>
+                        <option value="outOfStock">Rupture de stock</option>
+                    </select>
+                </div>
+            </div>
+        </section>
         <!-- Products Grid -->
         <section class="products-section">
             <div class="products-container">
-                <?php if (!empty($error)): ?>
+                <?php if (!empty($error ?? '')): ?>
                     <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
@@ -56,11 +74,14 @@ require __DIR__ . '/partials/header.php';
                 <?php else: ?>
                     <div class="products-grid">
                         <?php foreach ($products as $product): ?>
+                            <?php
+                              $imgUrl = product_image_public_url($product, $base_path);
+                              [$label, $cls] = product_stock_ui($product);
+                            ?>
                             <div class="product-card" data-product-id="<?= (int)$product['id'] ?>">
                                 <div class="product-image">
-                                    <?php $img = $product['image'] ?? ($product['image_url'] ?? null); ?>
-                                    <?php if (!empty($img)): ?>
-                                        <img src="<?= htmlspecialchars((string)$img) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
+                                    <?php if ($imgUrl): ?>
+                                        <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
                                     <?php else: ?>
                                         <div class="placeholder-image">
                                             <i class="fas fa-gem"></i>
@@ -80,79 +101,31 @@ require __DIR__ . '/partials/header.php';
                                     <?php if (isset($product['price'])): ?>
                                         <div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div>
                                     <?php endif; ?>
-                                    <?php $stock = $product['stock_quantity'] ?? ($product['stock'] ?? null); ?>
-                                    <?php if ($stock !== null): ?>
-                                        <div class="product-status <?= (int)$stock > 0 ? 'in-stock' : 'on-demand' ?>">
-                                            <?= (int)$stock > 0 ? 'En stock' : 'Sur demande' ?>
-                                        </div>
-                                    <?php endif; ?>
+                                    <div class="product-status <?= $cls ?>"><?= $label ?></div>
                                     <div class="product-actions">
                                         <form method="post" action="<?= $base_path ?>/add_to_cart.php">
-  <?= csrf_input() ?>
-  <input type="hidden" name="id" value="<?= (int)$product['id'] ?>">
-  <input type="hidden" name="back" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/', ENT_QUOTES, 'UTF-8') ?>">
-  <input type="number" name="qty" min="1" value="1" style="width:60px">
-  <button type="submit">
-    <i class="fas fa-shopping-cart"></i> Ajouter au panier
-  </button>
-</form>
+                                            <?= csrf_input() ?>
+                                            <input type="hidden" name="id" value="<?= (int)$product['id'] ?>">
+                                            <input type="hidden" name="back" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/') ?>">
+                                            <div class="qty-row">
+                                                <input type="number" name="qty" min="1" value="1" class="qty-input">
+                                                <button type="submit" class="add-to-cart-btn">
+                                                    <i class="fas fa-shopping-cart"></i>
+                                                    Ajouter au panier
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
-=======
-      <?php else: ?>
-      <div class="products-grid">
-        <?php foreach ($products as $product):
-          $rawImg = (string)($product['image'] ?? ($product['image_url'] ?? ''));
-          $imgUrl = '';
-          if ($rawImg !== '') {
-              $isAbs = preg_match('#^(?:https?:)?//#', $rawImg) || strncmp($rawImg, 'data:', 5) === 0;
-              $imgUrl = $isAbs ? $rawImg : ($base_path . '/' . ltrim($rawImg, '/'));
-          }
-          $stockRaw = $product['stock_quantity'] ?? ($product['stock'] ?? null);
-          $stockVal = ($stockRaw === null) ? 1 : (int)$stockRaw;
-        ?>
-        <div class="product-card" data-product-id="<?= (int)$product['id'] ?>">
-          <div class="product-image">
-            <?php if ($imgUrl): ?>
-              <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
-            <?php else: ?>
-              <div class="placeholder-image"><i class="fas fa-gem"></i></div>
-            <?php endif; ?>
-            <div class="product-overlay">
-              <button class="quick-view-btn" onclick="showProductDetails('<?= (int)$product['id'] ?>')"><i class="fas fa-eye"></i></button>
->>>>>>> 51b0590 (dernier version)
             </div>
-          </div>
-          <div class="product-info">
-            <h3><?= htmlspecialchars($product['name'] ?? 'Produit') ?></h3>
-            <?php if (!empty($product['description'])): ?><p class="product-description"><?= htmlspecialchars($product['description']) ?></p><?php endif; ?>
-            <?php if (isset($product['price'])): ?><div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div><?php endif; ?>
-            <div class="product-status <?= $stockVal > 0 ? 'in-stock' : 'on-demand' ?>"><?= $stockVal > 0 ? 'En stock' : 'Sur demande' ?></div>
-            <div class="product-actions">
-              <form method="post" action="<?= $base_path ?>/add_to_cart.php">
-                <?= csrf_input() ?>
-                <input type="hidden" name="id" value="<?= (int)$product['id'] ?>">
-                <input type="hidden" name="back" value="<?= htmlspecialchars($_SERVER['REQUEST_URI'] ?? '/', ENT_QUOTES, 'UTF-8') ?>">
-                <div class="qty-row">
-                  <input type="number" name="qty" min="1" value="1" style="width:60px">
-                  <button type="submit" class="add-to-cart-btn"><i class="fas fa-shopping-cart"></i> Ajouter au panier</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-        <?php endforeach; ?>
-      </div>
-      <?php endif; ?>
-    </div>
-  </section>
-</main>
-<style>
-/* ... ton CSS existant inchangé ... */
+        </section>
+    </main>
+
+    <style>
         /* Page Header */
         .page-header {
             background: linear-gradient(135deg, var(--primary-blue) 0%, var(--gold) 100%);
@@ -198,7 +171,7 @@ require __DIR__ . '/partials/header.php';
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 2px solid transparent.
         }
 
         .product-card:hover {
@@ -210,7 +183,7 @@ require __DIR__ . '/partials/header.php';
         .product-image {
             position: relative;
             height: 250px;
-            overflow: hidden.
+            overflow: hidden;
         }
 
         .product-image img {
@@ -245,7 +218,7 @@ require __DIR__ . '/partials/header.php';
         }
 
         .product-card:hover .product-overlay {
-            opacity: 1.
+            opacity: 1;
         }
 
         .quick-view-btn {
@@ -302,9 +275,9 @@ require __DIR__ . '/partials/header.php';
             color: #155724;
         }
 
-        .product-status.on-demand {
-            background: #fff3cd;
-            color: #856404;
+        .product-status.out-of-stock {
+            background: #f8d7da;
+            color: #721c24;
         }
 
         .add-to-cart-btn {
@@ -320,8 +293,26 @@ require __DIR__ . '/partials/header.php';
             align-items: center;
             gap: 0.5rem;
         }
-</style>
-<script>
-function showProductDetails(productId){ console.log('Show details for product:', productId); }
-</script>
-<?php require __DIR__ . '/partials/footer.php'; ?>
+
+        .qty-input {
+            width: 70px;
+            padding: .5rem;
+        }
+
+        
+        .product-actions .qty-row {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
+        }
+
+    </style>
+
+    <script>
+        function showProductDetails(productId) {
+            console.log('Show details for product:', productId);
+        }
+    </script>
+
+<?php
+require __DIR__ . '/partials/footer.php';

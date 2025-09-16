@@ -168,5 +168,17 @@ function users_list(): array {
     return $rows;
 }
 
+
+function product_parse_sizes($raw) {
+    if (!is_string($raw) || $raw === '') return array();
+    $parts = explode(',', $raw);
+    $out = array();
+    foreach ($parts as $p) {
+        $p = strtoupper(trim($p));
+        if ($p !== '' && !in_array($p, $out, true)) $out[] = $p;
+    }
+    return $out;
+}
+
 // Cart functions
 require_once __DIR__ . '/CartService.php';

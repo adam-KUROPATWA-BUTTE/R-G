@@ -7,6 +7,7 @@ if (!isset($base_path)) {
 ?>
     <!-- Footer -->
     <footer class="footer">
+        <link rel="stylesheet" href="/assets/css/product_modal.css">
         <div class="footer-content">
             <div class="footer-section">
                 <h3>R&G</h3>
@@ -23,8 +24,8 @@ if (!isset($base_path)) {
             </div>
             <div class="footer-section">
                 <h3>Contact</h3>
-                <p>Email: contact@rg-boutique.fr</p>
-                <p>Téléphone: +33 1 23 45 67 89</p>
+                <p><a href="mailto:contact@r-and-g.fr">Support !</a></p>
+                <p><a href="mailto:support@r-and-g.fr">Nous Contacter !</a></p>
             </div>
         </div>
         <div class="footer-bottom">
@@ -65,5 +66,7 @@ if (!isset($base_path)) {
             <script src="<?= $base_path ?>/<?= htmlspecialchars($script_file) ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
+<?php require __DIR__ . '/_product_modal.php'; ?>
+<script src="/assets/js/product_modal.js"></script>
 </body>
 </html>
