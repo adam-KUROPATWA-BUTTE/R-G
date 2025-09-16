@@ -31,6 +31,7 @@ if (is_json_request()) {
 $token = $data['csrf'] ?? $data['csrf_token'] ?? null;
 $id    = (int)($data['id'] ?? $data['product_id'] ?? 0);
 $qty   = (int)($data['qty'] ?? $data['quantity'] ?? 1);
+$size  = trim((string)($data['size'] ?? ''));
 $qty   = max(1, $qty);
 
 // Vérif CSRF
@@ -46,7 +47,7 @@ if (!csrf_verify($token)) {
 }
 
 try {
-    cart_add($id, $qty);
+    cart_add($id, $qty, $size);
 
     if (is_json_request()) {
         header('Content-Type: application/json; charset=utf-8');

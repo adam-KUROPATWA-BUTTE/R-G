@@ -48,7 +48,7 @@ function cart_total(): float {
     return round($total, 2);
 }
 
-function cart_add(int $productId, int $qty = 1): void {
+function cart_add(int $productId, int $qty = 1, string $size = ''): void {
     cart_init();
     $qty = max(1, $qty);
 
@@ -65,10 +65,19 @@ function cart_add(int $productId, int $qty = 1): void {
     $price = isset($p['price']) ? (float)$p['price'] : 0.0;
     $image = $p['image'] ?? null;
     $category = $p['category'] ?? null;
+    
+    // Validate size if product has sizes
+    $availableSizes = product_parse_sizes($p['sizes'] ?? '');
+    if (!empty($availableSizes) && !in_array(strtoupper($size), $availableSizes, true)) {
+        throw new RuntimeException("Taille invalide pour ce produit.");
+    }
+
+    // Create unique cart key: productId or productId_SIZE for variants
+    $cartKey = $size ? $productId . '_' . strtoupper($size) : $productId;
 
     // Respecter le stock si présent
     if (isset($p['stock_quantity'])) {
-        $inCart = $_SESSION['cart']['items'][$productId]['qty'] ?? 0;
+        $inCart = $_SESSION['cart']['items'][$cartKey]['qty'] ?? 0;
         $maxAddable = max(0, ((int)$p['stock_quantity']) - $inCart);
         $qty = min($qty, $maxAddable);
         if ($qty === 0) {
@@ -77,23 +86,29 @@ function cart_add(int $productId, int $qty = 1): void {
         }
     }
 
-    if (!isset($_SESSION['cart']['items'][$productId])) {
-        $_SESSION['cart']['items'][$productId] = [
+    if (!isset($_SESSION['cart']['items'][$cartKey])) {
+        $_SESSION['cart']['items'][$cartKey] = [
             'id' => $productId,
             'name' => $name,
             'price' => $price,
             'qty' => 0,
             'image' => $image,
             'category' => $category,
+            'size' => $size ? strtoupper($size) : null,
+            'cart_key' => $cartKey,
         ];
     }
-    $_SESSION['cart']['items'][$productId]['qty'] += $qty;
+    $_SESSION['cart']['items'][$cartKey]['qty'] += $qty;
     $_SESSION['cart']['updated_at'] = time();
 }
 
-function cart_update(int $productId, int $qty): void {
+function cart_update(int $productId, int $qty, string $size = ''): void {
     cart_init();
-    if (!isset($_SESSION['cart']['items'][$productId])) return;
+    
+    // Create unique cart key: productId or productId_SIZE for variants
+    $cartKey = $size ? $productId . '_' . strtoupper($size) : $productId;
+    
+    if (!isset($_SESSION['cart']['items'][$cartKey])) return;
 
     $qty = max(0, $qty);
 
@@ -104,16 +119,20 @@ function cart_update(int $productId, int $qty): void {
     }
 
     if ($qty === 0) {
-        unset($_SESSION['cart']['items'][$productId]);
+        unset($_SESSION['cart']['items'][$cartKey]);
     } else {
-        $_SESSION['cart']['items'][$productId]['qty'] = $qty;
+        $_SESSION['cart']['items'][$cartKey]['qty'] = $qty;
     }
     $_SESSION['cart']['updated_at'] = time();
 }
 
-function cart_remove(int $productId): void {
+function cart_remove(int $productId, string $size = ''): void {
     cart_init();
-    unset($_SESSION['cart']['items'][$productId]);
+    
+    // Create unique cart key: productId or productId_SIZE for variants
+    $cartKey = $size ? $productId . '_' . strtoupper($size) : $productId;
+    
+    unset($_SESSION['cart']['items'][$cartKey]);
     $_SESSION['cart']['updated_at'] = time();
 }
 
