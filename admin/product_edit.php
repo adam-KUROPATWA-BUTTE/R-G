@@ -22,7 +22,7 @@ function column_exists(string $table, string $column): bool {
 }
 
 function get_product(int $id): ?array {
-    $sql = "SELECT id, name, description, price, category, image, stock_quantity
+    $sql = "SELECT id, name, description, price, category, image, stock_quantity, sizes
             FROM products
             WHERE id = ? LIMIT 1";
     $st = db()->prepare($sql);
@@ -32,8 +32,9 @@ function get_product(int $id): ?array {
 }
 
 function create_product(array $d) {
-    $fields = array('name','description','price','category','stock_quantity','image','sizes');
-    ...
+    $sql = "INSERT INTO products (name, description, price, category, stock_quantity, image, sizes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $st = db()->prepare($sql);
     $st->execute(array(
       (string)$d['name'],
       (string)$d['description'],
@@ -41,18 +42,19 @@ function create_product(array $d) {
       (string)$d['category'],
       (int)$d['stock_quantity'],
       (string)$d['image'],
-      (string)$d['sizes']
+      (string)($d['sizes'] ?? '')
     ));
+    return db()->lastInsertId();
 }
 function update_product($id, array $d) {
     $sql = "UPDATE products
             SET name=?, description=?, price=?, category=?, stock_quantity=?, image=?, sizes=?
             WHERE id = ?";
+    $st = db()->prepare($sql);
     $st->execute(array(
         $d['name'],$d['description'],$d['price'],$d['category'],
-        $d['stock_quantity'],$d['image'],$d['sizes'],$id
+        $d['stock_quantity'],$d['image'],$d['sizes'] ?? '',$id
     ));
-    ...
 }
 
 function store_image_upload(array $file, int $productId): string {
@@ -143,7 +145,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'price' => $price > 0 ? $price : 1,
                         'category' => $cat,
                         'stock_quantity' => $stock,
-                        'image' => ''
+                        'image' => '',
+                        'sizes' => $sizes_clean
                     ]);
                     $id = $tmpId;
                     $product['id'] = $id;
@@ -164,7 +167,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'price' => $price,
                     'category' => $cat,
                     'stock_quantity' => $stock,
-                    'image' => $currentImage
+                    'image' => $currentImage,
+                    'sizes' => $sizes_clean
                 ]);
                 $id = $newId;
                 $product['id'] = $id;
@@ -176,7 +180,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'price' => $price,
                     'category' => $cat,
                     'stock_quantity' => $stock,
-                    'image' => $currentImage
+                    'image' => $currentImage,
+                    'sizes' => $sizes_clean
                 ]);
                 $success = 'Produit mis à jour.';
             }
