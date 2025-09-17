@@ -30,6 +30,16 @@ require_admin();
           </div>
         </a>
         
+        <a href="/admin/orders.php" class="nav-card">
+          <div class="nav-card-icon">
+            <i class="fas fa-shopping-bag"></i>
+          </div>
+          <div class="nav-card-content">
+            <h3>Commandes</h3>
+            <p>Visualiser et gérer les commandes clients</p>
+          </div>
+        </a>
+        
         <a href="/admin/users.php" class="nav-card">
           <div class="nav-card-icon">
             <i class="fas fa-users"></i>
