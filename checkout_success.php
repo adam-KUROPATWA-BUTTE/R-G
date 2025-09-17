@@ -15,7 +15,7 @@ if (empty($sessionId)) {
 } else {
     try {
         $orderService = new OrderService();
-        $order = $orderService->findByStripeSession($sessionId);
+        $order = $orderService->findByRevolutSession($sessionId);
         
         if (!$order) {
             $error = 'Commande non trouvée pour cette session';

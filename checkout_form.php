@@ -87,7 +87,7 @@ require_once __DIR__ . '/partials/header.php';
                     </a>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-credit-card"></i> 
-                        Payer <?= number_format($cartTotal, 2, ',', ' ') ?> €
+                        Payer avec Revolut <?= number_format($cartTotal, 2, ',', ' ') ?> €
                     </button>
                 </div>
             </form>

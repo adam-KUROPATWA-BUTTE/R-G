@@ -314,11 +314,11 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
             </div>
         </div>
         
-        <?php if (!empty($order['stripe_session_id']) || !empty($order['payment_reference'])): ?>
+        <?php if (!empty($order['revolut_session_id']) || !empty($order['payment_reference'])): ?>
             <div class="payment-info">
                 <h4><i class="fas fa-credit-card"></i> Informations de Paiement</h4>
-                <?php if (!empty($order['stripe_session_id'])): ?>
-                    <p><strong>Session Stripe:</strong> <span class="payment-detail"><?= h($order['stripe_session_id']) ?></span></p>
+                <?php if (!empty($order['revolut_session_id'])): ?>
+                    <p><strong>Session Revolut:</strong> <span class="payment-detail"><?= h($order['revolut_session_id']) ?></span></p>
                 <?php endif; ?>
                 <?php if (!empty($order['payment_reference'])): ?>
                     <p><strong>Référence de paiement:</strong> <span class="payment-detail"><?= h($order['payment_reference']) ?></span></p>

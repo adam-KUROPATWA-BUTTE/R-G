@@ -242,8 +242,8 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
                                         <span title="<?= h($order['payment_reference']) ?>">
                                             <i class="fas fa-check-circle" style="color: #059669;"></i>
                                         </span>
-                                    <?php elseif (!empty($order['stripe_session_id'])): ?>
-                                        <span title="Session Stripe créée">
+                                    <?php elseif (!empty($order['revolut_session_id'])): ?>
+                                        <span title="Session Revolut créée">
                                             <i class="fas fa-clock" style="color: #d97706;"></i>
                                         </span>
                                     <?php else: ?>

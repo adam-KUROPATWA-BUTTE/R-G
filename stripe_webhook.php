@@ -1,7 +1,7 @@
 <?php
 /**
- * Stripe Webhook Handler
- * Traite les événements Stripe (confirmations de paiement, échecs, etc.)
+ * Revolut Business Webhook Handler
+ * Traite les événements Revolut Business (confirmations de paiement, échecs, etc.)
  */
 
 declare(strict_types=1);
@@ -40,28 +40,16 @@ function loadEnv(): array {
 }
 
 /**
- * Vérifie la signature du webhook Stripe
+ * Vérifie la signature du webhook Revolut Business
  */
-function verifyStripeSignature(string $payload, string $signature, string $secret): bool {
-    // Dans un vrai projet avec Stripe installé:
-    if (class_exists('\Stripe\Webhook')) {
-        try {
-            \Stripe\Webhook::constructEvent($payload, $signature, $secret);
-            return true;
-        } catch (Exception $e) {
-            error_log('Erreur signature Stripe: ' . $e->getMessage());
-            return false;
-        }
-    }
-    
-    // Simulation pour le développement
+function verifyRevolutSignature(string $payload, string $signature, string $secret): bool {
     if (empty($signature) || empty($secret)) {
         return false;
     }
     
-    // Validation basique pour la démo
+    // Revolut utilise HMAC-SHA256 pour signer les webhooks
     $expectedSignature = hash_hmac('sha256', $payload, $secret);
-    return hash_equals($expectedSignature, substr($signature, 3)); // Enlever 'v1='
+    return hash_equals($expectedSignature, $signature);
 }
 
 /**
@@ -95,74 +83,93 @@ function logWebhookEvent(string $eventType, string $eventId, string $status, str
 }
 
 /**
- * Traite l'événement checkout.session.completed
+ * Traite l'événement de paiement terminé
  */
-function handleCheckoutCompleted(array $event): bool {
+function handlePaymentCompleted(array $event): bool {
     try {
-        $session = $event['data']['object'] ?? [];
-        $sessionId = $session['id'] ?? '';
-        $paymentIntentId = $session['payment_intent'] ?? '';
+        $payment = $event['data'] ?? [];
+        $paymentId = $payment['id'] ?? '';
+        $orderRef = $payment['merchant_order_ext_ref'] ?? '';
+        $state = $payment['state'] ?? '';
         
-        if (empty($sessionId)) {
-            throw new Exception('ID de session manquant');
+        if (empty($paymentId)) {
+            throw new Exception('ID de paiement manquant');
+        }
+        
+        // Extraire l'ID de commande depuis la référence
+        $orderId = null;
+        if (preg_match('/^RG-(\d+)$/', $orderRef, $matches)) {
+            $orderId = (int)$matches[1];
+        }
+        
+        if (!$orderId) {
+            logWebhookEvent('payment_completed', $paymentId, 'order_not_found', 
+                'Impossible d\'extraire l\'ID de commande depuis: ' . $orderRef);
+            return false;
         }
         
         $orderService = new OrderService();
-        
-        // Trouver la commande par session Stripe
-        $order = $orderService->findByStripeSession($sessionId);
+        $order = $orderService->find($orderId);
         
         if (!$order) {
-            logWebhookEvent('checkout.session.completed', $sessionId, 'order_not_found', 
-                'Aucune commande trouvée pour la session: ' . $sessionId);
+            logWebhookEvent('payment_completed', $paymentId, 'order_not_found', 
+                'Commande #' . $orderId . ' non trouvée');
             return false;
         }
         
         // Vérifier si déjà marquée comme payée
         if ($order['status'] === 'paid') {
-            logWebhookEvent('checkout.session.completed', $sessionId, 'already_processed', 
-                'Commande #' . $order['id'] . ' déjà marquée comme payée');
+            logWebhookEvent('payment_completed', $paymentId, 'already_processed', 
+                'Commande #' . $orderId . ' déjà marquée comme payée');
             return true;
         }
         
-        // Marquer la commande comme payée
-        $orderService->markPaid((int)$order['id'], $paymentIntentId);
-        
-        logWebhookEvent('checkout.session.completed', $sessionId, 'success', 
-            'Commande #' . $order['id'] . ' marquée comme payée');
-        
-        return true;
+        // Vérifier que le paiement est réussi
+        if ($state === 'completed') {
+            // Marquer la commande comme payée
+            $orderService->markPaid($orderId, $paymentId);
+            
+            logWebhookEvent('payment_completed', $paymentId, 'success', 
+                'Commande #' . $orderId . ' marquée comme payée');
+            
+            return true;
+        } else {
+            // Marquer comme échouée ou annulée selon l'état
+            $newStatus = in_array($state, ['failed', 'declined']) ? 'failed' : 'canceled';
+            $orderService->updateStatus($orderId, $newStatus);
+            
+            logWebhookEvent('payment_completed', $paymentId, 'payment_' . $state, 
+                'Commande #' . $orderId . ' marquée comme ' . $newStatus);
+            
+            return true;
+        }
         
     } catch (Exception $e) {
-        $errorMsg = 'Erreur traitement checkout.session.completed: ' . $e->getMessage();
+        $errorMsg = 'Erreur traitement payment_completed: ' . $e->getMessage();
         error_log($errorMsg);
-        logWebhookEvent('checkout.session.completed', $sessionId ?? 'unknown', 'error', $errorMsg);
+        logWebhookEvent('payment_completed', $paymentId ?? 'unknown', 'error', $errorMsg);
         return false;
     }
 }
 
 /**
- * Traite l'événement payment_intent.payment_failed
+ * Traite l'événement de paiement en attente
  */
-function handlePaymentFailed(array $event): bool {
+function handlePaymentPending(array $event): bool {
     try {
-        $paymentIntent = $event['data']['object'] ?? [];
-        $paymentIntentId = $paymentIntent['id'] ?? '';
-        $failureCode = $paymentIntent['last_payment_error']['code'] ?? '';
-        $failureMessage = $paymentIntent['last_payment_error']['message'] ?? '';
+        $payment = $event['data'] ?? [];
+        $paymentId = $payment['id'] ?? '';
+        $orderRef = $payment['merchant_order_ext_ref'] ?? '';
         
-        // Note: Pour lier un payment_intent à une commande, il faudrait stocker
-        // le payment_intent_id dans la table orders lors de la création de la session
-        
-        logWebhookEvent('payment_intent.payment_failed', $paymentIntentId, 'processed', 
-            "Échec paiement: $failureCode - $failureMessage");
+        logWebhookEvent('payment_pending', $paymentId, 'processed', 
+            'Paiement en attente pour la référence: ' . $orderRef);
         
         return true;
         
     } catch (Exception $e) {
-        $errorMsg = 'Erreur traitement payment_intent.payment_failed: ' . $e->getMessage();
+        $errorMsg = 'Erreur traitement payment_pending: ' . $e->getMessage();
         error_log($errorMsg);
-        logWebhookEvent('payment_intent.payment_failed', $paymentIntentId ?? 'unknown', 'error', $errorMsg);
+        logWebhookEvent('payment_pending', $paymentId ?? 'unknown', 'error', $errorMsg);
         return false;
     }
 }
@@ -178,7 +185,7 @@ try {
     
     // Lire le payload
     $payload = file_get_contents('php://input');
-    $signature = $_SERVER['HTTP_STRIPE_SIGNATURE'] ?? '';
+    $signature = $_SERVER['HTTP_X_REVOLUT_SIGNATURE'] ?? '';
     
     if (empty($payload)) {
         http_response_code(400);
@@ -187,18 +194,18 @@ try {
     
     // Charger la configuration
     $env = loadEnv();
-    $webhookSecret = $env['STRIPE_WEBHOOK_SECRET'] ?? '';
+    $webhookSecret = $env['REVOLUT_WEBHOOK_SECRET'] ?? '';
     
     // Vérifier la signature (sauf en mode développement sans secret configuré)
     if (!empty($webhookSecret)) {
-        if (!verifyStripeSignature($payload, $signature, $webhookSecret)) {
+        if (!verifyRevolutSignature($payload, $signature, $webhookSecret)) {
             http_response_code(400);
             logWebhookEvent('signature_verification', 'unknown', 'failed', 'Signature invalide');
             exit('Signature invalide');
         }
     } else {
         // Mode développement - log un avertissement
-        error_log('AVERTISSEMENT: Webhook traité sans vérification de signature (STRIPE_WEBHOOK_SECRET non configuré)');
+        error_log('AVERTISSEMENT: Webhook traité sans vérification de signature (REVOLUT_WEBHOOK_SECRET non configuré)');
     }
     
     // Parser l'événement
@@ -209,19 +216,25 @@ try {
         exit('JSON invalide');
     }
     
-    $eventType = $event['type'] ?? '';
-    $eventId = $event['id'] ?? '';
+    $eventType = $event['event'] ?? '';
+    $eventId = $event['data']['id'] ?? '';
     
     // Traiter l'événement selon son type
     $processed = false;
     
     switch ($eventType) {
-        case 'checkout.session.completed':
-            $processed = handleCheckoutCompleted($event);
+        case 'PaymentCompleted':
+            $processed = handlePaymentCompleted($event);
             break;
             
-        case 'payment_intent.payment_failed':
-            $processed = handlePaymentFailed($event);
+        case 'PaymentPending':
+            $processed = handlePaymentPending($event);
+            break;
+            
+        case 'PaymentFailed':
+        case 'PaymentDeclined':
+            // Ces événements sont gérés dans handlePaymentCompleted
+            $processed = handlePaymentCompleted($event);
             break;
             
         default:

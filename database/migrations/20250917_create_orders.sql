@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_name VARCHAR(150) NULL,
   customer_email VARCHAR(150) NULL,
   customer_address TEXT NULL,
-  stripe_session_id VARCHAR(191) NULL,
+  revolut_session_id VARCHAR(191) NULL,
   payment_reference VARCHAR(191) NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS orders (
   customer_name TEXT,
   customer_email TEXT,
   customer_address TEXT,
-  stripe_session_id TEXT,
+  revolut_session_id TEXT,
   payment_reference TEXT
 );
 

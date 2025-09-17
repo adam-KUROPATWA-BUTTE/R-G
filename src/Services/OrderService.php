@@ -113,7 +113,7 @@ class OrderService
     {
         $stmt = $this->pdo->prepare("
             SELECT id, created_at, updated_at, status, total_cents, 
-                   customer_name, customer_email, stripe_session_id, payment_reference
+                   customer_name, customer_email, revolut_session_id, payment_reference
             FROM orders 
             ORDER BY created_at DESC 
             LIMIT ?
@@ -142,7 +142,7 @@ class OrderService
         $stmt = $this->pdo->prepare("
             SELECT id, created_at, updated_at, status, total_cents,
                    customer_name, customer_email, customer_address,
-                   stripe_session_id, payment_reference
+                   revolut_session_id, payment_reference
             FROM orders 
             WHERE id = ?
         ");
@@ -214,35 +214,35 @@ class OrderService
     }
 
     /**
-     * Lier une session Stripe à une commande
+     * Lier une session Revolut à une commande
      * 
      * @param int $id ID de la commande
-     * @param string $sessionId ID de la session Stripe
+     * @param string $sessionId ID de la session Revolut
      */
-    public function setStripeSession(int $id, string $sessionId): void
+    public function setRevolutSession(int $id, string $sessionId): void
     {
         $stmt = $this->pdo->prepare("
             UPDATE orders 
-            SET stripe_session_id = ?, updated_at = CURRENT_TIMESTAMP
+            SET revolut_session_id = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         ");
         $stmt->execute([$sessionId, $id]);
     }
 
     /**
-     * Trouver une commande par session Stripe
+     * Trouver une commande par session Revolut
      * 
-     * @param string $sessionId ID de la session Stripe
+     * @param string $sessionId ID de la session Revolut
      * @return array|null Commande ou null si non trouvée
      */
-    public function findByStripeSession(string $sessionId): ?array
+    public function findByRevolutSession(string $sessionId): ?array
     {
         $stmt = $this->pdo->prepare("
             SELECT id, created_at, updated_at, status, total_cents,
                    customer_name, customer_email, customer_address,
-                   stripe_session_id, payment_reference
+                   revolut_session_id, payment_reference
             FROM orders 
-            WHERE stripe_session_id = ?
+            WHERE revolut_session_id = ?
         ");
         $stmt->execute([$sessionId]);
         $order = $stmt->fetch(PDO::FETCH_ASSOC);
