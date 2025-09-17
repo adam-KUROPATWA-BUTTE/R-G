@@ -89,9 +89,9 @@ require __DIR__ . '/partials/header.php';
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-overlay">
-                                        <button class="quick-view-btn" onclick="showProductDetails('<?= (int)$product['id'] ?>')">
+                                        <a href="<?= $base_path ?>/product.php?id=<?= (int)$product['id'] ?>" class="quick-view-btn">
                                             <i class="fas fa-eye"></i>
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="product-info">
@@ -394,12 +394,6 @@ require __DIR__ . '/partials/header.php';
             }
         }
     </style>
-
-    <script>
-        function showProductDetails(productId) {
-            console.log('Show details for product:', productId);
-        }
-    </script>
 
 <?php
 require __DIR__ . '/partials/footer.php';
