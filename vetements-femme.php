@@ -3,6 +3,7 @@ require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
 require_once __DIR__ . '/src/products_front.php';
+require_once __DIR__ . '/src/ProductRepository.php';
 $current_user = current_user();
 
 // Base path (gère les sous-dossiers)
@@ -11,7 +12,8 @@ if ($base_path === '/') $base_path = '';
 
 // Get products for femme category
 try {
-    $products = products_list('femme');
+    $productRepo = new ProductRepository();
+    $products = $productRepo->getAll('femme');
 } catch (Throwable $e) {
     $products = [];
     $error = 'Erreur lors du chargement des produits.';

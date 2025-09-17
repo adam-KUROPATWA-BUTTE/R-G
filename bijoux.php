@@ -3,6 +3,7 @@ require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
 require_once __DIR__ . '/src/products_front.php';
+require_once __DIR__ . '/src/ProductRepository.php';
 $current_user = current_user();
 
 // Base path
@@ -11,7 +12,8 @@ if ($base_path === '/') $base_path = '';
 
 // Load products from database (bijoux category)
 try {
-    $products = products_list('bijoux');
+    $productRepo = new ProductRepository();
+    $products = $productRepo->getAll('bijoux');
 } catch (Throwable $e) {
     $products = [];
     $error = 'Erreur lors du chargement des produits.';

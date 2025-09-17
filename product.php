@@ -3,6 +3,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/functions.php';
 require_once __DIR__ . '/src/csrf.php';
+require_once __DIR__ . '/src/ProductRepository.php';
 
 // Get product ID
 if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
@@ -11,11 +12,9 @@ if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
 }
 $productId = (int)$_GET['id'];
 
-// Get product details
-$pdo = db();
-$stmt = $pdo->prepare("SELECT id, name, description, price, image, stock_quantity, category, sizes FROM products WHERE id = ? LIMIT 1");
-$stmt->execute([$productId]);
-$product = $stmt->fetch(PDO::FETCH_ASSOC);
+// Get product details using ProductRepository
+$productRepo = new ProductRepository();
+$product = $productRepo->getById($productId);
 
 if (!$product) {
     http_response_code(404);
@@ -23,7 +22,7 @@ if (!$product) {
 }
 
 // Parse sizes
-$sizes = product_parse_sizes($product['sizes'] ?? '');
+$sizes = $productRepo->parseSizes($product['sizes'] ?? '');
 $inStock = (int)$product['stock_quantity'] > 0;
 
 // Base path for assets
