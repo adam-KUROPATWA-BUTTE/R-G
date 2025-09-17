@@ -5,18 +5,30 @@
  */
 
 declare(strict_types=1);
+session_start();
 
 require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/csrf.php';
 require_once __DIR__ . '/src/CartService.php';
+require_once __DIR__ . '/src/Services/OrderService.php';
 
-// Vérification CSRF
+// Vérification CSRF pour les requêtes POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!csrf_validate()) {
+    if (!csrf_verify($_POST['csrf'] ?? '')) {
         http_response_code(403);
-        exit(json_encode(['error' => 'Token CSRF invalide']));
+        $_SESSION['error'] = 'Token CSRF invalide';
+        header('Location: /cart.php');
+        exit;
     }
+}
+
+// Vérifier qu'il y a des articles dans le panier
+$cart = cart_get();
+if (empty($cart['items'])) {
+    $_SESSION['error'] = 'Votre panier est vide';
+    header('Location: /cart.php');
+    exit;
 }
 
 /**
@@ -44,316 +56,139 @@ function loadEnv(): array {
 }
 
 /**
- * Initialise Stripe avec les clés d'environnement
+ * Prépare les données client à partir de la session et des données POST
  */
-function initializeStripe(): void {
-    // NOTE: Dans un vrai projet, vous installeriez Stripe via Composer:
-    // composer require stripe/stripe-php
+function prepareCustomerData(): array {
+    $user = current_user();
     
-    // Pour ce stub, nous simulons l'initialisation
-    // require_once 'vendor/autoload.php';
-    
-    $env = loadEnv();
-    
-    if (empty($env['STRIPE_SECRET_KEY'])) {
-        throw new Exception('STRIPE_SECRET_KEY non configurée dans .env');
-    }
-    
-    // \Stripe\Stripe::setApiKey($env['STRIPE_SECRET_KEY']);
-    
-    // Simulation pour le développement
-    if (!defined('STRIPE_INITIALIZED')) {
-        define('STRIPE_INITIALIZED', true);
-        error_log('Stripe initialisé avec la clé: ' . substr($env['STRIPE_SECRET_KEY'], 0, 7) . '...');
-    }
+    return [
+        'name' => $_POST['customer_name'] ?? $user['first_name'] ?? $user['name'] ?? '',
+        'email' => $_POST['customer_email'] ?? $user['email'] ?? '',
+        'address' => $_POST['customer_address'] ?? ''
+    ];
 }
 
 /**
- * Crée une session Stripe Checkout
+ * Créer une commande et initier le paiement Stripe
  */
-function createStripeCheckout(array $items, string $customerEmail, array $options = []): array {
+function createCheckoutSession(): void {
     try {
-        initializeStripe();
         $env = loadEnv();
+        $baseUrl = $env['APP_URL'] ?? 'http://localhost:8000';
         
-        // Validation des articles
-        if (empty($items)) {
-            throw new InvalidArgumentException('Aucun article fourni');
+        // Récupérer le panier
+        $cart = cart_get();
+        $customer = prepareCustomerData();
+        
+        // Créer la commande en statut pending
+        $orderService = new OrderService();
+        $orderId = $orderService->createFromCart($cart, $customer, 'pending');
+        
+        // Vérifier si Stripe est configuré
+        $stripeKey = $env['STRIPE_SECRET_KEY'] ?? '';
+        
+        if (empty($stripeKey) || strpos($stripeKey, 'sk_') !== 0) {
+            // Mode simulation pour le développement
+            handleSimulatedCheckout($orderId, $baseUrl);
+            return;
         }
         
-        // Calcul du total
-        $totalAmount = 0;
-        $lineItems = [];
+        // Mode production - Créer vraie session Stripe
+        if (class_exists('\Stripe\Stripe')) {
+            handleRealStripeCheckout($orderId, $cart, $customer, $env);
+        } else {
+            // Stripe PHP SDK non installé, mode simulation
+            handleSimulatedCheckout($orderId, $baseUrl);
+        }
         
-        foreach ($items as $item) {
-            if (!isset($item['name'], $item['price'], $item['quantity'])) {
-                throw new InvalidArgumentException('Article invalide: nom, prix et quantité requis');
-            }
-            
-            $price = (float)$item['price'];
-            $quantity = (int)$item['quantity'];
-            
-            if ($price <= 0 || $quantity <= 0) {
-                throw new InvalidArgumentException('Prix et quantité doivent être positifs');
-            }
-            
-            $totalAmount += $price * $quantity;
-            
-            // Format pour Stripe (centimes)
-            $lineItems[] = [
-                'price_data' => [
-                    'currency' => 'eur',
-                    'product_data' => [
-                        'name' => $item['name'],
-                        'description' => $item['description'] ?? '',
-                        'images' => isset($item['image']) ? [$item['image']] : [],
-                    ],
-                    'unit_amount' => (int)($price * 100), // Convertir en centimes
+    } catch (Exception $e) {
+        error_log('Erreur checkout: ' . $e->getMessage());
+        $_SESSION['error'] = 'Erreur lors de la création de la commande: ' . $e->getMessage();
+        header('Location: /cart.php');
+        exit;
+    }
+}
+
+/**
+ * Gère le checkout simulé pour le développement
+ */
+function handleSimulatedCheckout(int $orderId, string $baseUrl): void {
+    $orderService = new OrderService();
+    $order = $orderService->find($orderId);
+    
+    if (!$order) {
+        throw new Exception('Commande introuvable');
+    }
+    
+    // Créer un ID de session simulé
+    $sessionId = 'cs_sim_' . $orderId . '_' . time();
+    $orderService->setStripeSession($orderId, $sessionId);
+    
+    // Rediriger vers une page de paiement simulé
+    $checkoutUrl = $baseUrl . '/mock_stripe_checkout.php?' . http_build_query([
+        'session_id' => $sessionId,
+        'order_id' => $orderId,
+        'amount' => $order['total'],
+        'email' => $order['customer_email']
+    ]);
+    
+    header('Location: ' . $checkoutUrl);
+    exit;
+}
+
+/**
+ * Gère le checkout Stripe réel (nécessite Stripe PHP SDK)
+ */
+function handleRealStripeCheckout(int $orderId, array $cart, array $customer, array $env): void {
+    \Stripe\Stripe::setApiKey($env['STRIPE_SECRET_KEY']);
+    
+    $baseUrl = $env['APP_URL'] ?? 'http://localhost:8000';
+    
+    // Préparer les articles pour Stripe
+    $lineItems = [];
+    foreach ($cart['items'] as $item) {
+        $lineItems[] = [
+            'price_data' => [
+                'currency' => 'eur',
+                'product_data' => [
+                    'name' => $item['name'],
+                    'description' => $item['size'] ? "Taille: {$item['size']}" : '',
+                    'images' => !empty($item['image']) ? [$item['image']] : [],
                 ],
-                'quantity' => $quantity,
-            ];
-        }
-        
-        // Configuration de la session
-        $sessionConfig = [
-            'payment_method_types' => ['card'],
-            'line_items' => $lineItems,
-            'mode' => 'payment',
-            'success_url' => ($options['success_url'] ?? $env['APP_URL']) . '/success.php?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => ($options['cancel_url'] ?? $env['APP_URL']) . '/cart.php?cancelled=1',
-            'customer_email' => $customerEmail,
-            'metadata' => [
-                'source' => 'r-g-boutique',
-                'timestamp' => time(),
-                'total_items' => count($items),
+                'unit_amount' => (int)round($item['price'] * 100), // Centimes
             ],
+            'quantity' => $item['qty'],
         ];
-        
-        // Ajout des options supplémentaires
-        if (isset($options['shipping_address_collection'])) {
-            $sessionConfig['shipping_address_collection'] = $options['shipping_address_collection'];
-        }
-        
-        // SIMULATION: Dans un vrai projet, vous créeriez la session Stripe ici
-        // $session = \Stripe\Checkout\Session::create($sessionConfig);
-        
-        // Pour le développement, nous simulons une réponse
-        $simulatedSession = [
-            'id' => 'cs_test_' . uniqid(),
-            'url' => $env['APP_URL'] . '/mock_stripe_checkout.php?amount=' . urlencode($totalAmount) . '&email=' . urlencode($customerEmail),
-            'amount_total' => (int)($totalAmount * 100),
-            'currency' => 'eur',
-            'customer_email' => $customerEmail,
-            'status' => 'open',
-        ];
-        
-        // Log de la tentative
-        logPaymentAttempt(current_user()['id'] ?? 0, $totalAmount, 'session_created', 'Session Stripe créée: ' . $simulatedSession['id']);
-        
-        return [
-            'success' => true,
-            'session' => $simulatedSession,
-            'checkout_url' => $simulatedSession['url'],
-        ];
-        
-    } catch (Exception $e) {
-        logPaymentAttempt(current_user()['id'] ?? 0, $totalAmount ?? 0, 'session_error', $e->getMessage());
-        
-        return [
-            'success' => false,
-            'error' => $e->getMessage(),
-        ];
-    }
-}
-
-/**
- * Log des tentatives de paiement
- */
-function logPaymentAttempt(int $userId, float $amount, string $status, string $details = ''): void {
-    try {
-        $pdo = db();
-        
-        // Créer la table si elle n'existe pas
-        $pdo->exec("
-            CREATE TABLE IF NOT EXISTS payment_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER,
-                amount DECIMAL(10,2),
-                status VARCHAR(50),
-                details TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            )
-        ");
-        
-        $stmt = $pdo->prepare("
-            INSERT INTO payment_logs (user_id, amount, status, details, created_at) 
-            VALUES (?, ?, ?, ?, datetime('now'))
-        ");
-        $stmt->execute([$userId, $amount, $status, $details]);
-        
-    } catch (Exception $e) {
-        error_log('Erreur lors du logging de paiement: ' . $e->getMessage());
-    }
-}
-
-/**
- * Point d'entrée principal
- */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    header('Content-Type: application/json');
-    
-    try {
-        $input = json_decode(file_get_contents('php://input'), true);
-        
-        if (!$input) {
-            throw new InvalidArgumentException('Données JSON invalides');
-        }
-        
-        $items = $input['items'] ?? [];
-        $email = $input['email'] ?? (current_user()['email'] ?? '');
-        $options = $input['options'] ?? [];
-        
-        if (empty($email)) {
-            throw new InvalidArgumentException('Email client requis');
-        }
-        
-        $result = createStripeCheckout($items, $email, $options);
-        echo json_encode($result);
-        
-    } catch (Exception $e) {
-        http_response_code(400);
-        echo json_encode([
-            'success' => false,
-            'error' => $e->getMessage(),
-        ]);
     }
     
+    // Créer la session Stripe
+    $session = \Stripe\Checkout\Session::create([
+        'payment_method_types' => ['card'],
+        'line_items' => $lineItems,
+        'mode' => 'payment',
+        'success_url' => $baseUrl . '/checkout_success.php?session_id={CHECKOUT_SESSION_ID}',
+        'cancel_url' => $baseUrl . '/checkout_cancel.php?order_id=' . $orderId,
+        'customer_email' => $customer['email'],
+        'metadata' => [
+            'order_id' => (string)$orderId,
+            'source' => 'r-g-boutique'
+        ],
+    ]);
+    
+    // Lier la session à la commande
+    $orderService = new OrderService();
+    $orderService->setStripeSession($orderId, $session->id);
+    
+    // Rediriger vers Stripe
+    header('Location: ' . $session->url);
     exit;
 }
 
-// Interface de test pour les développeurs
-if ($_SERVER['REQUEST_METHOD'] === 'GET' && ($_GET['test'] ?? '') === '1') {
-    $current_user = current_user();
-    
-    if (!$current_user || ($current_user['role'] ?? '') !== 'admin') {
-        http_response_code(403);
-        exit('Accès réservé aux administrateurs');
-    }
-    ?>
-    <!DOCTYPE html>
-    <html lang="fr">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Test Stripe Checkout - R&G</title>
-        <style>
-            body { font-family: Arial, sans-serif; max-width: 800px; margin: 2rem auto; padding: 1rem; }
-            .form-group { margin: 1rem 0; }
-            label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
-            input, textarea { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; }
-            button { background: #1D3557; color: white; padding: 1rem 2rem; border: none; border-radius: 4px; cursor: pointer; }
-            button:hover { background: #2c5282; }
-            .result { margin-top: 2rem; padding: 1rem; border-radius: 4px; }
-            .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
-            .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
-        </style>
-    </head>
-    <body>
-        <h1>Test Stripe Checkout</h1>
-        <p><strong>Interface de test pour développeurs uniquement</strong></p>
-        
-        <form id="testForm">
-            <div class="form-group">
-                <label for="email">Email client:</label>
-                <input type="email" id="email" value="<?= htmlspecialchars($current_user['email']) ?>" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="items">Articles (JSON):</label>
-                <textarea id="items" rows="10" placeholder="Exemple d'articles...">[
-    {
-        "name": "Robe élégante",
-        "description": "Belle robe pour soirée",
-        "price": 89.99,
-        "quantity": 1,
-        "image": "https://example.com/image.jpg"
-    },
-    {
-        "name": "Collier doré",
-        "description": "Bijou en or 18 carats",
-        "price": 45.50,
-        "quantity": 2
-    }
-]</textarea>
-            </div>
-            
-            <button type="submit">Créer Session Checkout</button>
-        </form>
-        
-        <div id="result"></div>
-        
-        <script>
-            document.getElementById('testForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const email = document.getElementById('email').value;
-                const itemsText = document.getElementById('items').value;
-                const resultDiv = document.getElementById('result');
-                
-                try {
-                    const items = JSON.parse(itemsText);
-                    
-                    const response = await fetch('create_checkout.php', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-Token': '<?= csrf_token() ?>'
-                        },
-                        body: JSON.stringify({
-                            items: items,
-                            email: email
-                        })
-                    });
-                    
-                    const result = await response.json();
-                    
-                    if (result.success) {
-                        resultDiv.innerHTML = `
-                            <div class="result success">
-                                <h3>✅ Session créée avec succès!</h3>
-                                <p><strong>ID Session:</strong> ${result.session.id}</p>
-                                <p><strong>Montant total:</strong> ${(result.session.amount_total / 100).toFixed(2)} €</p>
-                                <p><strong>URL Checkout:</strong> <a href="${result.checkout_url}" target="_blank">${result.checkout_url}</a></p>
-                            </div>
-                        `;
-                    } else {
-                        resultDiv.innerHTML = `
-                            <div class="result error">
-                                <h3>❌ Erreur</h3>
-                                <p>${result.error}</p>
-                            </div>
-                        `;
-                    }
-                    
-                } catch (error) {
-                    resultDiv.innerHTML = `
-                        <div class="result error">
-                            <h3>❌ Erreur</h3>
-                            <p>Erreur JSON ou réseau: ${error.message}</p>
-                        </div>
-                    `;
-                }
-            });
-        </script>
-    </body>
-    </html>
-    <?php
-    exit;
-}
-
-// Page normale - redirection vers le panier
+// Point d'entrée principal
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    header('Location: cart.php');
-    exit;
+    // Afficher le formulaire de checkout
+    require_once __DIR__ . '/checkout_form.php';
+} else {
+    // Traiter la création de la session
+    createCheckoutSession();
 }
-?>

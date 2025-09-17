@@ -4,6 +4,7 @@ session_start();
 
 require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/ProductRepository.php';
+require_once __DIR__ . '/src/CartService.php';
 require_once __DIR__ . '/src/csrf.php';
 
 function json_request(): bool {
@@ -60,31 +61,19 @@ if (!empty($availableSizes) && ($size === '' || !in_array($size, $availableSizes
     $size = '';
 }
 
-// Panier
-if (!isset($_SESSION['cart'])) $_SESSION['cart'] = [];
-
-$merged = false;
-foreach ($_SESSION['cart'] as &$line) {
-    if ((int)$line['product_id'] === $id && ($line['size'] ?? '') === $size) {
-        $line['qty'] += $qty;
-        $merged = true;
-        break;
-    }
-}
-unset($line);
-
-if (!$merged) {
-    $_SESSION['cart'][] = [
-        'product_id' => $id,
-        'name'       => $product['name'],
-        'price'      => (float)$product['price'],
-        'qty'        => $qty,
-        'size'       => $size !== '' ? $size : null
-    ];
-}
+// Panier - Use CartService for consistency
+cart_add(
+    productId: $id,
+    qty: $qty,
+    name: $product['name'] ?? '',
+    price: (float)($product['price'] ?? 0),
+    image: $product['image'] ?? '',
+    category: $product['category'] ?? '',
+    size: $size
+);
 
 if (json_request()) {
-    $count = array_sum(array_map(fn($l)=>$l['qty'], $_SESSION['cart']));
+    $count = cart_count();
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
         'success' => true,
