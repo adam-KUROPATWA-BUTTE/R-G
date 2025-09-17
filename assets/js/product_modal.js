@@ -53,6 +53,34 @@
       stockEl.textContent = data.stock_label || '';
       stockEl.className = 'pqv-stock ' + (data.stock_class || '');
 
+
+      // Avant form.style.display ...
+var sizesWrap = document.getElementById('pqv-sizes-wrapper');
+var sizesBox = document.getElementById('pqv-sizes');
+var sizeHidden = document.getElementById('pqv-size-selected');
+sizesBox.innerHTML = '';
+sizeHidden.value = '';
+if (data.sizes && data.sizes.length > 0) {
+  sizesWrap.style.display = 'block';
+  data.sizes.forEach(function(sz){
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pqv-size-btn';
+    btn.textContent = sz;
+    btn.onclick = function(){
+      // reset
+      var all = sizesBox.querySelectorAll('.pqv-size-btn');
+      for (var i=0;i<all.length;i++) all[i].classList.remove('active');
+      btn.classList.add('active');
+      sizeHidden.value = sz;
+    };
+    sizesBox.appendChild(btn);
+  });
+} else {
+  sizesWrap.style.display = 'none';
+}
+
+
       // Formulaire ajout panier
       var form = $('#pqv-add-form');
       form.style.display = data.stock_quantity > 0 ? 'block' : 'none';

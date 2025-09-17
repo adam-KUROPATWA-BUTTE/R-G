@@ -3,6 +3,7 @@ require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
 require_once __DIR__ . '/src/products_front.php';
+require_once __DIR__ . '/src/ProductRepository.php';
 $current_user = current_user();
 
 // Base path
@@ -11,7 +12,8 @@ if ($base_path === '/') $base_path = '';
 
 // Load products from database (bijoux category)
 try {
-    $products = products_list('bijoux');
+    $productRepo = new ProductRepository();
+    $products = $productRepo->getAll('bijoux');
 } catch (Throwable $e) {
     $products = [];
     $error = 'Erreur lors du chargement des produits.';
@@ -88,9 +90,9 @@ require __DIR__ . '/partials/header.php';
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-overlay">
-                                        <button class="quick-view-btn" onclick="showProductDetails('<?= (int)$product['id'] ?>')">
+                                        <a href="<?= $base_path ?>/product.php?id=<?= (int)$product['id'] ?>" class="quick-view-btn">
                                             <i class="fas fa-eye"></i>
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="product-info">
@@ -307,12 +309,6 @@ require __DIR__ . '/partials/header.php';
         }
 
     </style>
-
-    <script>
-        function showProductDetails(productId) {
-            console.log('Show details for product:', productId);
-        }
-    </script>
 
 <?php
 require __DIR__ . '/partials/footer.php';

@@ -8,12 +8,13 @@
     <div class="pqv-right">
       <h2 id="pqv-title">...</h2>
       <div id="pqv-stock" class="pqv-stock"></div>
-      <div id="pqv-price" class="pqv-price"></div>
 
       <div id="pqv-sizes-wrapper" class="pqv-sizes" style="display:none;">
-          <div class="pqv-sizes-label">Tailles :</div>
-          <div id="pqv-sizes" class="pqv-sizes-list"></div>
+        <div class="pqv-sizes-label">Tailles :</div>
+        <div id="pqv-sizes" class="pqv-sizes-list"></div>
       </div>
+
+      <div id="pqv-price" class="pqv-price"></div>
 
       <p id="pqv-desc" class="pqv-desc"></p>
 

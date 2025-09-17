@@ -134,6 +134,26 @@
   border-color:#1e3a8a;
 }
 
+.pqv-sizes { display:flex; flex-direction:column; gap:.4rem; }
+.pqv-sizes-label { font-size:.75rem; font-weight:600; text-transform:uppercase; color:#444; }
+.pqv-sizes-list { display:flex; flex-wrap:wrap; gap:.4rem; }
+.pqv-size-btn {
+  background:#f1f5f9;
+  border:1px solid #cbd5e1;
+  padding:.35rem .7rem;
+  font-size:.75rem;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
+  transition:.15s;
+}
+.pqv-size-btn.active,
+.pqv-size-btn:hover {
+  background:#1e3a8a;
+  color:#fff;
+  border-color:#1e3a8a;
+}
+
 @media (max-width: 820px){
   .pqv-dialog { flex-direction:column; }
   .pqv-main-img.zoomed { transform:none; cursor:default; box-shadow:none; }

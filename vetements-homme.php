@@ -3,6 +3,7 @@ require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/functions.php';
 require_once __DIR__ . '/src/products_front.php';
+require_once __DIR__ . '/src/ProductRepository.php';
 $current_user = current_user();
 
 // Base path
@@ -11,7 +12,8 @@ if ($base_path === '/') $base_path = '';
 
 // Get products for homme category
 try {
-    $products = products_list('homme');
+    $productRepo = new ProductRepository();
+    $products = $productRepo->getAll('homme');
 } catch (Throwable $e) {
     $products = [];
     $error = 'Erreur lors du chargement des produits.';
@@ -89,9 +91,9 @@ require __DIR__ . '/partials/header.php';
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-overlay">
-                                        <button class="quick-view-btn" onclick="showProductDetails('<?= (int)$product['id'] ?>')">
+                                        <a href="<?= $base_path ?>/product.php?id=<?= (int)$product['id'] ?>" class="quick-view-btn">
                                             <i class="fas fa-eye"></i>
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="product-info">
@@ -376,30 +378,7 @@ require __DIR__ . '/partials/header.php';
             border: 1px solid #f5c6cb;
         }
 
-        @media (max-width: 768px) {
-            .filters {
-                flex-direction: column;
-            }
-            
-            .filters select {
-                width: 100%;
-            }
-            
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header-content h1 {
-                font-size: 2rem;
-            }
-        }
     </style>
-
-    <script>
-        function showProductDetails(productId) {
-            console.log('Show details for product:', productId);
-        }
-    </script>
 
 <?php
 require __DIR__ . '/partials/footer.php';

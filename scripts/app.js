@@ -563,37 +563,39 @@ class RGApp {
     
     // Gestion des articles (pour les pages de catégories)
     createProductCard(product) {
-        const stockStatus = product.inStock ? 'En stock' : 'Sur demande';
-        const stockClass = product.inStock ? 'in-stock' : 'on-demand';
-        
-        return `
-            <div class="product-card" data-product-id="${product.id}">
-                <div class="product-image">
-                    <img src="${product.image}" alt="${product.name}" onerror="this.src='data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"200\" viewBox=\"0 0 200 200\"><rect width=\"200\" height=\"200\" fill=\"%23f3f4f6\"/><text x=\"50%\" y=\"50%\" text-anchor=\"middle\" dy=\"0.3em\" fill=\"%23666\">Image</text></svg>'">
-                    <div class="product-overlay">
-                        <button class="quick-view-btn" onclick="app.showProductDetails('${product.id}')">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="product-info">
-                    <h3>${product.name}</h3>
-                    <p class="product-description">${product.description}</p>
-                    <div class="product-price">${this.formatPrice(product.price)}</div>
-                    <div class="product-status ${stockClass}">${stockStatus}</div>
-                    <button class="add-to-cart-btn" onclick="app.addToCart({
-                        id: '${product.id}',
-                        name: '${product.name}',
-                        price: ${product.price},
-                        image: '${product.image}'
-                    })">
-                        <i class="fas fa-shopping-cart"></i>
-                        Ajouter au panier
-                    </button>
+    const stockStatus = product.inStock ? 'En stock' : 'Sur demande';
+    const stockClass = product.inStock ? 'in-stock' : 'on-demand';
+    
+    return `
+        <div class="product-card" data-product-id="${product.id}">
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.name}"
+                     onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;200&quot; height=&quot;200&quot; viewBox=&quot;0 0 200 200&quot;><rect width=&quot;200&quot; height=&quot;200&quot; fill=&quot;%23f3f4f6&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; text-anchor=&quot;middle&quot; dy=&quot;0.3em&quot; fill=&quot;%23666&quot;>Image</text></svg>'">
+                <div class="product-overlay">
+                    <a class="quick-view-btn" href="product.php?id=${product.id}" aria-label="Voir ${product.name}">
+                        <i class="fas fa-eye"></i>
+                    </a>
                 </div>
             </div>
-        `;
-    }
+            <div class="product-info">
+                <h3>${product.name}</h3>
+                <p class="product-description">${product.description}</p>
+                <div class="product-price">${this.formatPrice(product.price)}</div>
+                <div class="product-status ${stockClass}">${stockStatus}</div>
+                <button class="add-to-cart-btn" onclick="app.addToCart({
+                    id: '${product.id}',
+                    name: '${product.name}',
+                    price: ${product.price},
+                    image: '${product.image}'
+                })">
+                    <i class="fas fa-shopping-cart"></i>
+                    Ajouter au panier
+                </button>
+            </div>
+        </div>
+    `;
+}
+
     
     // Affichage des détails d'un produit
     showProductDetails(productId) {
