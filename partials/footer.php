@@ -58,6 +58,47 @@ if (!isset($base_path)) {
                     }
                 });
             }
+            
+            // Mobile menu functionality
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.setAttribute('aria-expanded', 
+                        mobileMenu.classList.contains('active'));
+                    
+                    // Change icon
+                    const icon = mobileMenuToggle.querySelector('i');
+                    if (mobileMenu.classList.contains('active')) {
+                        icon.className = 'fas fa-times';
+                    } else {
+                        icon.className = 'fas fa-bars';
+                    }
+                });
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                        const icon = mobileMenuToggle.querySelector('i');
+                        icon.className = 'fas fa-bars';
+                    }
+                });
+                
+                // Close mobile menu when a link is clicked
+                const mobileLinks = mobileMenu.querySelectorAll('a');
+                mobileLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.setAttribute('aria-expanded', 'false');
+                        const icon = mobileMenuToggle.querySelector('i');
+                        icon.className = 'fas fa-bars';
+                    });
+                });
+            }
         });
     </script>
     <script src="<?= $base_path ?>/scripts/cart.js"></script>

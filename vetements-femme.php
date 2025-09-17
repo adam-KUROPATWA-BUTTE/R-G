@@ -378,23 +378,6 @@ require __DIR__ . '/partials/header.php';
             border: 1px solid #f5c6cb;
         }
 
-        @media (max-width: 768px) {
-            .filters {
-                flex-direction: column;
-            }
-            
-            .filters select {
-                width: 100%;
-            }
-            
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header-content h1 {
-                font-size: 2rem;
-            }
-        }
     </style>
 
 <?php

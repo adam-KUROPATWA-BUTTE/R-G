@@ -26,6 +26,7 @@ if ($current_user) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($page_title) ? htmlspecialchars($page_title) : 'R&G - Boutique de Mode et Bijoux' ?></title>
     <link rel="stylesheet" href="<?= $base_path ?>/styles/main.css">
+    <link rel="stylesheet" href="<?= $base_path ?>/styles/responsive.css">
     <link rel="stylesheet" href="<?= $base_path ?>/styles/auth.css">
     <?php if (isset($additional_css)): ?>
         <?php foreach ($additional_css as $css_file): ?>
@@ -76,6 +77,30 @@ if ($current_user) {
                     <a href="<?= $base_path ?>/bijoux.php">Bijoux</a>
                     <?php if ($current_user && ($current_user['role'] ?? '') === 'admin'): ?>
                         <a href="<?= $base_path ?>/admin/">Administration</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- Mobile Menu Button (hidden on desktop) -->
+            <button class="nav-mobile-toggle" id="mobileMenuToggle" aria-label="Menu Mobile">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <!-- Mobile Menu (hidden by default) -->
+            <div class="nav-mobile-menu" id="mobileMenu">
+                <div class="nav-links">
+                    <a href="<?= $base_path ?>/">Accueil</a>
+                    <a href="<?= $base_path ?>/vetements-femme.php">Vêtements Femme</a>
+                    <a href="<?= $base_path ?>/vetements-homme.php">Vêtements Homme</a>
+                    <a href="<?= $base_path ?>/bijoux.php">Bijoux</a>
+                    <?php if ($current_user && ($current_user['role'] ?? '') === 'admin'): ?>
+                        <a href="<?= $base_path ?>/admin/">Administration</a>
+                    <?php endif; ?>
+                    <?php if ($current_user): ?>
+                        <a href="<?= $base_path ?>/logout.php">Déconnexion</a>
+                    <?php else: ?>
+                        <a href="<?= $base_path ?>/login.php">Connexion</a>
+                        <a href="<?= $base_path ?>/register.php">Inscription</a>
                     <?php endif; ?>
                 </div>
             </div>
