@@ -120,6 +120,13 @@ require_once __DIR__ . '/partials/header.php'; // <-- adapte si nécessaire
                     Ajouter au panier
                 </button>
             </form>
+
+            <?php if (!empty($product['revolut_payment_link'])): ?>
+                <a href="checkout_revolut.php?id=<?= (int)$product['id'] ?>" class="revolut-btn">
+                    <i class="fas fa-credit-card"></i>
+                    Acheter avec Revolut
+                </a>
+            <?php endif; ?>
         </div>
     </main>
 </div>
@@ -179,6 +186,12 @@ if (file_exists(__DIR__.'/partials/footer.php')) {
 
 <style>
 /* Styles spécifiques fiche produit (si tu ne veux pas créer product-inline.css) */
+body {
+    background-color: #ffffff !important;
+}
+.page-wrapper {
+    background: #ffffff !important;
+}
 .product-detail-container {
     max-width:1200px;
     margin:1rem auto 3rem;
@@ -235,6 +248,12 @@ if (file_exists(__DIR__.'/partials/footer.php')) {
 }
 .add-cart-form .add-btn:hover { background:#1e40af; }
 .add-cart-form .add-btn:disabled { opacity:.55; cursor:not-allowed; }
+.revolut-btn {
+    background:#0075eb; color:#fff; border:none; padding:.85rem 1.25rem;
+    border-radius:11px; font-weight:600; cursor:pointer; display:inline-flex; gap:.5rem; align-items:center; transition:.18s;
+    text-decoration:none; margin-top:.8rem;
+}
+.revolut-btn:hover { background:#005bb5; }
 .flash { border-radius:8px; padding:.65rem .95rem; font-size:.8rem; }
 .flash-success { background:#ecfdf5; border:1px solid #10b981; color:#065f46; }
 .flash-error { background:#fef2f2; border:1px solid #f87171; color:#991b1b; }
