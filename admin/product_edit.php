@@ -22,7 +22,7 @@ function column_exists(string $table, string $column): bool {
 }
 
 function get_product(int $id): ?array {
-    $sql = "SELECT id, name, description, price, category, image, stock_quantity, sizes
+    $sql = "SELECT id, name, description, price, category, image, images, stock_quantity, sizes
             FROM products
             WHERE id = ? LIMIT 1";
     $st = db()->prepare($sql);
@@ -31,9 +31,47 @@ function get_product(int $id): ?array {
     return $row ?: null;
 }
 
+// Helper to handle multiple image uploads (refs #36)
+function store_multiple_images(array $files, int $productId): array {
+    $uploadedPaths = [];
+    
+    if (empty($files['name'])) {
+        return $uploadedPaths;
+    }
+    
+    // Handle both single and multiple file uploads
+    $fileCount = is_array($files['name']) ? count($files['name']) : 1;
+    
+    for ($i = 0; $i < $fileCount; $i++) {
+        $file = [];
+        if (is_array($files['name'])) {
+            $file['name'] = $files['name'][$i] ?? '';
+            $file['tmp_name'] = $files['tmp_name'][$i] ?? '';
+            $file['error'] = $files['error'][$i] ?? UPLOAD_ERR_NO_FILE;
+            $file['size'] = $files['size'][$i] ?? 0;
+        } else {
+            $file = $files;
+        }
+        
+        if ($file['error'] === UPLOAD_ERR_NO_FILE) {
+            continue;
+        }
+        
+        try {
+            $path = store_image_upload($file, $productId);
+            $uploadedPaths[] = $path;
+        } catch (Throwable $e) {
+            // Log error but continue with other images
+            error_log("Failed to upload image: " . $e->getMessage());
+        }
+    }
+    
+    return $uploadedPaths;
+}
+
 function create_product(array $d) {
-    $sql = "INSERT INTO products (name, description, price, category, stock_quantity, image, sizes) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO products (name, description, price, category, stock_quantity, image, images, sizes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $st = db()->prepare($sql);
     $st->execute(array(
       (string)$d['name'],
@@ -42,18 +80,19 @@ function create_product(array $d) {
       (string)$d['category'],
       (int)$d['stock_quantity'],
       (string)$d['image'],
+      (string)($d['images'] ?? ''),
       (string)($d['sizes'] ?? '')
     ));
     return db()->lastInsertId();
 }
 function update_product($id, array $d) {
     $sql = "UPDATE products
-            SET name=?, description=?, price=?, category=?, stock_quantity=?, image=?, sizes=?
+            SET name=?, description=?, price=?, category=?, stock_quantity=?, image=?, images=?, sizes=?
             WHERE id = ?";
     $st = db()->prepare($sql);
     $st->execute(array(
         $d['name'],$d['description'],$d['price'],$d['category'],
-        $d['stock_quantity'],$d['image'],$d['sizes'] ?? '',$id
+        $d['stock_quantity'],$d['image'],$d['images'] ?? '',$d['sizes'] ?? '',$id
     ));
 }
 
@@ -132,9 +171,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Image actuelle (si pas de nouvel upload)
         $currentImage = (string)($product['image'] ?? '');
+        $currentImages = (string)($product['images'] ?? '');
+        
+        // Parse existing images array
+        $existingImages = [];
+        if (!empty($currentImages)) {
+            $decoded = json_decode($currentImages, true);
+            if (is_array($decoded)) {
+                $existingImages = $decoded;
+            }
+        }
 
-        // Upload image si fournie
-        if (!empty($_FILES['image']['name'])) {
+        // Upload images si fournies (refs #36)
+        if (!empty($_FILES['images']['name'][0])) {
             try {
                 // Si en création, crée d'abord un id temporaire en BDD pour avoir un dossier/id
                 if ($mode === 'create') {
@@ -146,6 +195,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'category' => $cat,
                         'stock_quantity' => $stock,
                         'image' => '',
+                        'images' => '',
+                        'sizes' => $sizes_clean
+                    ]);
+                    $id = $tmpId;
+                    $product['id'] = $id;
+                    $mode = 'edit';
+                }
+                $newImages = store_multiple_images($_FILES['images'], $id);
+                if (!empty($newImages)) {
+                    // Merge with existing images
+                    $allImages = array_merge($existingImages, $newImages);
+                    $currentImages = json_encode($allImages);
+                    // Set first image as main image for backward compatibility
+                    if (empty($currentImage)) {
+                        $currentImage = $newImages[0];
+                    }
+                }
+            } catch (Throwable $e) {
+                $errors[] = 'Images non enregistrées: '.$e->getMessage();
+            }
+        }
+        
+        // Also handle single image upload for backward compatibility
+        if (!empty($_FILES['image']['name'])) {
+            try {
+                if ($mode === 'create' && !isset($id)) {
+                    $tmpId = create_product([
+                        'name' => $name ?: 'tmp',
+                        'description' => $desc,
+                        'price' => $price > 0 ? $price : 1,
+                        'category' => $cat,
+                        'stock_quantity' => $stock,
+                        'image' => '',
+                        'images' => '',
                         'sizes' => $sizes_clean
                     ]);
                     $id = $tmpId;
@@ -168,6 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'category' => $cat,
                     'stock_quantity' => $stock,
                     'image' => $currentImage,
+                    'images' => $currentImages,
                     'sizes' => $sizes_clean
                 ]);
                 $id = $newId;
@@ -181,6 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'category' => $cat,
                     'stock_quantity' => $stock,
                     'image' => $currentImage,
+                    'images' => $currentImages,
                     'sizes' => $sizes_clean
                 ]);
                 $success = 'Produit mis à jour.';
@@ -229,14 +314,55 @@ $page_title = $mode === 'create' ? 'Créer un produit' : 'Modifier le produit #'
         <input type="text" name="sizes" value="<?= htmlspecialchars($product['sizes']) ?>" placeholder="XS,S,M,L,XL">
         <small style="display:block;font-size:.7rem;color:#555;">Laisser vide si le produit n’a pas de tailles.</small>
     </label>
-    <label>Image (jpeg/png/webp/gif)
+    
+    <!-- Multiple Images Upload (refs #36) -->
+    <label>Images supplémentaires (jpeg/png/webp/gif)
+      <input type="file" name="images[]" accept=".jpg,.jpeg,.png,.webp,.gif" multiple>
+      <small style="display:block;font-size:.7rem;color:#555;">Sélectionnez plusieurs images pour créer une galerie. La première image sera l'image principale.</small>
+    </label>
+    
+    <?php 
+    // Display existing images
+    $existingImages = [];
+    if (!empty($product['images'])) {
+        $decoded = json_decode($product['images'], true);
+        if (is_array($decoded)) {
+            $existingImages = $decoded;
+        }
+    }
+    // Fallback to single image for backward compatibility
+    if (empty($existingImages) && !empty($product['image'])) {
+        $existingImages = [$product['image']];
+    }
+    ?>
+    
+    <?php if (!empty($existingImages)): ?>
+      <div style="margin-top:1rem;">
+        <strong style="display:block;margin-bottom:0.5rem;color:var(--primary-blue);">Images actuelles:</strong>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+          <?php foreach ($existingImages as $index => $imgPath): ?>
+            <?php $imgUrl = $base_path . '/' . ltrim($imgPath, '/'); ?>
+            <div style="position:relative;">
+              <img src="<?= htmlspecialchars($imgUrl) ?>" alt="Image <?= $index + 1 ?>" style="height:100px;border:2px solid #e5e7eb;border-radius:8px;object-fit:cover;">
+              <?php if ($index === 0): ?>
+                <span style="position:absolute;top:5px;left:5px;background:var(--gold);color:white;padding:2px 6px;border-radius:4px;font-size:0.7rem;font-weight:bold;">Principale</span>
+              <?php endif; ?>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    <?php endif; ?>
+    
+    <!-- Legacy single image upload for backward compatibility -->
+    <label>Image principale (jpeg/png/webp/gif)
       <input type="file" name="image" accept=".jpg,.jpeg,.png,.webp,.gif">
+      <small style="display:block;font-size:.7rem;color:#555;">Optionnel si vous avez déjà des images.</small>
     </label>
     <?php if (!empty($product['image'])): ?>
       <?php $imgUrl = $base_path . '/' . ltrim((string)$product['image'], '/'); ?>
       <div style="display:flex;align-items:center;gap:1rem;">
         <img src="<?= htmlspecialchars($imgUrl) ?>" alt="" style="height:80px;border:1px solid #e5e7eb;border-radius:8px;">
-        <span>Image actuelle</span>
+        <span>Image principale actuelle</span>
       </div>
     <?php endif; ?>
     <div style="display:flex;gap:.75rem;">

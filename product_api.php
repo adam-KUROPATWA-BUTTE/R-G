@@ -8,10 +8,25 @@ if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
 $id = (int)$_GET['id'];
 
 $pdo = db();
-$stmt = $pdo->prepare("SELECT id,name,description,price,image,stock_quantity,category,sizes FROM products WHERE id=? LIMIT 1");
+$stmt = $pdo->prepare("SELECT id,name,description,price,image,images,stock_quantity,category,sizes FROM products WHERE id=? LIMIT 1");
 $stmt->execute(array($id));
 $p = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$p) { echo json_encode(array('error'=>'not found')); exit; }
+
+// Parse images for gallery (refs #36)
+$imagesArr = array();
+if (!empty($p['images'])) {
+    $decoded = json_decode($p['images'], true);
+    if (is_array($decoded)) {
+        foreach ($decoded as $imgPath) {
+            $imagesArr[] = '/' . ltrim($imgPath, '/');
+        }
+    }
+}
+// Fallback to single image for backward compatibility
+if (empty($imagesArr) && !empty($p['image'])) {
+    $imagesArr = ['/' . ltrim($p['image'], '/')];
+}
 
 $img = !empty($p['image']) ? '/' . ltrim($p['image'],'/') : '';
 $inStock = (int)$p['stock_quantity'] > 0;
@@ -31,6 +46,7 @@ echo json_encode(array(
   'description'=>$p['description'],
   'price'=>(float)$p['price'],
   'image'=>$img,
+  'images'=>$imagesArr,
   'stock_quantity'=>(int)$p['stock_quantity'],
   'stock_label'=>$inStock ? 'En stock' : 'Rupture de stock',
   'stock_class'=>$inStock ? 'in-stock':'out-of-stock',

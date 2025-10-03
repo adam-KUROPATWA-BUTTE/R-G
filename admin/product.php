@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/functions.php';
-require_once __DIR__ . '/src/csrf.php';
+require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../src/functions.php';
+require_once __DIR__ . '/../src/csrf.php';
 
 // Get product ID
 if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
@@ -13,13 +13,26 @@ $productId = (int)$_GET['id'];
 
 // Get product details
 $pdo = db();
-$stmt = $pdo->prepare("SELECT id, name, description, price, image, stock_quantity, category, sizes FROM products WHERE id = ? LIMIT 1");
+$stmt = $pdo->prepare("SELECT id, name, description, price, image, images, stock_quantity, category, sizes FROM products WHERE id = ? LIMIT 1");
 $stmt->execute([$productId]);
 $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$product) {
     http_response_code(404);
     exit('Produit non trouvé');
+}
+
+// Parse images for gallery (refs #36)
+$productImages = [];
+if (!empty($product['images'])) {
+    $decoded = json_decode($product['images'], true);
+    if (is_array($decoded)) {
+        $productImages = $decoded;
+    }
+}
+// Fallback to single image for backward compatibility
+if (empty($productImages) && !empty($product['image'])) {
+    $productImages = [$product['image']];
 }
 
 // Parse sizes
@@ -50,6 +63,47 @@ $page_title = htmlspecialchars($product['name']) . ' - R&G';
             align-items: start;
         }
         
+        /* Image Gallery Styles (refs #36) */
+        .product-image-section {
+            position: sticky;
+            top: 1rem;
+        }
+        
+        .gallery-main-image {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .gallery-thumbnails {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .gallery-thumbnail {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            cursor: pointer;
+            object-fit: cover;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-thumbnail:hover {
+            border-color: var(--gold);
+            transform: scale(1.05);
+        }
+        
+        .gallery-thumbnail.active {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 2px var(--gold);
+        }
+        
         .product-image {
             width: 100%;
             height: auto;
@@ -75,11 +129,48 @@ $page_title = htmlspecialchars($product['name']) . ' - R&G';
             margin-bottom: 1rem;
         }
         
+        /* Expandable Description Styles (refs #37) */
         .product-description {
             font-size: 1.1rem;
             line-height: 1.6;
             color: var(--text-color);
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .description-content {
+            max-height: 150px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .description-content.expanded {
+            max-height: none;
+        }
+        
+        .description-toggle {
+            background: none;
+            border: none;
+            color: var(--primary-blue);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .description-toggle:hover {
+            color: var(--gold);
+        }
+        
+        .description-toggle i {
+            transition: transform 0.3s ease;
+        }
+        
+        .description-toggle.expanded i {
+            transform: rotate(180deg);
         }
         
         .product-stock {
@@ -179,15 +270,36 @@ $page_title = htmlspecialchars($product['name']) . ' - R&G';
             .product-title {
                 font-size: 2rem;
             }
+            
+            .product-image-section {
+                position: static;
+            }
+            
+            .gallery-thumbnail {
+                width: 60px;
+                height: 60px;
+            }
         }
     </style>
 </head>
 <body>
     <main class="product-detail-container">
         <div class="product-image-section">
-            <?php if (!empty($product['image'])): ?>
-                <?php $imgUrl = $base_path . '/' . ltrim($product['image'], '/'); ?>
-                <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="product-image">
+            <?php if (!empty($productImages)): ?>
+                <?php $mainImgUrl = $base_path . '/' . ltrim($productImages[0], '/'); ?>
+                <img src="<?= htmlspecialchars($mainImgUrl) ?>" alt="<?= htmlspecialchars($product['name']) ?>" class="gallery-main-image" id="mainImage">
+                
+                <?php if (count($productImages) > 1): ?>
+                    <div class="gallery-thumbnails">
+                        <?php foreach ($productImages as $index => $imgPath): ?>
+                            <?php $thumbUrl = $base_path . '/' . ltrim($imgPath, '/'); ?>
+                            <img src="<?= htmlspecialchars($thumbUrl) ?>" 
+                                 alt="<?= htmlspecialchars($product['name']) ?> - Image <?= $index + 1 ?>" 
+                                 class="gallery-thumbnail <?= $index === 0 ? 'active' : '' ?>" 
+                                 onclick="changeMainImage('<?= htmlspecialchars($thumbUrl, ENT_QUOTES) ?>', this)">
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             <?php else: ?>
                 <div class="product-image" style="background: #f5f5f5; display: flex; align-items: center; justify-content: center; min-height: 400px; color: #666;">
                     Aucune image disponible
@@ -204,7 +316,15 @@ $page_title = htmlspecialchars($product['name']) . ' - R&G';
             
             <?php if (!empty($product['description'])): ?>
                 <div class="product-description">
-                    <?= nl2br(htmlspecialchars($product['description'])) ?>
+                    <div class="description-content" id="descriptionContent">
+                        <?= nl2br(htmlspecialchars($product['description'])) ?>
+                    </div>
+                    <?php if (strlen($product['description']) > 300): ?>
+                        <button class="description-toggle" id="descriptionToggle" onclick="toggleDescription()">
+                            <span id="toggleText">Voir plus</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    <?php endif; ?>
                 </div>
             <?php endif; ?>
             
@@ -251,6 +371,39 @@ $page_title = htmlspecialchars($product['name']) . ' - R&G';
     </main>
 
     <script>
+        // Image Gallery - Change main image when clicking thumbnail (refs #36)
+        function changeMainImage(imageUrl, thumbnailElement) {
+            const mainImage = document.getElementById('mainImage');
+            if (mainImage) {
+                mainImage.src = imageUrl;
+            }
+            
+            // Update active state
+            const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+            thumbnails.forEach(thumb => thumb.classList.remove('active'));
+            if (thumbnailElement) {
+                thumbnailElement.classList.add('active');
+            }
+        }
+        
+        // Expandable Description Toggle (refs #37)
+        function toggleDescription() {
+            const content = document.getElementById('descriptionContent');
+            const toggle = document.getElementById('descriptionToggle');
+            const toggleText = document.getElementById('toggleText');
+            
+            if (content && toggle && toggleText) {
+                content.classList.toggle('expanded');
+                toggle.classList.toggle('expanded');
+                
+                if (content.classList.contains('expanded')) {
+                    toggleText.textContent = 'Voir moins';
+                } else {
+                    toggleText.textContent = 'Voir plus';
+                }
+            }
+        }
+        
         // Handle size selection
         document.addEventListener('DOMContentLoaded', function() {
             const sizeButtons = document.querySelectorAll('.size-btn');
@@ -309,8 +462,12 @@ $page_title = htmlspecialchars($product['name']) . ' - R&G';
             "price": "<?= (float)$product['price'] ?>",
             "availability": "<?= $inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' ?>"
         }
-        <?php if (!empty($product['image'])): ?>
-        ,"image": "<?= htmlspecialchars($base_path . '/' . ltrim($product['image'], '/')) ?>"
+        <?php if (!empty($productImages)): ?>
+        ,"image": [
+            <?php foreach ($productImages as $index => $imgPath): ?>
+                "<?= htmlspecialchars($base_path . '/' . ltrim($imgPath, '/')) ?>"<?= $index < count($productImages) - 1 ? ',' : '' ?>
+            <?php endforeach; ?>
+        ]
         <?php endif; ?>
         <?php if (!empty($sizes)): ?>
         ,"additionalProperty": [
