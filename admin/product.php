@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/functions.php';
-require_once __DIR__ . '/src/csrf.php';
+require_once __DIR__ . '/../src/bootstrap.php';
+require_once __DIR__ . '/../src/functions.php';
+require_once __DIR__ . '/../src/csrf.php';
 
 // Get product ID
 if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
