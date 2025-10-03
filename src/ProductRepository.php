@@ -25,7 +25,7 @@ class ProductRepository
         $available = table_columns('products');
         $availableSet = array_flip($available);
 
-        $wanted = ['id','name','description','price','stock_quantity','image','category','category_id','status','revolut_payment_link','created_at','updated_at'];
+        $wanted = ['id','name','description','price','stock_quantity','image','images','category','category_id','status','revolut_payment_link','created_at','updated_at'];
         $cols = array_values(array_filter($wanted, fn($c) => isset($availableSet[$c])));
         if (empty($cols)) $cols = ['id'];
 
@@ -51,7 +51,7 @@ class ProductRepository
         $available = table_columns('products');
         $availableSet = array_flip($available);
 
-        $wanted = ['id','name','description','price','stock_quantity','image','category','category_id','status','sizes','revolut_payment_link','created_at','updated_at'];
+        $wanted = ['id','name','description','price','stock_quantity','image','images','category','category_id','status','sizes','revolut_payment_link','created_at','updated_at'];
         $cols = array_values(array_filter($wanted, fn($c) => isset($availableSet[$c])));
         if (empty($cols)) $cols = ['id'];
 

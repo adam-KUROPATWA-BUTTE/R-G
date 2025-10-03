@@ -20,6 +20,19 @@ if (!$product) {
     exit('Produit non trouvé');
 }
 
+// Parse images for gallery (refs #36)
+$productImages = [];
+if (!empty($product['images'])) {
+    $decoded = json_decode($product['images'], true);
+    if (is_array($decoded)) {
+        $productImages = $decoded;
+    }
+}
+// Fallback to single image for backward compatibility
+if (empty($productImages) && !empty($product['image'])) {
+    $productImages = [$product['image']];
+}
+
 // Parse tailles
 if (method_exists($repo, 'parseSizes')) {
     $sizes = $repo->parseSizes($product['sizes'] ?? '');
@@ -63,16 +76,28 @@ require_once __DIR__ . '/partials/header.php'; // <-- adapte si nécessaire
 
     <main class="product-detail-container">
         <div class="product-media">
-            <?php
-            $img = '';
-            if (!empty($product['image'])) {
-                $raw = $product['image'];
-                $isAbs = preg_match('#^(?:https?:)?//#',$raw) || strncmp($raw,'data:',5)===0;
-                $img = $isAbs ? $raw : '/'.ltrim($raw,'/');
-            }
-            ?>
-            <?php if ($img): ?>
-                <img src="<?= h($img) ?>" alt="<?= h($product['name']) ?>" class="product-image">
+            <?php if (!empty($productImages)): ?>
+                <?php 
+                $mainImgPath = $productImages[0];
+                $isAbs = preg_match('#^(?:https?:)?//#',$mainImgPath) || strncmp($mainImgPath,'data:',5)===0;
+                $mainImgUrl = $isAbs ? $mainImgPath : '/'.ltrim($mainImgPath,'/');
+                ?>
+                <img src="<?= h($mainImgUrl) ?>" alt="<?= h($product['name']) ?>" class="product-image" id="mainImage">
+                
+                <?php if (count($productImages) > 1): ?>
+                    <div class="gallery-thumbnails">
+                        <?php foreach ($productImages as $index => $imgPath): ?>
+                            <?php 
+                            $isAbsThumb = preg_match('#^(?:https?:)?//#',$imgPath) || strncmp($imgPath,'data:',5)===0;
+                            $thumbUrl = $isAbsThumb ? $imgPath : '/'.ltrim($imgPath,'/');
+                            ?>
+                            <img src="<?= h($thumbUrl) ?>" 
+                                 alt="<?= h($product['name']) ?> - Image <?= $index + 1 ?>" 
+                                 class="gallery-thumbnail <?= $index === 0 ? 'active' : '' ?>" 
+                                 onclick="changeMainImage('<?= h($thumbUrl) ?>', this)">
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             <?php else: ?>
                 <div class="product-image product-image--placeholder">
                     Image indisponible
@@ -88,7 +113,17 @@ require_once __DIR__ . '/partials/header.php'; // <-- adapte si nécessaire
             </div>
 
             <?php if (!empty($product['description'])): ?>
-                <div class="product-description"><?= nl2br(h($product['description'])) ?></div>
+                <div class="product-description">
+                    <div class="description-content" id="descriptionContent">
+                        <?= nl2br(h($product['description'])) ?>
+                    </div>
+                    <?php if (strlen($product['description']) > 300): ?>
+                        <button class="description-toggle" id="descriptionToggle" onclick="toggleDescription()">
+                            <span id="toggleText">Voir plus</span>
+                            <span class="chevron">▼</span>
+                        </button>
+                    <?php endif; ?>
+                </div>
             <?php endif; ?>
 
             <?php if (!empty($sizes)): ?>
@@ -142,6 +177,40 @@ if (file_exists(__DIR__.'/partials/footer.php')) {
 
 <!-- Script de sélection des tailles -->
 <script>
+// Image Gallery - Change main image when clicking thumbnail (refs #36)
+function changeMainImage(imageUrl, thumbnailElement) {
+    const mainImage = document.getElementById('mainImage');
+    if (mainImage) {
+        mainImage.src = imageUrl;
+    }
+    
+    // Update active state
+    const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+    thumbnails.forEach(thumb => thumb.classList.remove('active'));
+    if (thumbnailElement) {
+        thumbnailElement.classList.add('active');
+    }
+}
+
+// Expandable Description Toggle (refs #37)
+function toggleDescription() {
+    const content = document.getElementById('descriptionContent');
+    const toggle = document.getElementById('descriptionToggle');
+    const toggleText = document.getElementById('toggleText');
+    
+    if (content && toggle && toggleText) {
+        content.classList.toggle('expanded');
+        toggle.classList.toggle('expanded');
+        
+        if (content.classList.contains('expanded')) {
+            toggleText.textContent = 'Voir moins';
+        } else {
+            toggleText.textContent = 'Voir plus';
+        }
+    }
+}
+
+// Size selection script
 (function(){
     const grid = document.getElementById('sizesGrid');
     const sizeInput = document.getElementById('selectedSize');
@@ -207,8 +276,11 @@ body {
 .product-media {
     width: 100%;
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
-    justify-content: center;
+    justify-content: flex-start;
+    position: sticky;
+    top: 1rem;
 }
 .product-image {
     width:100%; 
@@ -224,12 +296,86 @@ body {
     display:flex; align-items:center; justify-content:center;
     color:#475569; font-weight:600; height:500px; width:100%;
 }
+
+/* Image Gallery Styles (refs #36) */
+.gallery-thumbnails {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.gallery-thumbnail {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    cursor: pointer;
+    object-fit: cover;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.gallery-thumbnail:hover {
+    border-color: #D3AA36;
+    transform: scale(1.05);
+}
+
+.gallery-thumbnail.active {
+    border-color: #1D3557;
+    box-shadow: 0 0 0 2px #D3AA36;
+}
+
+/* Expandable Description Styles (refs #37) */
+.product-description {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #334155;
+    margin: 0 0 1.5rem;
+    position: relative;
+}
+
+.description-content {
+    max-height: 150px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.description-content.expanded {
+    max-height: none;
+}
+
+.description-toggle {
+    background: none;
+    border: none;
+    color: #1d4ed8;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.description-toggle:hover {
+    color: #D3AA36;
+}
+
+.description-toggle .chevron {
+    transition: transform 0.3s ease;
+    font-size: 0.8em;
+}
+
+.description-toggle.expanded .chevron {
+    transform: rotate(180deg);
+}
+
 .product-title { font-size:clamp(1.9rem,4.6vw,2.6rem); margin:0 0 1rem; font-weight:700; line-height:1.1; color:#1e3a8a; }
 .product-price { font-size:2rem; font-weight:600; color:#b8860b; margin-bottom:1rem; }
 .product-stock { font-weight:600; margin-bottom:1rem; }
 .in-stock { color:#15803d; }
 .out-of-stock { color:#b91c1c; }
-.product-description { line-height:1.55; margin:0 0 1.5rem; color:#334155; }
 .sizes-label { font-size:.7rem; font-weight:700; letter-spacing:.7px; text-transform:uppercase; color:#1e3a8a; margin-bottom:.5rem; }
 .sizes-grid { display:flex; flex-wrap:wrap; gap:.55rem; }
 .size-btn {
@@ -257,4 +403,15 @@ body {
 .flash { border-radius:8px; padding:.65rem .95rem; font-size:.8rem; }
 .flash-success { background:#ecfdf5; border:1px solid #10b981; color:#065f46; }
 .flash-error { background:#fef2f2; border:1px solid #f87171; color:#991b1b; }
+
+@media (max-width: 768px) {
+    .product-media {
+        position: static;
+    }
+    
+    .gallery-thumbnail {
+        width: 60px;
+        height: 60px;
+    }
+}
 </style>
