@@ -62,15 +62,7 @@ if (!empty($availableSizes) && ($size === '' || !in_array($size, $availableSizes
 }
 
 // Panier - Use CartService for consistency
-cart_add(
-    productId: $id,
-    qty: $qty,
-    name: $product['name'] ?? '',
-    price: (float)($product['price'] ?? 0),
-    image: $product['image'] ?? '',
-    category: $product['category'] ?? '',
-    size: $size
-);
+cart_add($id, $qty, $size);
 
 if (json_request()) {
     $count = cart_count();

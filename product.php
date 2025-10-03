@@ -186,6 +186,7 @@ if (file_exists(__DIR__.'/partials/footer.php')) {
     gap:3rem;
     grid-template-columns:1fr 1fr;
     padding:0 1rem;
+    background: white;
 }
 @media (max-width:900px){
     .product-detail-container { grid-template-columns:1fr; gap:2rem; }

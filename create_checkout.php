@@ -80,9 +80,18 @@ function createCheckoutSession(): void {
         $cart = cart_get();
         $customer = prepareCustomerData();
         
+        // Récupérer la méthode de paiement sélectionnée
+        $paymentMethod = $_POST['payment_method'] ?? 'stripe';
+        
         // Créer la commande en statut pending
         $orderService = new OrderService();
         $orderId = $orderService->createFromCart($cart, $customer, 'pending');
+        
+        // Rediriger vers le bon processeur de paiement
+        if ($paymentMethod === 'revolut') {
+            handleRevolutCheckout($orderId, $cart, $customer, $env);
+            return;
+        }
         
         // Vérifier si Stripe est configuré
         $stripeKey = $env['STRIPE_SECRET_KEY'] ?? '';
@@ -132,6 +141,86 @@ function handleSimulatedCheckout(int $orderId, string $baseUrl): void {
         'email' => $order['customer_email']
     ]);
     
+    header('Location: ' . $checkoutUrl);
+    exit;
+}
+
+/**
+ * Gère le checkout Revolut Business
+ */
+function handleRevolutCheckout(int $orderId, array $cart, array $customer, array $env): void {
+    $orderService = new OrderService();
+    $order = $orderService->find($orderId);
+    
+    if (!$order) {
+        throw new Exception('Commande introuvable');
+    }
+    
+    $baseUrl = $env['APP_URL'] ?? 'http://localhost:8000';
+    $revolutApiKey = $env['REVOLUT_API_KEY'] ?? '';
+    
+    // Si Revolut n'est pas configuré, utiliser le mode simulation
+    if (empty($revolutApiKey) || strpos($revolutApiKey, 'pk_') !== 0) {
+        // Mode simulation Revolut
+        $sessionId = 'rev_sim_' . $orderId . '_' . time();
+        $orderService->setStripeSession($orderId, $sessionId);
+        
+        $checkoutUrl = $baseUrl . '/mock_stripe_checkout.php?' . http_build_query([
+            'session_id' => $sessionId,
+            'order_id' => $orderId,
+            'amount' => $order['total'],
+            'email' => $order['customer_email'],
+            'method' => 'revolut'
+        ]);
+        
+        header('Location: ' . $checkoutUrl);
+        exit;
+    }
+    
+    // Mode production Revolut Business
+    // Préparer les données pour l'API Revolut
+    $orderData = [
+        'amount' => (int)round($order['total'] * 100), // Centimes
+        'currency' => 'EUR',
+        'description' => 'Commande R&G #' . $orderId,
+        'customer_email' => $customer['email'],
+        'metadata' => [
+            'order_id' => (string)$orderId,
+            'source' => 'r-g-boutique'
+        ]
+    ];
+    
+    // Appel API Revolut Business
+    $ch = curl_init('https://merchant.revolut.com/api/1.0/orders');
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST => true,
+        CURLOPT_HTTPHEADER => [
+            'Authorization: Bearer ' . $revolutApiKey,
+            'Content-Type: application/json',
+        ],
+        CURLOPT_POSTFIELDS => json_encode($orderData)
+    ]);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode !== 200 && $httpCode !== 201) {
+        throw new Exception('Erreur lors de la création de l\'ordre Revolut');
+    }
+    
+    $revolutOrder = json_decode($response, true);
+    
+    if (!isset($revolutOrder['public_id'])) {
+        throw new Exception('Réponse invalide de Revolut');
+    }
+    
+    // Stocker l'ID de la session Revolut
+    $orderService->setStripeSession($orderId, $revolutOrder['public_id']);
+    
+    // Rediriger vers Revolut checkout
+    $checkoutUrl = 'https://checkout.revolut.com/pay/' . $revolutOrder['public_id'];
     header('Location: ' . $checkoutUrl);
     exit;
 }

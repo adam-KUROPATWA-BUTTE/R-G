@@ -81,6 +81,32 @@ require_once __DIR__ . '/partials/header.php';
                               placeholder="Adresse, code postal, ville"></textarea>
                 </div>
                 
+                <!-- Payment Method Selection -->
+                <div class="form-group">
+                    <label>Méthode de paiement *</label>
+                    <div class="payment-methods">
+                        <div class="payment-option">
+                            <input type="radio" 
+                                   id="payment_stripe" 
+                                   name="payment_method" 
+                                   value="stripe" 
+                                   checked>
+                            <label for="payment_stripe">
+                                <i class="fab fa-stripe"></i> Carte bancaire (Stripe)
+                            </label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" 
+                                   id="payment_revolut" 
+                                   name="payment_method" 
+                                   value="revolut">
+                            <label for="payment_revolut">
+                                <i class="fas fa-credit-card"></i> Revolut Business
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="form-actions">
                     <a href="/cart.php" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Retour au panier
@@ -203,6 +229,52 @@ require_once __DIR__ . '/partials/header.php';
 .form-group textarea:focus {
     outline: none;
     border-color: #1d4ed8;
+}
+
+.payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.payment-option {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.payment-option:hover {
+    border-color: #1d4ed8;
+    background: #f8fafc;
+}
+
+.payment-option input[type="radio"] {
+    width: auto;
+    margin-right: 0.75rem;
+    cursor: pointer;
+}
+
+.payment-option label {
+    margin: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.payment-option input[type="radio"]:checked + label {
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.payment-option:has(input[type="radio"]:checked) {
+    border-color: #1d4ed8;
+    background: #eff6ff;
 }
 
 .form-actions {
