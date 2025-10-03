@@ -364,6 +364,89 @@ img {
     }
 }
 
+/* Product Detail Page Responsive Styles */
+@media (max-width: 480px) {
+    /* Mobile - Product detail page */
+    .product-detail-container {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+        padding: 0 0.5rem !important;
+        margin: 0.5rem auto 2rem !important;
+    }
+    
+    .product-media {
+        width: 100%;
+    }
+    
+    .product-image {
+        min-height: 300px !important;
+        max-height: 400px !important;
+    }
+    
+    .product-image--placeholder {
+        height: 300px !important;
+    }
+    
+    .product-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .product-price {
+        font-size: 1.5rem !important;
+    }
+    
+    .sizes-grid {
+        gap: 0.4rem !important;
+    }
+    
+    .size-btn {
+        padding: 0.5rem 0.8rem !important;
+        font-size: 0.75rem !important;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    /* Tablet - Product detail page */
+    .product-detail-container {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+    }
+    
+    .product-image {
+        min-height: 400px !important;
+        max-height: 550px !important;
+    }
+    
+    .product-image--placeholder {
+        height: 400px !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet Landscape - Product detail page */
+    .product-detail-container {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 2rem !important;
+    }
+    
+    .product-image {
+        min-height: 450px !important;
+        max-height: 600px !important;
+    }
+}
+
+@media (min-width: 1025px) {
+    /* Desktop - Product detail page */
+    .product-detail-container {
+        grid-template-columns: 1fr 1fr !important;
+    }
+    
+    .product-image {
+        min-height: 500px !important;
+        max-height: 700px !important;
+    }
+}
+
 /* Touch optimizations */
 @media (hover: none) and (pointer: coarse) {
     /* Optimisations pour les appareils tactiles */
@@ -384,5 +467,10 @@ img {
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+    
+    .size-btn {
+        min-height: 44px !important;
+        min-width: 44px !important;
     }
 }

@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once __DIR__ . '/src/auth.php';
 require_once __DIR__ . '/src/csrf.php';
 $current_user = current_user();
