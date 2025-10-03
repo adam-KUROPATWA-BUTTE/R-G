@@ -39,7 +39,7 @@ $inStock = (int)($product['stock_quantity'] ?? 0) > 0;
 function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); }
 
 $page_title = h($product['name']) . ' - R&G';
-$additional_css = ['styles/product-inline.css']; // tu peux créer ce fichier ou laisser vide
+$additional_css = ['styles/responsive.css'];
 require_once __DIR__ . '/partials/header.php'; // <-- adapte si nécessaire
 ?>
 <div class="page-wrapper">
@@ -190,14 +190,25 @@ if (file_exists(__DIR__.'/partials/footer.php')) {
 @media (max-width:900px){
     .product-detail-container { grid-template-columns:1fr; gap:2rem; }
 }
+.product-media {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
 .product-image {
-    width:100%; max-height:600px; object-fit:cover;
-    border-radius:14px; background:#f1f5f9;
+    width:100%; 
+    min-height:500px;
+    max-height:700px; 
+    height:auto;
+    object-fit:contain;
+    border-radius:14px; 
+    background:#f1f5f9;
     box-shadow:0 4px 22px rgba(0,0,0,.12);
 }
 .product-image--placeholder {
     display:flex; align-items:center; justify-content:center;
-    color:#475569; font-weight:600; height:420px;
+    color:#475569; font-weight:600; height:500px; width:100%;
 }
 .product-title { font-size:clamp(1.9rem,4.6vw,2.6rem); margin:0 0 1rem; font-weight:700; line-height:1.1; color:#1e3a8a; }
 .product-price { font-size:2rem; font-weight:600; color:#b8860b; margin-bottom:1rem; }

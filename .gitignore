@@ -1,5 +1,6 @@
 # Configuration files with secrets
 src/config.php
+.env
 
 # IDE files
 .vscode/
