@@ -17,16 +17,15 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     // Important: définir les paramètres AVANT session_start()
     $params = [
         'lifetime' => 0,
-        'path' => $basePath,          // Set session cookie path to subdirectory
-        'domain' => '',               // laisse vide pour host courant
-        'secure' => $isHttps,         // true si HTTPS
+        'path' => $basePath,
+        'domain' => '',
+        'secure' => $isHttps,
         'httponly' => true,
-        'samesite' => 'Lax',          // ok pour formulaires cross-page
+        'samesite' => 'Lax',
     ];
     if (PHP_VERSION_ID >= 70300) {
         session_set_cookie_params($params);
     } else {
-        // Compat anciennes versions: pas de samesite propre.
         session_set_cookie_params(
             $params['lifetime'],
             $params['path'],
@@ -36,11 +35,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
         );
     }
 
-    // Si vous avez déjà un nom de session global, décommentez et utilisez-le PARTOUT:
-    // session_name('RGSESSID');
-
     session_start();
 }
 
 // Charge le module CSRF
 require_once __DIR__ . '/csrf.php';
+
+// ===== AJOUTEZ CETTE LIGNE =====
+require_once __DIR__ . '/db.php';

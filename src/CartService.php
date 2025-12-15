@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/functions.php'; // fournit product_get(), table_columns(), db(), etc.
+require_once __DIR__ . '/functions.php';
 require_once __DIR__ . '/csrf.php';
 
 function cart_ensure_session(): void {
@@ -14,7 +14,7 @@ function cart_init(): void {
     cart_ensure_session();
     if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
         $_SESSION['cart'] = [
-            'items' => [], // productId => ['id','name','price','qty','image','category']
+            'items' => [],
             'updated_at' => time(),
         ];
     }
@@ -56,7 +56,6 @@ function cart_add(int $productId, int $qty = 1, string $size = ''): void {
     if (!$p) {
         throw new RuntimeException("Produit introuvable (#{$productId}).");
     }
-    // Bloquer les inactifs si ta table a 'status'
     if (isset($p['status']) && $p['status'] === 'inactive') {
         throw new RuntimeException("Ce produit est inactif.");
     }
@@ -66,22 +65,18 @@ function cart_add(int $productId, int $qty = 1, string $size = ''): void {
     $image = $p['image'] ?? null;
     $category = $p['category'] ?? null;
     
-    // Validate size if product has sizes
     $availableSizes = product_parse_sizes($p['sizes'] ?? '');
     if (!empty($availableSizes) && !in_array(strtoupper($size), $availableSizes, true)) {
         throw new RuntimeException("Taille invalide pour ce produit.");
     }
 
-    // Create unique cart key: productId or productId_SIZE for variants
     $cartKey = $size ? $productId . '_' . strtoupper($size) : $productId;
 
-    // Respecter le stock si présent
     if (isset($p['stock_quantity'])) {
         $inCart = $_SESSION['cart']['items'][$cartKey]['qty'] ?? 0;
         $maxAddable = max(0, ((int)$p['stock_quantity']) - $inCart);
         $qty = min($qty, $maxAddable);
         if ($qty === 0) {
-            // Pas assez de stock pour en ajouter
             return;
         }
     }
@@ -105,14 +100,12 @@ function cart_add(int $productId, int $qty = 1, string $size = ''): void {
 function cart_update(int $productId, int $qty, string $size = ''): void {
     cart_init();
     
-    // Create unique cart key: productId or productId_SIZE for variants
     $cartKey = $size ? $productId . '_' . strtoupper($size) : $productId;
     
     if (!isset($_SESSION['cart']['items'][$cartKey])) return;
 
     $qty = max(0, $qty);
 
-    // Respecter le stock si présent
     $p = product_get($productId);
     if ($p && isset($p['stock_quantity'])) {
         $qty = min($qty, (int)$p['stock_quantity']);
@@ -129,7 +122,6 @@ function cart_update(int $productId, int $qty, string $size = ''): void {
 function cart_remove(int $productId, string $size = ''): void {
     cart_init();
     
-    // Create unique cart key: productId or productId_SIZE for variants
     $cartKey = $size ? $productId . '_' . strtoupper($size) : $productId;
     
     unset($_SESSION['cart']['items'][$cartKey]);
@@ -139,4 +131,36 @@ function cart_remove(int $productId, string $size = ''): void {
 function cart_clear(): void {
     cart_init();
     $_SESSION['cart'] = ['items' => [], 'updated_at' => time()];
+}
+
+/**
+ * ✅ Récupère tous les items du panier avec détails complets depuis la BDD
+ */
+function cart_get_all(): array {
+    $pdo = db();
+    $cartItems = cart_items();
+    $result = [];
+    
+    foreach ($cartItems as $cartKey => $item) {
+        $productId = (int)$item['id'];
+        
+        // ✅ Table 'products' (et non 'produits')
+        $stmt = $pdo->prepare("SELECT id, name, price, image FROM products WHERE id = ?");
+        $stmt->execute([$productId]);
+        $produit = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$produit) continue;
+        
+        $result[] = [
+            'id' => (int)$produit['id'],
+            'nom' => $produit['name'],          // ✅ Mapping 'name' -> 'nom'
+            'prix' => (float)$produit['price'], // ✅ Mapping 'price' -> 'prix'
+            'image' => $produit['image'],
+            'taille' => $item['size'] ?? null,
+            'quantite' => (int)$item['qty'],
+            'cart_key' => $cartKey
+        ];
+    }
+    
+    return $result;
 }
