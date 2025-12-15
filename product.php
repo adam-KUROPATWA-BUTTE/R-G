@@ -155,13 +155,6 @@ require_once __DIR__ . '/partials/header.php'; // <-- adapte si nécessaire
                     Ajouter au panier
                 </button>
             </form>
-
-            <?php if (!empty($product['revolut_payment_link'])): ?>
-                <a href="checkout_revolut.php?id=<?= (int)$product['id'] ?>" class="revolut-btn">
-                    <i class="fas fa-credit-card"></i>
-                    Acheter avec Revolut
-                </a>
-            <?php endif; ?>
         </div>
     </main>
 </div>

@@ -99,7 +99,7 @@ require __DIR__ . '/partials/header.php';
                                 <div class="product-info">
                                     <h3><?= htmlspecialchars($product['name'] ?? 'Produit') ?></h3>
                                     <?php if (!empty($product['description'])): ?>
-                                        <p class="product-description"><?= htmlspecialchars($product['description']) ?></p>
+                                        <p class="product-description"><?= htmlspecialchars(mb_substr($product['description'], 0, 80)) ?><?= mb_strlen($product['description']) > 80 ? '...' : '' ?></p>
                                     <?php endif; ?>
                                     <?php if (isset($product['price'])): ?>
                                         <div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div>
@@ -291,11 +291,17 @@ require __DIR__ . '/partials/header.php';
         }
 
         .product-description {
-            color: var(--dark-gray);
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
+    color: var(--dark-gray);
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    height: 2.8em; /* Exactement 2 lignes */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Limite à 2 lignes */
+    -webkit-box-orient: vertical;
+}
 
         .product-price {
             font-size: 1.5rem;

@@ -1,17 +1,21 @@
 <?php
 declare(strict_types=1);
+session_start();
 
 require_once __DIR__ . '/src/bootstrap.php';
 require_once __DIR__ . '/src/CartService.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); exit('Méthode non autorisée'); }
-if (!csrf_verify($_POST['csrf'] ?? null)) { http_response_code(400); exit('CSRF invalide'); }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: cart.php');
+    exit;
+}
 
-$id = (int)($_POST['id'] ?? 0);
-$qty = max(0, (int)($_POST['qty'] ?? 0));
-cart_update($id, $qty);
+$index = isset($_POST['item_index']) ? (int)$_POST['item_index'] : -1;
+$quantity = isset($_POST['quantity']) ? max(1, (int)$_POST['quantity']) : 1;
 
-// Compute base path for subdirectory deployments
-$base_path = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
-$base_path = $base_path === '/' ? '' : rtrim($base_path, '');
-header('Location: ' . $base_path . '/cart.php');
+if ($index >= 0) {
+    cart_update_quantity($index, $quantity);
+}
+
+header('Location: cart.php');
+exit;
