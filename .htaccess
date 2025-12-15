@@ -4,11 +4,13 @@ Options -Indexes
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Interdire l'accès direct à src/
-  RewriteRule ^src/ - [F,L]
+  # Interdire l'accès direct à src/, app/, config/, routes/
+  RewriteRule ^(src|app|config|routes|database)/ - [F,L]
 
-  # Compat éventuelle: rediriger /index.html -> /index.php
-  RewriteRule ^index\.html$ /index.php [L]
+  # Redirect all requests to public/index.php (MVC routing)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^(.*)$ public/index.php [QSA,L]
 
   # Forcer www sans casser LWS (optionnel) - commentez si non souhaité
   #RewriteCond %{HTTP_HOST} !^www\. [NC]
