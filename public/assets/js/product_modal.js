@@ -1,6 +1,36 @@
 (function() {
   function $(sel, ctx){ return (ctx||document).querySelector(sel); }
   function createEl(tag,c){ var e=document.createElement(tag); if(c) e.className=c; return e; }
+  
+  // Handle size selection
+  function handleSizes(sizes) {
+    var sizesWrap = document.getElementById('pqv-sizes-wrapper');
+    var sizesBox = document.getElementById('pqv-sizes');
+    var sizeHidden = document.getElementById('pqv-size-selected');
+    
+    sizesBox.innerHTML = '';
+    sizeHidden.value = '';
+    
+    if (sizes && sizes.length > 0) {
+      sizesWrap.style.display = 'block';
+      sizes.forEach(function(sz){
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pqv-size-btn';
+        btn.textContent = sz;
+        btn.onclick = function(){
+          // reset
+          var all = sizesBox.querySelectorAll('.pqv-size-btn');
+          for (var i=0;i<all.length;i++) all[i].classList.remove('active');
+          btn.classList.add('active');
+          sizeHidden.value = sz;
+        };
+        sizesBox.appendChild(btn);
+      });
+    } else {
+      sizesWrap.style.display = 'none';
+    }
+  }
 
   window.showProductDetails = function(id){
     var modal = $('#productQuickViewModal');
@@ -54,60 +84,12 @@
       stockEl.className = 'pqv-stock ' + (data.stock_class || '');
 
 
-      // Avant form.style.display ...
-var sizesWrap = document.getElementById('pqv-sizes-wrapper');
-var sizesBox = document.getElementById('pqv-sizes');
-var sizeHidden = document.getElementById('pqv-size-selected');
-sizesBox.innerHTML = '';
-sizeHidden.value = '';
-if (data.sizes && data.sizes.length > 0) {
-  sizesWrap.style.display = 'block';
-  data.sizes.forEach(function(sz){
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'pqv-size-btn';
-    btn.textContent = sz;
-    btn.onclick = function(){
-      // reset
-      var all = sizesBox.querySelectorAll('.pqv-size-btn');
-      for (var i=0;i<all.length;i++) all[i].classList.remove('active');
-      btn.classList.add('active');
-      sizeHidden.value = sz;
-    };
-    sizesBox.appendChild(btn);
-  });
-} else {
-  sizesWrap.style.display = 'none';
-}
-
+      // Handle sizes
+      handleSizes(data.sizes);
 
       // Formulaire ajout panier
       var form = $('#pqv-add-form');
       form.style.display = data.stock_quantity > 0 ? 'block' : 'none';
-      var sizesWrap = document.getElementById('pqv-sizes-wrapper');
-var sizesBox = document.getElementById('pqv-sizes');
-var sizeHidden = document.getElementById('pqv-size-selected');
-sizesBox.innerHTML = '';
-sizeHidden.value = '';
-if (data.sizes && data.sizes.length > 0) {
-  sizesWrap.style.display = 'block';
-  data.sizes.forEach(function(sz){
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'pqv-size-btn';
-    btn.textContent = sz;
-    btn.onclick = function(){
-      // reset
-      var all = sizesBox.querySelectorAll('.pqv-size-btn');
-      for (var i=0;i<all.length;i++) all[i].classList.remove('active');
-      btn.classList.add('active');
-      sizeHidden.value = sz;
-    };
-    sizesBox.appendChild(btn);
-  });
-} else {
-  sizesWrap.style.display = 'none';
-}
       $('#pqv-id').value = data.id;
 
       // Lien fiche complète (si tu crées product.php)

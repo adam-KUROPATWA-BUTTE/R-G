@@ -6,8 +6,8 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/Services/OrderService.php';
+require_once __DIR__ . '/../../src/bootstrap.php';
+require_once __DIR__ . '/../../src/Services/OrderService.php';
 
 // Désactiver l'output buffering pour les webhooks
 if (ob_get_level()) {

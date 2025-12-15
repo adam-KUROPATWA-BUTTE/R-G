@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../src/bootstrap.php';
-require_once __DIR__ . '/../config/config_stripe.php';
-require_once __DIR__ . '/../vendor/stripe-php/init.php';
+require_once __DIR__ . '/../../src/bootstrap.php';
+require_once __DIR__ . '/../../config/config_stripe.php';
+require_once __DIR__ . '/../../vendor/stripe-php/init.php';
 
 \Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY);
 
