@@ -11,7 +11,7 @@ if (!isset($base_path)) {
         <div class="footer-content">
             <div class="footer-section">
                 <h3>R&G</h3>
-                <p>Votre destination mode et bijoux de luxe</p>
+                <p>Votre destination mode et bijoux</p>
             </div>
             <div class="footer-section">
                 <h3>Navigation</h3>
