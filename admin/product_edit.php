@@ -83,8 +83,9 @@ function create_product(array $d) {
       (string)($d['images'] ?? ''),
       (string)($d['sizes'] ?? '')
     ));
-    return db()->lastInsertId();
+    return (int)db()->lastInsertId(); // ✅ Cast en int
 }
+
 function update_product($id, array $d) {
     $sql = "UPDATE products
             SET name=?, description=?, price=?, category=?, stock_quantity=?, image=?, images=?, sizes=?
@@ -198,11 +199,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'images' => '',
                         'sizes' => $sizes_clean
                     ]);
-                    $id = $tmpId;
+                    $id = (int)$tmpId; // ✅ Cast en int
                     $product['id'] = $id;
                     $mode = 'edit';
                 }
-                $newImages = store_multiple_images($_FILES['images'], $id);
+                $newImages = store_multiple_images($_FILES['images'], (int)$id); // ✅ Cast en int
                 if (!empty($newImages)) {
                     // Merge with existing images
                     $allImages = array_merge($existingImages, $newImages);
@@ -231,11 +232,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'images' => '',
                         'sizes' => $sizes_clean
                     ]);
-                    $id = $tmpId;
+                    $id = (int)$tmpId; // ✅ Cast en int
                     $product['id'] = $id;
                     $mode = 'edit';
                 }
-                $rel = store_image_upload($_FILES['image'], $id);
+                $rel = store_image_upload($_FILES['image'], (int)$id); // ✅ Cast en int
                 $currentImage = $rel;
             } catch (Throwable $e) {
                 $errors[] = 'Image non enregistrée: '.$e->getMessage();
@@ -254,7 +255,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'images' => $currentImages,
                     'sizes' => $sizes_clean
                 ]);
-                $id = $newId;
+                $id = (int)$newId; // ✅ Cast en int
                 $product['id'] = $id;
                 $success = 'Produit créé.';
             } else {
@@ -312,7 +313,7 @@ $page_title = $mode === 'create' ? 'Créer un produit' : 'Modifier le produit #'
     </label>
     <label>Tailles disponibles (CSV ex: XS,S,M,L,XL ou TU)
         <input type="text" name="sizes" value="<?= htmlspecialchars($product['sizes']) ?>" placeholder="XS,S,M,L,XL">
-        <small style="display:block;font-size:.7rem;color:#555;">Laisser vide si le produit n’a pas de tailles.</small>
+        <small style="display:block;font-size:.7rem;color:#555;">Laisser vide si le produit n'a pas de tailles.</small>
     </label>
     
     <!-- Multiple Images Upload (refs #36) -->

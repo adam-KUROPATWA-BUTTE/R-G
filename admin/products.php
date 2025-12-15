@@ -2,6 +2,19 @@
 require_once __DIR__ . '/../src/auth.php';
 require_once __DIR__ . '/../src/functions.php';
 require_once __DIR__ . '/../src/csrf.php';
+require_once __DIR__ . '/../src/bootstrap.php';
+
+
+// Debug temporaire
+$u = current_user();
+if (!$u) {
+    die("❌ Pas d'utilisateur connecté. <a href='/login.php'>Se connecter</a>");
+}
+if (($u['role'] ?? '') !== 'admin') {
+    die("❌ Accès refusé. Votre rôle: " . ($u['role'] ?? 'aucun') . ". Attendu: admin");
+}
+// Fin debug
+
 require_admin();
 
 $action = $_GET['action'] ?? '';

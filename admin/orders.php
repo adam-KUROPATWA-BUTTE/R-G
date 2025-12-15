@@ -3,15 +3,38 @@ declare(strict_types=1);
 session_start();
 
 require_once __DIR__ . '/../src/auth.php';
-require_once __DIR__ . '/../src/Services/OrderService.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
-// Vérifier que l'utilisateur est admin
+// Vérification admin
+$u = current_user();
+if (!$u) {
+    die("❌ Pas d'utilisateur connecté. <a href='/login.php'>Se connecter</a>");
+}
+if (($u['role'] ?? '') !== 'admin') {
+    die("❌ Accès refusé. Votre rôle: " . ($u['role'] ?? 'aucun') . ". Attendu: admin");
+}
+
 require_admin();
 
-$orderService = new OrderService();
-
+// Récupérer les commandes
 try {
-    $orders = $orderService->findAll(100); // Limiter à 100 commandes
+    $pdo = db();
+    $stmt = $pdo->query("
+        SELECT 
+            id,
+            total,
+            statut as status,
+            email_client as customer_email,
+            CONCAT(prenom_client, ' ', nom_client) as customer_name,
+            revolut_order_id as payment_reference,
+            stripe_session_id,
+            date_creation as created_at,
+            date_paiement as paid_at
+        FROM commandes
+        ORDER BY date_creation DESC
+        LIMIT 100
+    ");
+    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $orders = [];
     $error = 'Erreur lors du chargement des commandes : ' . $e->getMessage();
@@ -19,8 +42,9 @@ try {
 
 function formatStatus(string $status): array {
     $statusMap = [
-        'pending' => ['Attente', 'status-pending'],
+        'pending' => ['En attente', 'status-pending'],
         'paid' => ['Payée', 'status-paid'],
+        'cancelled' => ['Annulée', 'status-canceled'],
         'canceled' => ['Annulée', 'status-canceled'],
         'failed' => ['Échouée', 'status-failed']
     ];
@@ -28,7 +52,9 @@ function formatStatus(string $status): array {
     return $statusMap[$status] ?? [$status, 'status-unknown'];
 }
 
-function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); }
+function h(string $v): string { 
+    return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); 
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -38,10 +64,10 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
     <title>Commandes - Admin R&G</title>
     <link rel="stylesheet" href="/styles/main.css">
     <link rel="stylesheet" href="/styles/admin.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
         .orders-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 2rem 1rem;
         }
@@ -84,6 +110,33 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
         
         .btn:hover {
             transform: translateY(-1px);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+        
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1e3a8a;
         }
         
         .orders-table {
@@ -184,6 +237,14 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
             border: 1px solid #f87171;
             color: #991b1b;
         }
+        
+        /* Icônes de paiement */
+        .payment-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -201,6 +262,33 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
                 <?= h($error) ?>
             </div>
         <?php endif; ?>
+        
+        <?php
+        // Calculer les statistiques
+        $totalOrders = count($orders);
+        $totalRevenue = array_sum(array_map(fn($o) => (float)$o['total'], $orders));
+        $paidOrders = count(array_filter($orders, fn($o) => $o['status'] === 'paid'));
+        $pendingOrders = count(array_filter($orders, fn($o) => $o['status'] === 'pending'));
+        ?>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3><i class="fas fa-shopping-cart"></i> Total Commandes</h3>
+                <div class="value"><?= $totalOrders ?></div>
+            </div>
+            <div class="stat-card">
+                <h3><i class="fas fa-euro-sign"></i> Chiffre d'affaires</h3>
+                <div class="value"><?= number_format((float)$totalRevenue, 2, ',', ' ') ?> €</div>
+            </div>
+            <div class="stat-card">
+                <h3><i class="fas fa-check-circle"></i> Commandes Payées</h3>
+                <div class="value" style="color: #059669;"><?= $paidOrders ?></div>
+            </div>
+            <div class="stat-card">
+                <h3><i class="fas fa-clock"></i> En Attente</h3>
+                <div class="value" style="color: #d97706;"><?= $pendingOrders ?></div>
+            </div>
+        </div>
         
         <div class="orders-table">
             <?php if (empty($orders)): ?>
@@ -231,25 +319,21 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
                                 <td><?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></td>
                                 <td><?= h($order['customer_name'] ?? 'N/A') ?></td>
                                 <td><?= h($order['customer_email'] ?? 'N/A') ?></td>
-                                <td><strong><?= number_format($order['total'], 2, ',', ' ') ?> €</strong></td>
+                                <td><strong><?= number_format((float)$order['total'], 2, ',', ' ') ?> €</strong></td>
                                 <td>
                                     <span class="status-badge <?= $statusClass ?>">
                                         <?= h($statusLabel) ?>
                                     </span>
                                 </td>
-                                <td>
-                                    <?php if (!empty($order['payment_reference'])): ?>
-                                        <span title="<?= h($order['payment_reference']) ?>">
-                                            <i class="fas fa-check-circle" style="color: #059669;"></i>
-                                        </span>
-                                    <?php elseif (!empty($order['stripe_session_id'])): ?>
-                                        <span title="Session Stripe créée">
-                                            <i class="fas fa-clock" style="color: #d97706;"></i>
-                                        </span>
+                                <td class="payment-icon">
+                                    <?php if (!empty($order['stripe_session_id'])): ?>
+                                        <i class="fab fa-stripe" title="Stripe" style="color: #635bff; font-size: 1.5rem;"></i>
+                                    <?php elseif (!empty($order['payment_reference'])): ?>
+                                        <i class="fas fa-credit-card" title="Revolut" style="color: #0075eb;"></i>
+                                    <?php elseif ($order['status'] === 'pending'): ?>
+                                        <i class="fas fa-clock" title="En attente de paiement" style="color: #d97706;"></i>
                                     <?php else: ?>
-                                        <span title="Pas de paiement">
-                                            <i class="fas fa-minus-circle" style="color: #6b7280;"></i>
-                                        </span>
+                                        <i class="fas fa-ban" title="Pas de paiement" style="color: #9ca3af;"></i>
                                     <?php endif; ?>
                                 </td>
                                 <td>

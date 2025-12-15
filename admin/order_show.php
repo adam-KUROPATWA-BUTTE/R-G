@@ -3,9 +3,17 @@ declare(strict_types=1);
 session_start();
 
 require_once __DIR__ . '/../src/auth.php';
-require_once __DIR__ . '/../src/Services/OrderService.php';
+require_once __DIR__ . '/../src/bootstrap.php';
 
-// Vérifier que l'utilisateur est admin
+// Vérification admin
+$u = current_user();
+if (!$u) {
+    die("❌ Pas d'utilisateur connecté. <a href='/login.php'>Se connecter</a>");
+}
+if (($u['role'] ?? '') !== 'admin') {
+    die("❌ Accès refusé. Votre rôle: " . ($u['role'] ?? 'aucun') . ". Attendu: admin");
+}
+
 require_admin();
 
 if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
@@ -14,10 +22,51 @@ if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
 }
 
 $orderId = (int)$_GET['id'];
-$orderService = new OrderService();
 
 try {
-    $order = $orderService->find($orderId);
+    $pdo = db();
+    
+    // Récupérer la commande
+    $stmt = $pdo->prepare("
+        SELECT 
+            id,
+            total,
+            statut as status,
+            email_client as customer_email,
+            nom_client,
+            prenom_client,
+            CONCAT(prenom_client, ' ', nom_client) as customer_name,
+            telephone,
+            adresse_livraison as customer_address,
+            revolut_order_id as payment_reference,
+            date_creation as created_at,
+            date_paiement as updated_at
+        FROM commandes
+        WHERE id = ?
+    ");
+    $stmt->execute([$orderId]);
+    $order = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$order) {
+        http_response_code(404);
+        exit('Commande non trouvée');
+    }
+    
+    // Récupérer les items de la commande
+    $stmtItems = $pdo->prepare("
+        SELECT 
+            produit_id as product_id,
+            nom_produit as product_name,
+            quantite as quantity,
+            prix_unitaire as unit_price,
+            taille as size,
+            (quantite * prix_unitaire) as total_price
+        FROM commande_items
+        WHERE commande_id = ?
+    ");
+    $stmtItems->execute([$orderId]);
+    $order['items'] = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+    
 } catch (Exception $e) {
     $order = null;
     $error = 'Erreur lors du chargement de la commande : ' . $e->getMessage();
@@ -30,8 +79,9 @@ if (!$order) {
 
 function formatStatus(string $status): array {
     $statusMap = [
-        'pending' => ['Attente', 'status-pending'],
+        'pending' => ['En attente', 'status-pending'],
         'paid' => ['Payée', 'status-paid'],
+        'cancelled' => ['Annulée', 'status-canceled'],
         'canceled' => ['Annulée', 'status-canceled'],
         'failed' => ['Échouée', 'status-failed']
     ];
@@ -39,7 +89,9 @@ function formatStatus(string $status): array {
     return $statusMap[$status] ?? [$status, 'status-unknown'];
 }
 
-function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); }
+function h(string $v): string { 
+    return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); 
+}
 
 [$statusLabel, $statusClass] = formatStatus($order['status']);
 ?>
@@ -123,7 +175,7 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
         .info-row {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             padding: 0.5rem 0;
             border-bottom: 1px solid #f3f4f6;
         }
@@ -135,10 +187,13 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
         .info-label {
             font-weight: 600;
             color: #6b7280;
+            min-width: 120px;
         }
         
         .info-value {
             color: #374151;
+            text-align: right;
+            flex: 1;
         }
         
         .status-badge {
@@ -234,7 +289,7 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
             border: 1px solid #0ea5e9;
             border-radius: 0.5rem;
             padding: 1rem;
-            margin-top: 1rem;
+            margin-bottom: 2rem;
         }
         
         .payment-info h4 {
@@ -266,6 +321,16 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
             </div>
         <?php endif; ?>
         
+        <?php if (!empty($order['payment_reference'])): ?>
+            <div class="payment-info">
+                <h4><i class="fas fa-credit-card"></i> Informations de Paiement Revolut</h4>
+                <p><strong>ID Transaction Revolut:</strong> <span class="payment-detail"><?= h($order['payment_reference']) ?></span></p>
+                <?php if ($order['status'] === 'paid' && !empty($order['updated_at'])): ?>
+                    <p><strong>Payé le:</strong> <?= date('d/m/Y à H:i', strtotime($order['updated_at'])) ?></p>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+        
         <div class="order-info">
             <div class="info-card">
                 <h3><i class="fas fa-info-circle"></i> Informations Commande</h3>
@@ -279,20 +344,16 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
                 </div>
                 <div class="info-row">
                     <span class="info-label">Statut</span>
-                    <span class="status-badge <?= $statusClass ?>">
-                        <?= h($statusLabel) ?>
+                    <span class="info-value">
+                        <span class="status-badge <?= $statusClass ?>">
+                            <?= h($statusLabel) ?>
+                        </span>
                     </span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Total</span>
-                    <span class="info-value"><strong><?= number_format($order['total'], 2, ',', ' ') ?> €</strong></span>
+                    <span class="info-value"><strong style="font-size: 1.25rem; color: #059669;"><?= number_format((float)$order['total'], 2, ',', ' ') ?> €</strong></span> <!-- ✅ CORRECTION 1 -->
                 </div>
-                <?php if ($order['updated_at'] && $order['updated_at'] !== $order['created_at']): ?>
-                    <div class="info-row">
-                        <span class="info-label">Dernière mise à jour</span>
-                        <span class="info-value"><?= date('d/m/Y à H:i', strtotime($order['updated_at'])) ?></span>
-                    </div>
-                <?php endif; ?>
             </div>
             
             <div class="info-card">
@@ -303,32 +364,34 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
                 </div>
                 <div class="info-row">
                     <span class="info-label">Email</span>
-                    <span class="info-value"><?= h($order['customer_email'] ?? 'Non renseigné') ?></span>
+                    <span class="info-value">
+                        <a href="mailto:<?= h($order['customer_email'] ?? '') ?>" style="color: #2563eb;">
+                            <?= h($order['customer_email'] ?? 'Non renseigné') ?>
+                        </a>
+                    </span>
                 </div>
+                <?php if (!empty($order['telephone'])): ?>
+                    <div class="info-row">
+                        <span class="info-label">Téléphone</span>
+                        <span class="info-value">
+                            <a href="tel:<?= h($order['telephone']) ?>" style="color: #2563eb;">
+                                <?= h($order['telephone']) ?>
+                            </a>
+                        </span>
+                    </div>
+                <?php endif; ?>
                 <?php if (!empty($order['customer_address'])): ?>
                     <div class="info-row">
                         <span class="info-label">Adresse</span>
-                        <span class="info-value"><?= nl2br(h($order['customer_address'])) ?></span>
+                        <span class="info-value" style="white-space: pre-line;"><?= h($order['customer_address']) ?></span>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
         
-        <?php if (!empty($order['stripe_session_id']) || !empty($order['payment_reference'])): ?>
-            <div class="payment-info">
-                <h4><i class="fas fa-credit-card"></i> Informations de Paiement</h4>
-                <?php if (!empty($order['stripe_session_id'])): ?>
-                    <p><strong>Session Stripe:</strong> <span class="payment-detail"><?= h($order['stripe_session_id']) ?></span></p>
-                <?php endif; ?>
-                <?php if (!empty($order['payment_reference'])): ?>
-                    <p><strong>Référence de paiement:</strong> <span class="payment-detail"><?= h($order['payment_reference']) ?></span></p>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-        
         <div class="items-card">
             <div class="items-header">
-                <h3><i class="fas fa-list"></i> Articles Commandés</h3>
+                <h3><i class="fas fa-list"></i> Articles Commandés (<?= count($order['items']) ?>)</h3>
             </div>
             
             <?php if (empty($order['items'])): ?>
@@ -341,10 +404,10 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
                     <thead>
                         <tr>
                             <th>Produit</th>
-                            <th>Taille</th>
-                            <th>Prix unitaire</th>
-                            <th>Quantité</th>
-                            <th>Total</th>
+                            <th style="text-align: center;">Taille</th>
+                            <th style="text-align: right;">Prix unitaire</th>
+                            <th style="text-align: center;">Quantité</th>
+                            <th style="text-align: right;">Total</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -353,18 +416,24 @@ function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8')
                                 <td>
                                     <strong><?= h($item['product_name']) ?></strong>
                                     <?php if ($item['product_id']): ?>
-                                        <br><small style="color: #6b7280;">ID: <?= (int)$item['product_id'] ?></small>
+                                        <br><small style="color: #6b7280;">Réf: #<?= (int)$item['product_id'] ?></small>
                                     <?php endif; ?>
                                 </td>
-                                <td><?= h($item['size'] ?? 'N/A') ?></td>
-                                <td><?= number_format($item['unit_price'], 2, ',', ' ') ?> €</td>
-                                <td><?= (int)$item['quantity'] ?></td>
-                                <td><strong><?= number_format($item['total_price'], 2, ',', ' ') ?> €</strong></td>
+                                <td style="text-align: center;">
+                                    <?= !empty($item['size']) ? h($item['size']) : '<span style="color: #9ca3af;">-</span>' ?>
+                                </td>
+                                <td style="text-align: right;"><?= number_format((float)$item['unit_price'], 2, ',', ' ') ?> €</td> <!-- ✅ CORRECTION 2 -->
+                                <td style="text-align: center;"><strong><?= (int)$item['quantity'] ?></strong></td>
+                                <td style="text-align: right;"><strong><?= number_format((float)$item['total_price'], 2, ',', ' ') ?> €</strong></td> <!-- ✅ CORRECTION 3 -->
                             </tr>
                         <?php endforeach; ?>
                         <tr class="total-row">
-                            <td colspan="4" style="text-align: right;"><strong>Total de la commande:</strong></td>
-                            <td><strong><?= number_format($order['total'], 2, ',', ' ') ?> €</strong></td>
+                            <td colspan="4" style="text-align: right; padding: 1.5rem;"><strong style="font-size: 1.125rem;">TOTAL DE LA COMMANDE:</strong></td>
+                            <td style="text-align: right; padding: 1.5rem;">
+                                <strong style="font-size: 1.25rem; color: #059669;">
+                                    <?= number_format((float)$order['total'], 2, ',', ' ') ?> € <!-- ✅ CORRECTION 4 -->
+                                </strong>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
