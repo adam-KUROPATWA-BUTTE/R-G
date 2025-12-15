@@ -36,18 +36,37 @@ Site e-commerce élégant pour la boutique R&G, spécialisée dans les vêtement
 - Typography professionnelle
 - Icônes Font Awesome
 
+## 🏗️ Architecture
+
+Le projet utilise une **architecture MVC (Model-View-Controller)** pour une meilleure organisation et maintenabilité du code.
+
+📖 **Documentation complète** : [Architecture MVC](docs/MVC_ARCHITECTURE.md)
+
 ## 📁 Structure du Projet
 
 ```
 R-G/
-├── index.html              # Page d'accueil
-├── styles/
-│   └── main.css           # Styles CSS principaux
-├── scripts/
-│   └── app.js             # JavaScript application
-├── pages/
-│   ├── femme.html         # Page vêtements femme
-│   ├── homme.html         # Page vêtements homme
+├── app/                    # Application MVC
+│   ├── Controllers/       # Contrôleurs (logique métier)
+│   ├── Models/            # Modèles (accès données)
+│   ├── Views/             # Vues (présentation HTML)
+│   └── Router.php         # Système de routage
+├── public/                # Point d'entrée public
+│   ├── index.php          # Point d'entrée unique
+│   ├── assets/            # Ressources (images, CSS, JS)
+│   ├── styles/            # Fichiers CSS
+│   ├── scripts/           # Fichiers JavaScript
+│   └── uploads/           # Fichiers uploadés
+├── config/                # Configuration
+│   ├── config.php         # Config générale
+│   └── database.php       # Config base de données
+├── routes/                # Définition des routes
+│   └── web.php            # Routes web
+├── src/                   # Code legacy (compatibilité)
+├── database/              # Base de données SQLite
+├── docs/                  # Documentation
+├── autoload.php           # Autoloader PSR-4
+└── .htaccess              # Configuration Apache
 │   └── bijoux.html        # Page bijoux
 ├── assets/
 │   └── logo.svg           # Logo R&G optimisé
