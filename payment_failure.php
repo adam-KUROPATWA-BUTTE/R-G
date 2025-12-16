@@ -1,19 +1,12 @@
 <?php
-session_start();
-require_once __DIR__ . '/src/bootstrap.php';
-
-$orderId = isset($_GET['order_id']) ? (int)$_GET['order_id'] : 0;
-
-// Mettre à jour le statut de la commande
-if ($orderId > 0) {
-    try {
-        $pdo = db();
-        $stmt = $pdo->prepare("UPDATE commandes SET statut = 'failed' WHERE id = ?");
-        $stmt->execute([$orderId]);
-    } catch (Exception $e) {
-        error_log("Payment failure update error: " . $e->getMessage());
-    }
-}
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /payment/failure instead (handled by PaymentController@failure)
+ */
+$query = $_SERVER['QUERY_STRING'] ?? '';
+$url = '/payment/failure' . ($query ? '?' . $query : '');
+header('Location: ' . $url);
+exit;
 ?>
 <!DOCTYPE html>
 <html lang="fr">

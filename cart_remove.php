@@ -1,15 +1,12 @@
 <?php
-declare(strict_types=1);
-session_start();
-
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/CartService.php';
-
-$index = isset($_GET['index']) ? (int)$_GET['index'] : -1;
-
-if ($index >= 0) {
-    cart_remove($index);
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use POST /cart/remove instead (handled by CartController@remove)
+ */
+if (isset($_GET['index'])) {
+    // Redirect with query parameter
+    header('Location: /cart/remove?index=' . urlencode($_GET['index']));
+} else {
+    header('Location: /cart');
 }
-
-header('Location: cart.php');
 exit;

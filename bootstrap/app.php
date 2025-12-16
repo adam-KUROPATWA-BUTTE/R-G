@@ -33,14 +33,12 @@ require_once APP_ROOT . '/src/config.php';
 require_once APP_ROOT . '/src/db.php';
 require_once APP_ROOT . '/src/schema.php';
 
-// Load helper functions for backward compatibility
-require_once APP_ROOT . '/app/Helpers/functions.php';
-
 // Load legacy auth and csrf functions (for compatibility during migration)
 require_once APP_ROOT . '/src/auth.php';
 require_once APP_ROOT . '/src/csrf.php';
 
 // Load legacy cart functions (for compatibility during migration)
+// Note: CartService.php also loads src/functions.php
 require_once APP_ROOT . '/src/CartService.php';
 
 return true;

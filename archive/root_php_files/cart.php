@@ -1,10 +1,20 @@
 <?php
-/**
- * DEPRECATED - Redirect to MVC route
- * Use /cart instead (handled by CartController@index)
- */
-header('Location: /cart');
-exit;
+declare(strict_types=1);
+
+require_once __DIR__ . '/src/bootstrap.php';
+require_once __DIR__ . '/src/auth.php';
+require_once __DIR__ . '/src/functions.php';
+require_once __DIR__ . '/src/CartService.php';
+
+$current_user = current_user();
+
+// Récupérer les données du panier
+$items = cart_items();
+$total = cart_total();
+$count = cart_count();
+
+$page_title = 'Mon Panier - R&G';
+require __DIR__ . '/partials/header.php';
 ?>
 
 <!-- Hero Header -->

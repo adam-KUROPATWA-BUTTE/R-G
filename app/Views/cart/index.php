@@ -3,8 +3,12 @@ $page_title = 'Mon Panier - R&G';
 require __DIR__ . '/../layouts/header.php';
 
 // Helper function
-function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); }
-function csrf_input(): string { return function_exists('csrf_field') ? csrf_field() : ''; }
+if (!function_exists('h')) {
+    function h(string $v): string { return htmlspecialchars($v, ENT_QUOTES, 'UTF-8'); }
+}
+if (!function_exists('csrf_input')) {
+    function csrf_input(): string { return function_exists('csrf_field') ? csrf_field() : ''; }
+}
 ?>
 
 <!-- Hero Header -->

@@ -1,17 +1,33 @@
 <?php
-/**
- * DEPRECATED - Redirect to MVC route
- * Use /vetements-femme instead (handled by ProductController@vetementsFemme)
- */
-header('Location: /vetements-femme');
-exit;
+require_once __DIR__ . '/src/bootstrap.php';
+require_once __DIR__ . '/src/auth.php';
+require_once __DIR__ . '/src/functions.php';
+require_once __DIR__ . '/src/products_front.php';
+require_once __DIR__ . '/src/ProductRepository.php';
+$current_user = current_user();
+
+// Base path
+$base_path = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+if ($base_path === '/') $base_path = '';
+
+// Get products for homme category
+try {
+    $productRepo = new ProductRepository();
+    $products = $productRepo->getAll('homme');
+} catch (Throwable $e) {
+    $products = [];
+    $error = 'Erreur lors du chargement des produits.';
+}
+
+$page_title = 'Vêtements Homme - R&G';
+require __DIR__ . '/partials/header.php';
 ?>
 
     <!-- Page Header -->
     <header class="page-header">
         <div class="header-content">
-            <h1><i class="fas fa-female"></i> Vêtements Femme</h1>
-            <p>Élégance et sophistication pour la femme moderne</p>
+            <h1><i class="fas fa-male"></i> Vêtements Homme</h1>
+            <p>Style raffiné et sophistiqué pour l'homme moderne</p>
         </div>
     </header>
 
@@ -24,8 +40,8 @@ exit;
                 <div class="filters">
                     <select id="categoryFilter">
                         <option value="">Toutes les catégories</option>
-                        <option value="robes">Robes</option>
-                        <option value="hauts">Hauts</option>
+                        <option value="costumes">Costumes</option>
+                        <option value="chemises">Chemises</option>
                         <option value="pantalons">Pantalons</option>
                         <option value="vestes">Vestes</option>
                     </select>
@@ -56,7 +72,7 @@ exit;
                 <div class="products-grid" id="productsGrid">
                     <?php if (empty($products)): ?>
                         <div class="no-products">
-                            <i class="fas fa-tshirt"></i>
+                            <i class="fas fa-user-tie"></i>
                             <p>Aucun produit disponible pour le moment dans cette catégorie.</p>
                         </div>
                     <?php else: ?>
@@ -71,7 +87,7 @@ exit;
                                         <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
                                     <?php else: ?>
                                         <div class="placeholder-image">
-                                            <i class="fas fa-tshirt"></i>
+                                            <i class="fas fa-user-tie"></i>
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-overlay">
@@ -83,7 +99,7 @@ exit;
                                 <div class="product-info">
                                     <h3><?= htmlspecialchars($product['name'] ?? 'Produit') ?></h3>
                                     <?php if (!empty($product['description'])): ?>
-                                        <p class="product-description"><?= htmlspecialchars(mb_substr($product['description'], 0, 80)) ?><?= mb_strlen($product['description']) > 80 ? '...' : '' ?></p>
+                                        <p class="product-description"><?= htmlspecialchars($product['description']) ?></p>
                                     <?php endif; ?>
                                     <?php if (isset($product['price'])): ?>
                                         <div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div>
@@ -275,17 +291,11 @@ exit;
         }
 
         .product-description {
-    color: var(--dark-gray);
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    height: 2.8em; /* Exactement 2 lignes */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limite à 2 lignes */
-    -webkit-box-orient: vertical;
-}
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
 
         .product-price {
             font-size: 1.5rem;

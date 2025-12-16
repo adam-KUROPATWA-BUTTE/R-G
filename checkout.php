@@ -1,18 +1,12 @@
 <?php
-declare(strict_types=1);
-session_start();
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/CartService.php';
-require_once __DIR__ . '/config/config_stripe.php'; // ✅ CHANGÉ
-
-// Gérer l'annulation
-if (isset($_GET['cancelled'])) {
-    $cancelMessage = "Paiement annulé. Vous pouvez réessayer ou modifier votre commande.";
-}
-
-// ✅ CORRECTION : Récupérer les items avec détails complets
-$pdo = db();
-$items = cart_get_all();
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /checkout instead (handled by CheckoutController@index)
+ */
+$query = $_SERVER['QUERY_STRING'] ?? '';
+$url = '/checkout' . ($query ? '?' . $query : '');
+header('Location: ' . $url);
+exit;
 $total = cart_total();
 
 if (empty($items) || $total <= 0) {

@@ -1,17 +1,33 @@
 <?php
-/**
- * DEPRECATED - Redirect to MVC route
- * Use /vetements-femme instead (handled by ProductController@vetementsFemme)
- */
-header('Location: /vetements-femme');
-exit;
+require_once __DIR__ . '/src/bootstrap.php';
+require_once __DIR__ . '/src/auth.php';
+require_once __DIR__ . '/src/functions.php';
+require_once __DIR__ . '/src/products_front.php';
+require_once __DIR__ . '/src/ProductRepository.php';
+$current_user = current_user();
+
+// Base path
+$base_path = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+if ($base_path === '/') $base_path = '';
+
+// Load products from database (bijoux category)
+try {
+    $productRepo = new ProductRepository();
+    $products = $productRepo->getAll('bijoux');
+} catch (Throwable $e) {
+    $products = [];
+    $error = 'Erreur lors du chargement des produits.';
+}
+
+$page_title = 'Bijoux - R&G';
+require __DIR__ . '/partials/header.php';
 ?>
 
     <!-- Page Header -->
     <header class="page-header">
         <div class="header-content">
-            <h1><i class="fas fa-female"></i> Vêtements Femme</h1>
-            <p>Élégance et sophistication pour la femme moderne</p>
+            <h1><i class="fas fa-gem"></i> Bijoux</h1>
+            <p>Pièces précieuses et uniques pour sublimer votre style</p>
         </div>
     </header>
 
@@ -45,7 +61,6 @@ exit;
                 </div>
             </div>
         </section>
-
         <!-- Products Grid -->
         <section class="products-section">
             <div class="products-container">
@@ -53,13 +68,13 @@ exit;
                     <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
                 <?php endif; ?>
 
-                <div class="products-grid" id="productsGrid">
-                    <?php if (empty($products)): ?>
-                        <div class="no-products">
-                            <i class="fas fa-tshirt"></i>
-                            <p>Aucun produit disponible pour le moment dans cette catégorie.</p>
-                        </div>
-                    <?php else: ?>
+                <?php if (empty($products)): ?>
+                    <div class="no-products">
+                        <i class="fas fa-gem"></i>
+                        <p>Aucun produit disponible pour le moment dans cette catégorie.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="products-grid">
                         <?php foreach ($products as $product): ?>
                             <?php
                               $imgUrl = product_image_public_url($product, $base_path);
@@ -71,7 +86,7 @@ exit;
                                         <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($product['name'] ?? 'Produit') ?>">
                                     <?php else: ?>
                                         <div class="placeholder-image">
-                                            <i class="fas fa-tshirt"></i>
+                                            <i class="fas fa-gem"></i>
                                         </div>
                                     <?php endif; ?>
                                     <div class="product-overlay">
@@ -83,7 +98,7 @@ exit;
                                 <div class="product-info">
                                     <h3><?= htmlspecialchars($product['name'] ?? 'Produit') ?></h3>
                                     <?php if (!empty($product['description'])): ?>
-                                        <p class="product-description"><?= htmlspecialchars(mb_substr($product['description'], 0, 80)) ?><?= mb_strlen($product['description']) > 80 ? '...' : '' ?></p>
+                                        <p class="product-description"><?= htmlspecialchars($product['description']) ?></p>
                                     <?php endif; ?>
                                     <?php if (isset($product['price'])): ?>
                                         <div class="product-price"><?= number_format((float)$product['price'], 2, ',', ' ') ?> €</div>
@@ -106,8 +121,8 @@ exit;
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                    <?php endif; ?>
-                </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </section>
     </main>
@@ -133,46 +148,6 @@ exit;
         .header-content p {
             font-size: 1.2rem;
             opacity: 0.9;
-        }
-
-        /* Filters Section */
-        .filters-section {
-            padding: 2rem;
-            background-color: var(--light-gray);
-        }
-
-        .filters-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .filters-container h3 {
-            color: var(--primary-blue);
-            margin-bottom: 1rem;
-            font-size: 1.2rem;
-        }
-
-        .filters {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .filters select {
-            padding: 0.8rem;
-            border: 2px solid var(--primary-blue);
-            border-radius: 5px;
-            background-color: var(--white);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .filters select:focus {
-            outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 5px rgba(211, 170, 54, 0.3);
         }
 
         /* Products Section */
@@ -275,17 +250,11 @@ exit;
         }
 
         .product-description {
-    color: var(--dark-gray);
-    margin-bottom: 1rem;
-    font-size: 0.9rem;
-    line-height: 1.4;
-    height: 2.8em; /* Exactement 2 lignes */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Limite à 2 lignes */
-    -webkit-box-orient: vertical;
-}
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
 
         .product-price {
             font-size: 1.5rem;
@@ -313,17 +282,6 @@ exit;
             color: #721c24;
         }
 
-        .product-actions .qty-row {
-            display: flex;
-            gap: .5rem;
-            align-items: center;
-        }
-
-        .qty-input {
-            width: 70px;
-            padding: .5rem;
-        }
-
         .add-to-cart-btn {
             padding: 0.8rem;
             background: var(--primary-blue);
@@ -338,34 +296,16 @@ exit;
             gap: 0.5rem;
         }
 
-        .add-to-cart-btn:hover {
-            background-color: var(--light-blue);
-            transform: translateY(-1px);
+        .qty-input {
+            width: 70px;
+            padding: .5rem;
         }
 
-        .no-products {
-            text-align: center;
-            padding: 3rem;
-            color: var(--dark-gray);
-            grid-column: 1 / -1;
-        }
-
-        .no-products i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: var(--primary-blue);
-        }
-
-        .alert {
-            padding: 1rem;
-            margin: 1rem 0;
-            border-radius: 5px;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        
+        .product-actions .qty-row {
+            display: flex;
+            gap: .5rem;
+            align-items: center;
         }
 
     </style>
