@@ -1,13 +1,10 @@
 <?php
-session_start();
-require_once __DIR__ . '/../src/bootstrap.php';
-require_once __DIR__ . '/../src/auth.php';
-
-// Debug temporaire
-$u = current_user();
-if (!$u) {
-    die("❌ Pas d'utilisateur connecté. <a href='/login.php'>Se connecter</a>");
-}
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /admin instead (handled by Admin\DashboardController@index)
+ */
+header('Location: /admin');
+exit;
 if (($u['role'] ?? '') !== 'admin') {
     die("❌ Accès refusé. Votre rôle: " . ($u['role'] ?? 'aucun') . ". Attendu: admin");
 }

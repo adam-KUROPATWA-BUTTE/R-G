@@ -10,6 +10,8 @@ spl_autoload_register(function ($class) {
         'Controllers\\' => __DIR__ . '/app/Controllers/',
         'Models\\'      => __DIR__ . '/app/Models/',
         'Services\\'    => __DIR__ . '/app/Services/',
+        'Config\\'      => __DIR__ . '/app/Config/',
+        'Helpers\\'     => __DIR__ . '/app/Helpers/',
     ];
     
     // Try each prefix
