@@ -1,17 +1,12 @@
 <?php
-declare(strict_types=1);
-session_start();
-
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/Services/OrderService.php';
-
-$orderId = $_GET['order_id'] ?? '';
-$order = null;
-
-if (!empty($orderId) && ctype_digit($orderId)) {
-    try {
-        $orderService = new OrderService();
-        $order = $orderService->find((int)$orderId);
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /checkout/cancel instead (handled by CheckoutController@cancel)
+ */
+$query = $_SERVER['QUERY_STRING'] ?? '';
+$url = '/checkout/cancel' . ($query ? '?' . $query : '');
+header('Location: ' . $url);
+exit;
         
         if ($order && $order['status'] === 'pending') {
             // Marquer la commande comme annulée

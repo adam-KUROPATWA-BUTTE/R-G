@@ -1,23 +1,10 @@
 <?php
-// Compat PHP 5.6: pas de declare(strict_types), pas de "??", pas de ": array"
-
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/csrf.php';
-require_once __DIR__ . '/src/functions.php';
-
-// Base path (compat sous-dossier)
-$scriptName = isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '/';
-$base_path = rtrim(str_replace('\\','/', dirname($scriptName)), '/');
-if ($base_path === '/') $base_path = '';
-
-function users_schema() {
-    $pdo = db();
-    $cols = array();
-    try {
-        $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if ($driver === 'sqlite') {
-            $stmt = $pdo->query("PRAGMA table_info(users)");
-            foreach ($stmt->fetchAll() as $row) {
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /register instead (handled by AuthController@register)
+ */
+header('Location: /register');
+exit;
                 $cols[] = is_array($row) ? (isset($row['name']) ? $row['name'] : (isset($row[1]) ? $row[1] : '')) : '';
             }
         } else {

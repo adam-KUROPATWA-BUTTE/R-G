@@ -1,84 +1,12 @@
 <?php
-declare(strict_types=1);
-session_start();
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/CartService.php';
-require_once __DIR__ . '/config/config_stripe.php';
-// ✅ REMPLACEZ PAR :
-if (file_exists(__DIR__ . '/vendor/autoload.php')) {
-    require_once __DIR__ . '/vendor/autoload.php';
-} elseif (file_exists(__DIR__ . '/vendor/stripe/stripe-php/init.php')) {
-    require_once __DIR__ . '/vendor/stripe/stripe-php/init.php';
-} else {
-    error_log("❌ Stripe library not found!");
-    // Continuer sans Stripe (pour affichage basique)
-}
-
-\Stripe\Stripe::setApiKey(STRIPE_SECRET_KEY);
-
-$sessionId = $_GET['session_id'] ?? '';
-
-$order = null;
-$session = null;
-
-if ($sessionId) {
-    try {
-        // Récupérer la session Stripe
-        $session = \Stripe\Checkout\Session::retrieve($sessionId);
-        
-        $orderId = $session->metadata->order_id ?? null;
-        
-        if ($orderId) {
-    $pdo = db();
-    
-    // ✅ MISE À JOUR FORCÉE du statut si payé
-    if ($session->payment_status === 'paid') {
-        $stmt = $pdo->prepare("
-            UPDATE commandes 
-            SET statut = 'paid', date_paiement = NOW() 
-            WHERE id = ? AND statut = 'pending'
-        ");
-        $stmt->execute([$orderId]);
-        
-        error_log("✅ Order #$orderId marked as PAID (from success page)");
-        
-        // ✅ VIDER LE PANIER
-        cart_clear();
-        error_log("🛒 Cart cleared after payment");
-        
-        // ✅ ENVOYER LES EMAILS
-        require_once __DIR__ . '/src/EmailService.php';
-        
-        // Récupérer les détails complets de la commande
-        $stmt = $pdo->prepare("SELECT * FROM commandes WHERE id = ?");
-        $stmt->execute([$orderId]);
-        $orderDetails = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        // Récupérer les articles
-        $stmt = $pdo->prepare("SELECT * FROM commande_items WHERE commande_id = ?");
-        $stmt->execute([$orderId]);
-        $orderItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        if ($orderDetails && $orderItems) {
-            // Email au client
-            send_order_confirmation_email($orderDetails, $orderItems);
-            
-            // Notification à l'admin
-            send_admin_order_notification($orderDetails);
-        }
-    }
-    
-    // Récupérer la commande pour l'affichage
-    $stmt = $pdo->prepare("SELECT * FROM commandes WHERE id = ?");
-    $stmt->execute([$orderId]);
-    $order = $stmt->fetch(PDO::FETCH_ASSOC);
-}
-    } catch (Exception $e) {
-        error_log("Error retrieving session: " . $e->getMessage());
-    }
-}
-
-$pageTitle = 'Paiement réussi - R&G';
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /payment/success instead (handled by PaymentController@success)
+ */
+$query = $_SERVER['QUERY_STRING'] ?? '';
+$url = '/payment/success' . ($query ? '?' . $query : '');
+header('Location: ' . $url);
+exit;
 ?>
 <!DOCTYPE html>
 <html lang="fr">

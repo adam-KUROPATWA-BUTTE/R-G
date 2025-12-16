@@ -1,26 +1,10 @@
 <?php
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/auth.php';
-require_once __DIR__ . '/src/functions.php';
-require_once __DIR__ . '/src/products_front.php';
-require_once __DIR__ . '/src/ProductRepository.php';
-$current_user = current_user();
-
-// Base path
-$base_path = rtrim(str_replace('\\','/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
-if ($base_path === '/') $base_path = '';
-
-// Load products from database (bijoux category)
-try {
-    $productRepo = new ProductRepository();
-    $products = $productRepo->getAll('bijoux');
-} catch (Throwable $e) {
-    $products = [];
-    $error = 'Erreur lors du chargement des produits.';
-}
-
-$page_title = 'Bijoux - R&G';
-require __DIR__ . '/partials/header.php';
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /bijoux instead (handled by ProductController@bijoux)
+ */
+header('Location: /bijoux');
+exit;
 ?>
 
     <!-- Page Header -->

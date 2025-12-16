@@ -1,18 +1,12 @@
 <?php
-declare(strict_types=1);
-session_start();
-
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/Services/OrderService.php';
-require_once __DIR__ . '/src/CartService.php';
-
-$sessionId = $_GET['session_id'] ?? '';
-$order = null;
-$error = '';
-
-if (empty($sessionId)) {
-    $error = 'Session de paiement non spécifiée';
-} else {
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /checkout/success instead (handled by CheckoutController@success)
+ */
+$query = $_SERVER['QUERY_STRING'] ?? '';
+$url = '/checkout/success' . ($query ? '?' . $query : '');
+header('Location: ' . $url);
+exit;
     try {
         $orderService = new OrderService();
         $order = $orderService->findByStripeSession($sessionId);

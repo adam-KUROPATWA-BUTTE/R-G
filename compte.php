@@ -1,13 +1,10 @@
 <?php
-require_once __DIR__ . '/src/bootstrap.php';  // Start session and CSRF first
-require_once __DIR__ . '/src/auth.php';
-
-// Require user to be logged in
-require_login();
-
-$current_user = current_user();
-$page_title = 'Mon Compte - R&G';
-require __DIR__ . '/partials/header.php';
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /compte instead (handled by UserController@account)
+ */
+header('Location: /compte');
+exit;
 ?>
 
 <!-- Page Header -->

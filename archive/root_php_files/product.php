@@ -1,14 +1,24 @@
 <?php
-/**
- * DEPRECATED - Redirect to MVC route
- * Use /product/{id} instead (handled by ProductController@show)
- */
-if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
-    header('Location: /product/' . $_GET['id']);
-} else {
-    header('Location: /');
+declare(strict_types=1);
+session_start();
+
+require_once __DIR__ . '/src/bootstrap.php';
+require_once __DIR__ . '/src/functions.php';
+require_once __DIR__ . '/src/csrf.php';
+require_once __DIR__ . '/src/ProductRepository.php';
+
+if (!isset($_GET['id']) || !ctype_digit($_GET['id'])) {
+    http_response_code(404);
+    exit('Produit non trouvé');
 }
-exit;
+$productId = (int)$_GET['id'];
+
+$repo    = new ProductRepository();
+$product = $repo->getById($productId);
+if (!$product) {
+    http_response_code(404);
+    exit('Produit non trouvé');
+}
 
 // Parse images for gallery (refs #36)
 $productImages = [];

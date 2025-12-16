@@ -1,22 +1,15 @@
 <?php
-declare(strict_types=1);
-session_start();
-
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/ProductRepository.php';
-require_once __DIR__ . '/src/CartService.php';
-require_once __DIR__ . '/src/csrf.php';
-
-function json_request(): bool {
-    $ct = $_SERVER['CONTENT_TYPE'] ?? '';
-    return stripos($ct, 'application/json') !== false;
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo 'Méthode non autorisée';
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use POST /cart/add instead (handled by CartController@add)
+ */
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Forward POST data to new route
+    header('Location: /cart/add');
     exit;
 }
+header('Location: /cart');
+exit;
 
 $data = $_POST;
 if (json_request()) {

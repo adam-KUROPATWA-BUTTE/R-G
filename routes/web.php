@@ -27,6 +27,11 @@ $router->post('/checkout/process', 'CheckoutController@process');
 $router->get('/checkout/success', 'CheckoutController@success');
 $router->get('/checkout/cancel', 'CheckoutController@cancel');
 
+// Payment
+$router->get('/payment/success', 'PaymentController@success');
+$router->get('/payment/failure', 'PaymentController@failure');
+$router->get('/payment/cancel', 'PaymentController@cancel');
+
 // User Authentication
 $router->any('/login', 'AuthController@login');
 $router->any('/register', 'AuthController@register');

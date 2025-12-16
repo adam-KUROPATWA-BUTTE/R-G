@@ -1,23 +1,10 @@
 <?php
-require_once __DIR__ . '/src/bootstrap.php';
-require_once __DIR__ . '/src/auth.php';
-
-// Compute base path for subdirectory deployments
-$base_path = dirname($_SERVER['SCRIPT_NAME'] ?? '/');
-$base_path = $base_path === '/' ? '' : rtrim($base_path, '');
-
-$error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    csrf_validate();
-    $email = trim($_POST['email'] ?? '');
-    $password = $_POST['password'] ?? '';
-    if ($email && $password) {
-        if (login_user($email, $password)) {
-            header('Location: ' . $base_path . '/');
-            exit;
-        } else {
-            $error = 'Email ou mot de passe incorrect.';
-        }
+/**
+ * DEPRECATED - Redirect to MVC route
+ * Use /login instead (handled by AuthController@login)
+ */
+header('Location: /login');
+exit;
     } else {
         $error = 'Veuillez remplir tous les champs.';
     }
