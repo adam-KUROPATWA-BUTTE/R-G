@@ -6,7 +6,7 @@ declare(strict_types=1);
  * - Vérifie erreur PHP
  * - Vérifie taille (5 Mo max)
  * - Vérifie MIME réel
- * - Crée dossier uploads/products/{productId}
+ * - Crée dossier public/uploads/products/{productId}
  * - Génère un nom de fichier aléatoire
  * - Retourne le chemin relatif à utiliser pour <img src="">
  */
@@ -18,7 +18,7 @@ class ImageUploadService
     {
         $this->baseUploadDir = $baseUploadDir
             ? rtrim($baseUploadDir, '/')
-            : __DIR__ . '/../../uploads/products';
+            : __DIR__ . '/../../public/uploads/products';
     }
 
     public function store(array $file, int $productId): ?string
