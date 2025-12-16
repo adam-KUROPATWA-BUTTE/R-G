@@ -272,7 +272,7 @@ class EmailService
             </tr>
         </table>
         
-        <a href='" . $this->siteUrl . "/admin/order_show.php?id=$orderNumber' 
+        <a href='" . $this->siteUrl . "/admin/orders/$orderNumber' 
            style='display: inline-block; background: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 20px;'>
             Voir la commande
         </a>

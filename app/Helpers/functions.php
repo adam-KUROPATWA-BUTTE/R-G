@@ -181,4 +181,5 @@ function product_parse_sizes($raw) {
 }
 
 // Cart functions
-require_once __DIR__ . '/CartService.php';
+// Note: CartService.php is now in Services/ directory and loaded via bootstrap
+// require_once __DIR__ . '/../Services/CartService.php';
