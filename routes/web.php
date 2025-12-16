@@ -28,9 +28,9 @@ $router->get('/checkout/success', 'CheckoutController@success');
 $router->get('/checkout/cancel', 'CheckoutController@cancel');
 
 // User Authentication
-$router->any('/login', 'UserController@login');
-$router->any('/register', 'UserController@register');
-$router->get('/logout', 'UserController@logout');
+$router->any('/login', 'AuthController@login');
+$router->any('/register', 'AuthController@register');
+$router->any('/logout', 'AuthController@logout');
 $router->get('/compte', 'UserController@account');
 
 // Admin Routes
@@ -42,3 +42,7 @@ $router->post('/admin/products', 'Admin\ProductController@index');
 $router->get('/admin/products/create', 'Admin\ProductController@create');
 $router->get('/admin/products/{id}/edit', 'Admin\ProductController@edit');
 $router->get('/admin/users', 'Admin\UserController@index');
+
+// API Routes
+$router->post('/api/stripe/create-session', 'Api\StripeController@createSession');
+$router->post('/api/stripe/webhook', 'Api\StripeController@webhook');
