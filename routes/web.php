@@ -32,3 +32,13 @@ $router->any('/login', 'UserController@login');
 $router->any('/register', 'UserController@register');
 $router->get('/logout', 'UserController@logout');
 $router->get('/compte', 'UserController@account');
+
+// Admin Routes
+$router->get('/admin', 'Admin\DashboardController@index');
+$router->get('/admin/orders', 'Admin\OrderController@index');
+$router->get('/admin/orders/{id}', 'Admin\OrderController@show');
+$router->get('/admin/products', 'Admin\ProductController@index');
+$router->post('/admin/products', 'Admin\ProductController@index');
+$router->get('/admin/products/create', 'Admin\ProductController@create');
+$router->get('/admin/products/{id}/edit', 'Admin\ProductController@edit');
+$router->get('/admin/users', 'Admin\UserController@index');
