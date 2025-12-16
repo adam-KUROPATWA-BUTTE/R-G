@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '/../src/auth.php';
-require_once __DIR__ . '/../src/bootstrap.php';
-require_once __DIR__ . '/../src/CartService.php';
+require_once __DIR__ . '/../../../src/auth.php';
+require_once __DIR__ . '/../../../src/bootstrap.php';
+require_once __DIR__ . '/../../../src/CartService.php';
 
 $current_user = current_user();
 $cart_count = cart_count();

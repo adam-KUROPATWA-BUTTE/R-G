@@ -7,7 +7,7 @@ if (!isset($base_path)) {
 ?>
     <!-- Footer -->
     <footer class="footer">
-        <link rel="stylesheet" href="/assets/css/product_modal.css">
+        <link rel="stylesheet" href="<?= $base_path ?>/assets/css/product_modal.css">
         <div class="footer-content">
             <div class="footer-section">
                 <h3>R&G</h3>
@@ -67,6 +67,6 @@ if (!isset($base_path)) {
         <?php endforeach; ?>
     <?php endif; ?>
 <?php require __DIR__ . '/_product_modal.php'; ?>
-<script src="/assets/js/product_modal.js"></script>
+<script src="<?= $base_path ?>/assets/js/product_modal.js"></script>
 </body>
 </html>

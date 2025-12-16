@@ -204,4 +204,4 @@ Legacy code in `src/` is still loaded for compatibility:
 ---
 
 **Version:** 2.0 (MVC Architecture)  
-**Last Updated:** December 2024
+**Last Updated:** December 2025

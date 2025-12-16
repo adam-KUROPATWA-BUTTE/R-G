@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/schema.php';
+require_once __DIR__ . '/../../src/db.php';
+require_once __DIR__ . '/../../src/schema.php';
 
 // Si dbh() est déjà défini ailleurs, éviter la redéclaration
 if (!function_exists('dbh')) {
