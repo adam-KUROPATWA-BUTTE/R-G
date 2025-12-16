@@ -173,7 +173,7 @@ require __DIR__ . '/partials/header.php';
             overflow: hidden;
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
-            border: 2px solid transparent.
+            border: 2px solid transparent;
         }
 
         .product-card:hover {
