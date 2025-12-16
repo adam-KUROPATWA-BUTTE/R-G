@@ -17,9 +17,9 @@ if (!isset($base_path)) {
                 <h3>Navigation</h3>
                 <ul>
                     <li><a href="<?= $base_path ?>/">Accueil</a></li>
-                    <li><a href="<?= $base_path ?>/vetements-femme.php">Vêtements Femme</a></li>
-                    <li><a href="<?= $base_path ?>/vetements-homme.php">Vêtements Homme</a></li>
-                    <li><a href="<?= $base_path ?>/bijoux.php">Bijoux</a></li>
+                    <li><a href="<?= $base_path ?>/vetements-femme">Vêtements Femme</a></li>
+                    <li><a href="<?= $base_path ?>/vetements-homme">Vêtements Homme</a></li>
+                    <li><a href="<?= $base_path ?>/bijoux">Bijoux</a></li>
                 </ul>
             </div>
             <div class="footer-section">

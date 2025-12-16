@@ -18,7 +18,7 @@
 
       <p id="pqv-desc" class="pqv-desc"></p>
 
-      <form id="pqv-add-form" method="post" action="/add_to_cart.php" class="pqv-form">
+      <form id="pqv-add-form" method="post" action="/cart/add" class="pqv-form">
         <?php if (function_exists('csrf_input')) echo csrf_input(); ?>
         <input type="hidden" name="id" id="pqv-id" value="">
         <input type="hidden" name="back" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>">

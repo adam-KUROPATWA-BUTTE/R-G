@@ -41,15 +41,15 @@ if ($current_user) {
             <!-- User icon and cart in top left -->
             <div class="nav-left">
                 <?php if ($current_user): ?>
-                    <a href="<?= $base_path ?>/compte.php" class="icon-btn user-btn user-icon" aria-label="Mon Compte">
+                    <a href="<?= $base_path ?>/compte" class="icon-btn user-btn user-icon" aria-label="Mon Compte">
                         <i class="fas fa-user-circle"></i>
                     </a>
                 <?php else: ?>
-                    <a href="<?= $base_path ?>/login.php" class="icon-btn user-btn user-icon" aria-label="Connexion">
+                    <a href="<?= $base_path ?>/login" class="icon-btn user-btn user-icon" aria-label="Connexion">
                         <i class="fas fa-user"></i>
                     </a>
                 <?php endif; ?>
-                <a href="<?= $base_path ?>/cart.php" class="icon-btn cart-btn" aria-label="Panier">
+                <a href="<?= $base_path ?>/cart" class="icon-btn cart-btn" aria-label="Panier">
                     <i class="fas fa-shopping-cart"></i>
                     <span class="cart-count" id="cartCount" data-cart-count="<?= $cart_count ?>"><?= $cart_count ?></span>
                 </a>
@@ -71,9 +71,9 @@ if ($current_user) {
                 </button>
                 <div class="dropdown-content" id="dropdownContent">
                     <a href="<?= $base_path ?>/">Accueil</a>
-                    <a href="<?= $base_path ?>/vetements-femme.php">Vêtements Femme</a>
-                    <a href="<?= $base_path ?>/vetements-homme.php">Vêtements Homme</a>
-                    <a href="<?= $base_path ?>/bijoux.php">Bijoux</a>
+                    <a href="<?= $base_path ?>/vetements-femme">Vêtements Femme</a>
+                    <a href="<?= $base_path ?>/vetements-homme">Vêtements Homme</a>
+                    <a href="<?= $base_path ?>/bijoux">Bijoux</a>
                     <?php if ($current_user && ($current_user['role'] ?? '') === 'admin'): ?>
                         <a href="<?= $base_path ?>/admin/">Administration</a>
                     <?php endif; ?>
