@@ -6,7 +6,7 @@ declare(strict_types=1);
  * - Vérifie erreur PHP
  * - Vérifie taille (5 Mo max)
  * - Vérifie MIME réel
- * - Crée dossier uploads/products/{productId}
+ * - Crée dossier public/uploads/products/{productId}
  * - Génère un nom de fichier aléatoire
  * - Retourne le chemin relatif à utiliser pour <img src="">
  */
@@ -16,9 +16,13 @@ class ImageUploadService
 
     public function __construct(?string $baseUploadDir = null)
     {
-        $this->baseUploadDir = $baseUploadDir
-            ? rtrim($baseUploadDir, '/')
-            : __DIR__ . '/../../uploads/products';
+        if ($baseUploadDir) {
+            $this->baseUploadDir = rtrim($baseUploadDir, '/');
+        } else {
+            // Use APP_ROOT if defined (from bootstrap), otherwise fall back to relative path
+            $appRoot = defined('APP_ROOT') ? APP_ROOT : dirname(__DIR__, 2);
+            $this->baseUploadDir = $appRoot . '/public/uploads/products';
+        }
     }
 
     public function store(array $file, int $productId): ?string

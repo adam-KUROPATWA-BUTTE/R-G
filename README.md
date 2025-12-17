@@ -42,38 +42,116 @@ Le projet utilise une **architecture MVC (Model-View-Controller)** pour une meil
 
 📖 **Documentation complète** : [Architecture MVC](docs/MVC_ARCHITECTURE.md)
 
-## 📁 Structure du Projet
+## 📁 Structure du Projet (Architecture MVC)
 
 ```
 R-G/
-├── app/                    # Application MVC
-│   ├── Controllers/       # Contrôleurs (logique métier)
-│   ├── Models/            # Modèles (accès données)
-│   ├── Views/             # Vues (présentation HTML)
-│   └── Router.php         # Système de routage
-├── public/                # Point d'entrée public
-│   ├── index.php          # Point d'entrée unique
-│   ├── assets/            # Ressources (images, CSS, JS)
-│   ├── styles/            # Fichiers CSS
-│   ├── scripts/           # Fichiers JavaScript
-│   └── uploads/           # Fichiers uploadés
-├── config/                # Configuration
-│   ├── config.php         # Config générale
-│   └── database.php       # Config base de données
-├── routes/                # Définition des routes
-│   └── web.php            # Routes web
-├── src/                   # Code legacy (compatibilité)
-├── database/              # Base de données SQLite
-├── docs/                  # Documentation
-├── autoload.php           # Autoloader PSR-4
-└── .htaccess              # Configuration Apache
-│   └── bijoux.html        # Page bijoux
-├── assets/
-│   └── logo.svg           # Logo R&G optimisé
-└── README.md              # Documentation
+├── app/                        # Application MVC
+│   ├── Config/                 # Configuration classes
+│   │   └── Database.php        # Singleton PDO connection
+│   ├── Controllers/            # Contrôleurs (logique métier)
+│   │   ├── Admin/              # Admin controllers
+│   │   │   ├── DashboardController.php
+│   │   │   ├── OrderController.php
+│   │   │   ├── ProductController.php
+│   │   │   └── UserController.php
+│   │   ├── Api/                # API controllers
+│   │   ├── Controller.php      # Base controller
+│   │   ├── AuthController.php
+│   │   ├── CartController.php
+│   │   ├── CheckoutController.php
+│   │   ├── HomeController.php
+│   │   ├── PaymentController.php
+│   │   ├── ProductController.php
+│   │   └── UserController.php
+│   ├── Models/                 # Modèles (accès données)
+│   │   ├── Database.php        # Database model
+│   │   ├── Product.php
+│   │   ├── Order.php
+│   │   ├── User.php
+│   │   └── Cart.php
+│   ├── Views/                  # Vues (présentation HTML)
+│   │   ├── layouts/            # Header, footer, etc.
+│   │   ├── admin/              # Admin views
+│   │   ├── auth/               # Login, register views
+│   │   ├── cart/               # Cart views
+│   │   ├── checkout/           # Checkout views
+│   │   ├── home/               # Home page
+│   │   ├── payment/            # Payment views
+│   │   ├── products/           # Product views
+│   │   └── user/               # User account views
+│   ├── Services/               # Business logic services
+│   │   ├── AuthService.php
+│   │   ├── CartService.php
+│   │   ├── CsrfService.php
+│   │   └── EmailService.php
+│   ├── Helpers/                # Helper functions
+│   │   └── functions.php
+│   └── Router.php              # Système de routage
+├── bootstrap/                  # Application bootstrap
+│   └── app.php                 # Initialization
+├── public/                     # Point d'entrée public (document root)
+│   ├── index.php               # Front controller (single entry point)
+│   ├── .htaccess               # URL rewriting for clean URLs
+│   ├── assets/                 # Static resources
+│   │   ├── css/
+│   │   ├── js/
+│   │   ├── logo.png
+│   │   └── logo.svg
+│   ├── scripts/                # JavaScript files
+│   ├── styles/                 # CSS files
+│   ├── uploads/                # User uploaded files (products)
+│   └── webhooks/               # Payment webhooks
+├── routes/                     # Route definitions
+│   └── web.php                 # Web routes (public + admin)
+├── src/                        # Legacy code (for compatibility)
+├── config/                     # Legacy configuration
+├── database/                   # SQLite database files
+├── docs/                       # Documentation
+├── .env                        # Environment configuration (not in git)
+├── .env.example                # Example environment file
+├── autoload.php                # PSR-4 autoloader
+├── .htaccess                   # Redirect to public/
+└── README.md                   # This file
 ```
 
 ## 🚀 Fonctionnement
+
+### Architecture MVC - Routing
+
+Le projet utilise une **architecture MVC moderne** avec un système de routing centralisé :
+
+#### Point d'entrée unique
+- Toutes les requêtes passent par `public/index.php` (front controller)
+- `.htaccess` redirige automatiquement vers `public/` 
+- Clean URLs sans `.php` (ex: `/product/123` au lieu de `product.php?id=123`)
+
+#### Routes principales
+```
+GET  /                          → HomeController@index
+GET  /bijoux                    → ProductController@bijoux
+GET  /vetements-femme           → ProductController@vetementsFemme
+GET  /vetements-homme           → ProductController@vetementsHomme
+GET  /product/{id}              → ProductController@show
+GET  /cart                      → CartController@index
+POST /cart/add                  → CartController@add
+POST /cart/update               → CartController@update
+GET  /checkout                  → CheckoutController@index
+GET  /payment/success           → PaymentController@success
+GET  /login                     → AuthController@login
+POST /register                  → AuthController@register
+GET  /admin                     → Admin\DashboardController@index
+GET  /admin/products            → Admin\ProductController@index
+GET  /admin/orders              → Admin\OrderController@index
+```
+
+Voir `routes/web.php` pour la liste complète des routes.
+
+#### Autoloading PSR-4
+- Namespace `Controllers\` → `app/Controllers/`
+- Namespace `Models\` → `app/Models/`
+- Namespace `Services\` → `app/Services/`
+- Namespace `Config\` → `app/Config/`
 
 ### Navigation
 - **Menu principal** : Accès via les 3 étoiles dorées
@@ -144,14 +222,72 @@ R-G/
 - Messages de confirmation et d'erreur
 - Workflow d'achat simplifié
 
-## 🚀 Installation et Utilisation
+## 🚀 Installation et Déploiement
 
-1. Cloner le repository
-2. Ouvrir `index.html` dans un navigateur
-3. Explorer les différentes catégories
-4. Tester les fonctionnalités de panier et connexion
+### Prérequis
+- PHP 7.4+ (recommandé: PHP 8.0+)
+- Serveur web Apache avec mod_rewrite activé
+- SQLite3 ou MySQL
+- Composer (optionnel, pour les dépendances futures)
 
-Aucune installation additionnelle requise - le site fonctionne directement dans le navigateur.
+### Installation Locale
+
+1. **Cloner le repository**
+   ```bash
+   git clone https://github.com/votre-repo/R-G.git
+   cd R-G
+   ```
+
+2. **Configurer l'environnement**
+   ```bash
+   cp .env.example .env
+   ```
+   Éditer `.env` avec vos paramètres :
+   - Base de données (SQLite par défaut)
+   - Clés API Stripe pour les paiements
+   - Configuration SMTP pour les emails
+
+3. **Permissions**
+   ```bash
+   chmod 755 public/uploads
+   chmod 644 database.db
+   ```
+
+4. **Lancer le serveur de développement**
+   ```bash
+   php -S localhost:8000 -t public
+   ```
+   Accéder à : http://localhost:8000
+
+### Déploiement Production
+
+1. **Configuration Apache**
+   - Le document root doit pointer vers `public/`
+   - Vérifier que mod_rewrite est activé
+   - `.htaccess` est déjà configuré
+
+2. **Variables d'environnement**
+   - Copier `.env.example` vers `.env`
+   - Configurer avec les vraies clés de production
+   - Ne **JAMAIS** commiter `.env` dans Git
+
+3. **Sécurité**
+   - Activer HTTPS
+   - Configurer les permissions : `755` pour dossiers, `644` pour fichiers
+   - Protéger les dossiers sensibles (app/, bootstrap/, config/, src/)
+
+4. **Base de données**
+   - Pour SQLite : vérifier les permissions sur `database.db`
+   - Pour MySQL : créer la base et configurer dans `.env`
+
+### Structure des URLs
+
+Avec la configuration MVC, toutes les URLs passent par `public/index.php` :
+- `http://votresite.com/` → Page d'accueil
+- `http://votresite.com/product/123` → Fiche produit
+- `http://votresite.com/admin` → Panel admin
+
+Pas besoin de `.php` dans les URLs - tout est géré automatiquement !
 
 ## 📞 Contact
 
